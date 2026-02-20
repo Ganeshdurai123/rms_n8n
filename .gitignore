@@ -22,6 +22,10 @@ Thumbs.db
 *.log
 logs/
 
+# File uploads (keep directory structure, ignore uploaded files)
+server/uploads/*
+!server/uploads/.gitkeep
+
 # Docker volumes
 mongo_data/
 redis_data/

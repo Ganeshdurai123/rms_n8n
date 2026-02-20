@@ -12,6 +12,7 @@ import {
   requestParamsSchema,
 } from './request.schema.js';
 import { commentRouter } from './comment.routes.js';
+import { attachmentRouter } from './attachment.routes.js';
 
 const router = Router({ mergeParams: true });
 
@@ -69,5 +70,8 @@ router.patch(
 
 // Mount comment sub-resource routes
 router.use('/:requestId/comments', commentRouter);
+
+// Mount attachment sub-resource routes
+router.use('/:requestId/attachments', attachmentRouter);
 
 export { router as requestRouter };
