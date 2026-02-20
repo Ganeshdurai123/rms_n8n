@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 3 - Request Lifecycle + Audit (IN PROGRESS)
+**Current focus:** Phase 3 - Request Lifecycle + Audit (COMPLETE)
 
 ## Current Position
 
 Phase: 3 of 8 (Request Lifecycle + Audit)
-Plan: 2 of 3 in current phase (03-02 complete)
-Status: In Progress
-Last activity: 2026-02-20 -- Completed 03-02-PLAN.md (Request CRUD + State Transitions + Assignment + Audit)
+Plan: 3 of 3 in current phase (03-03 complete -- PHASE COMPLETE)
+Status: Phase Complete
+Last activity: 2026-02-20 -- Completed 03-03-PLAN.md (Comments, Attachments, Request Detail, Audit Views)
 
-Progress: [████░░░░░░] 35%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 7min
-- Total execution time: 0.92 hours
+- Total plans completed: 9
+- Average duration: 8min
+- Total execution time: 1.24 hours
 
 **By Phase:**
 
@@ -29,14 +29,14 @@ Progress: [████░░░░░░] 35%
 |-------|-------|-------|----------|
 | 01-foundation-authentication | 4 | 29min | 7.3min |
 | 02-programs-dynamic-fields | 2 | 21min | 10.5min |
-| 03-request-lifecycle-audit | 2 | 5min | 2.5min |
+| 03-request-lifecycle-audit | 3 | 24min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4min), 02-02 (17min), 03-01 (2min), 03-02 (3min)
+- Last 5 plans: 02-02 (17min), 03-01 (2min), 03-02 (3min), 03-03 (19min)
 - Trend: stable
 
 *Updated after each plan completion*
-| Phase 03 P02 | 3min | 2 tasks | 4 files |
+| Phase 03 P03 | 19min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -79,6 +79,12 @@ Recent decisions affecting current work:
 - 03-02: Access scoping in getRequests: clients see createdBy:userId, team_members see createdBy OR assignedTo, admin/manager see all
 - 03-02: Creator-only submit rule: draft->submitted and rejected->submitted require request.createdBy === userId
 - 03-02: Assignment restricted to active program members with team_member or manager role via ProgramMember lookup
+- 03-03: Comment timeline uses createdAt ascending (oldest first) for natural conversation flow
+- 03-03: Attachment filenames use nanoid + timestamp to guarantee uniqueness on disk
+- 03-03: Request detail runs 4 parallel queries via Promise.all for optimal aggregation performance
+- 03-03: Admin audit log mounted at /api/v1/admin/audit -- separate admin namespace
+- 03-03: Per-request audit trail at /:requestId/audit accessible to any program member (not admin-only)
+- 03-03: Sub-resource routing pattern: commentRouter/attachmentRouter mounted via mergeParams
 
 ### Pending Todos
 
@@ -93,5 +99,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-02-PLAN.md (Request CRUD + State Transitions + Assignment + Audit)
+Stopped at: Completed 03-03-PLAN.md (Comments, Attachments, Request Detail, Audit Views) -- Phase 3 COMPLETE
 Resume file: None
