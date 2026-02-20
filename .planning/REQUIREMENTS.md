@@ -43,15 +43,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Requests
 
-- [ ] **REQ-01**: User can create a new request within a program (status: draft)
-- [ ] **REQ-02**: Request form renders dynamic fields based on program configuration
+- [x] **REQ-01**: User can create a new request within a program (status: draft)
+- [x] **REQ-02**: Request form renders dynamic fields based on program configuration
 - [ ] **REQ-03**: User can submit a draft request (draft -> submitted)
 - [ ] **REQ-04**: Manager can move request through lifecycle states (submitted -> in_review -> approved/rejected -> completed)
-- [ ] **REQ-05**: System validates state transitions (only allowed transitions by authorized roles)
+- [x] **REQ-05**: System validates state transitions (only allowed transitions by authorized roles)
 - [ ] **REQ-06**: User can add comments to a request with activity timeline
 - [ ] **REQ-07**: User can upload file attachments to a request (with type and size validation)
 - [ ] **REQ-08**: User can download file attachments from a request
-- [ ] **REQ-09**: System tracks complete history of all changes to a request (field edits, status changes, assignments)
+- [x] **REQ-09**: System tracks complete history of all changes to a request (field edits, status changes, assignments)
 - [ ] **REQ-10**: Manager can assign/reassign requests to team members
 - [ ] **REQ-11**: User can view request detail page with all fields, comments, attachments, and history
 
@@ -98,7 +98,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Audit
 
-- [ ] **AUDIT-01**: Every mutation creates an AuditLog entry (who, what, when, before/after)
+- [x] **AUDIT-01**: Every mutation creates an AuditLog entry (who, what, when, before/after)
 - [ ] **AUDIT-02**: Admin can view system-wide audit log with filtering
 - [ ] **AUDIT-03**: Users can view audit trail per request
 
@@ -176,18 +176,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-04 | Phase 2 | Complete |
 | PROG-05 | Phase 2 | Complete |
 | PROG-06 | Phase 2 | Complete |
-| REQ-01 | Phase 3 | Pending |
-| REQ-02 | Phase 3 | Pending |
+| REQ-01 | Phase 3 | Complete |
+| REQ-02 | Phase 3 | Complete |
 | REQ-03 | Phase 3 | Pending |
 | REQ-04 | Phase 3 | Pending |
-| REQ-05 | Phase 3 | Pending |
+| REQ-05 | Phase 3 | Complete |
 | REQ-06 | Phase 3 | Pending |
 | REQ-07 | Phase 3 | Pending |
 | REQ-08 | Phase 3 | Pending |
-| REQ-09 | Phase 3 | Pending |
+| REQ-09 | Phase 3 | Complete |
 | REQ-10 | Phase 3 | Pending |
 | REQ-11 | Phase 3 | Pending |
-| AUDIT-01 | Phase 3 | Pending |
+| AUDIT-01 | Phase 3 | Complete |
 | AUDIT-02 | Phase 3 | Pending |
 | AUDIT-03 | Phase 3 | Pending |
 | RT-01 | Phase 4 | Pending |

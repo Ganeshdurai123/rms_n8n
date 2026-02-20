@@ -66,12 +66,12 @@ Plans:
   3. User can add comments to a request and see them in an activity timeline, and can upload and download file attachments with type/size validation
   4. Every mutation (field edit, status change, assignment, comment) creates an audit log entry visible on the request detail page and in the admin audit log view
   5. Manager can assign/reassign requests to team members, and the request detail page shows all fields, comments, attachments, and complete history
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [x] 03-01-PLAN.md — Request, Comment, Attachment, AuditLog Mongoose models, Zod schemas, state machine transitions, audit utility
+- [ ] 03-02-PLAN.md — Request CRUD service/controller/routes, status transitions, assignment/reassignment, audit logging on all mutations
+- [ ] 03-03-PLAN.md — Comment CRUD, file attachments with multer upload/download, request detail aggregation, admin audit log API, per-request audit trail
 
 ### Phase 4: Real-Time Events
 **Goal**: Connected users receive instant updates when requests change within their programs, without polling or manual refresh
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation + Authentication | 4/4 | Complete | 2026-02-20 |
 | 2. Programs + Dynamic Fields | 2/2 | Complete | 2026-02-20 |
-| 3. Request Lifecycle + Audit | 0/3 | Not started | - |
+| 3. Request Lifecycle + Audit | 1/3 | In Progress | - |
 | 4. Real-Time Events | 0/2 | Not started | - |
 | 5. n8n Integration + Notifications | 0/3 | Not started | - |
 | 6. Sheet Views | 0/2 | Not started | - |
