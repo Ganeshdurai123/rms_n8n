@@ -152,3 +152,24 @@ export const listProgramsQuerySchema = z.object({
 });
 
 export type ListProgramsQuery = z.infer<typeof listProgramsQuerySchema>;
+
+/**
+ * Schema for adding a member to a program (POST /api/v1/programs/:programId/members).
+ */
+export const addMemberSchema = z.object({
+  userId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid user ID'),
+  role: z.enum(['manager', 'team_member', 'client']),
+});
+
+export type AddMemberInput = z.infer<typeof addMemberSchema>;
+
+/**
+ * Schema for query parameters when listing program members.
+ */
+export const listMembersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  role: z.enum(['manager', 'team_member', 'client']).optional(),
+});
+
+export type ListMembersQuery = z.infer<typeof listMembersQuerySchema>;

@@ -95,3 +95,66 @@ export async function archiveProgram(
     next(err);
   }
 }
+
+// --- Member Management ---
+
+/**
+ * POST /api/v1/programs/:programId/members
+ * Admin or program manager adds a member to a program.
+ */
+export async function addMember(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const membership = await programService.addMember(
+      req.params.programId as string,
+      req.body,
+      req.user!._id,
+    );
+    res.status(201).json({ membership });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/v1/programs/:programId/members/:memberId
+ * Admin or program manager removes a member from a program.
+ */
+export async function removeMember(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await programService.removeMember(
+      req.params.programId as string,
+      req.params.memberId as string,
+    );
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/programs/:programId/members
+ * Admin or program manager lists members of a program.
+ */
+export async function getMembers(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { members, total, page, limit } = await programService.getMembers(
+      req.params.programId as string,
+      req.query as any,
+    );
+    res.status(200).json(paginatedResponse(members, total, page, limit));
+  } catch (err) {
+    next(err);
+  }
+}

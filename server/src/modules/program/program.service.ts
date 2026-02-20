@@ -1,8 +1,10 @@
 import { Program } from './program.model.js';
+import { ProgramMember } from '../user/programMember.model.js';
+import { User } from '../auth/auth.model.js';
 import { AppError, NotFoundError } from '../../shared/errors.js';
 import { cacheGet, cacheSet, cacheInvalidate, CACHE_TTL_CONFIG, CACHE_TTL_LIST } from '../../shared/cache.js';
 import type { IProgramDocument } from './program.model.js';
-import type { CreateProgramInput, UpdateProgramInput, ListProgramsQuery } from './program.schema.js';
+import type { CreateProgramInput, UpdateProgramInput, ListProgramsQuery, AddMemberInput, ListMembersQuery } from './program.schema.js';
 
 /**
  * Escape special regex characters in a string for safe use in RegExp constructor.
@@ -173,4 +175,99 @@ export async function archiveProgram(programId: string): Promise<IProgramDocumen
   await cacheInvalidate('programs:list:*');
 
   return program;
+}
+
+// --- Member Management ---
+
+/**
+ * Add a member to a program with a specific program-level role.
+ * Verifies program exists and is active, and user exists and is active.
+ * Handles duplicate membership with 409 (same pattern as user.service.ts assignToProgram).
+ */
+export async function addMember(programId: string, data: AddMemberInput, addedBy: string) {
+  // Verify program exists and is active
+  const program = await Program.findById(programId);
+  if (!program) {
+    throw new NotFoundError('Program not found');
+  }
+  if (program.status === 'archived') {
+    throw new AppError('Cannot add members to an archived program', 400);
+  }
+
+  // Verify user exists and is active
+  const user = await User.findById(data.userId);
+  if (!user || !user.isActive) {
+    throw new NotFoundError('User not found or inactive');
+  }
+
+  try {
+    const membership = await ProgramMember.create({
+      userId: data.userId,
+      programId,
+      role: data.role,
+      addedBy,
+    });
+
+    // Invalidate member cache
+    await cacheInvalidate(`programs:${programId}:members:*`);
+    // Invalidate program list cache since membership changes affect access-scoped listing
+    await cacheInvalidate('programs:list:*');
+
+    return membership;
+  } catch (err: unknown) {
+    // Handle duplicate compound index violation (user already a member)
+    if (
+      err instanceof Error &&
+      'code' in err &&
+      (err as { code: number }).code === 11000
+    ) {
+      throw new AppError('User is already a member of this program', 409);
+    }
+    throw err;
+  }
+}
+
+/**
+ * Remove a member from a program.
+ * Deletes by member _id AND programId (both must match for safety).
+ */
+export async function removeMember(programId: string, memberId: string) {
+  const result = await ProgramMember.deleteOne({ _id: memberId, programId });
+
+  if (result.deletedCount === 0) {
+    throw new NotFoundError('Membership not found');
+  }
+
+  // Invalidate member cache
+  await cacheInvalidate(`programs:${programId}:members:*`);
+  // Invalidate program list cache since membership changes affect access-scoped listing
+  await cacheInvalidate('programs:list:*');
+}
+
+/**
+ * Get paginated list of members for a program.
+ * Populates only safe user fields per PITFALLS.md Pitfall 6.
+ */
+export async function getMembers(programId: string, query: ListMembersQuery) {
+  const filter: Record<string, unknown> = { programId, isActive: true };
+
+  if (query.role) {
+    filter.role = query.role;
+  }
+
+  const page = query.page;
+  const limit = query.limit;
+  const skip = (page - 1) * limit;
+
+  const [members, total] = await Promise.all([
+    ProgramMember.find(filter)
+      .populate('userId', 'firstName lastName email role')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean(),
+    ProgramMember.countDocuments(filter),
+  ]);
+
+  return { members, total, page, limit };
 }

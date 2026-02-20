@@ -38,8 +38,8 @@ const programMemberSchema = new Schema<IProgramMemberDocument>(
     },
     programId: {
       type: Schema.Types.ObjectId,
+      ref: 'Program',
       required: [true, 'Program ID is required'],
-      // ref: 'Program' -- will reference Program model created in Phase 2
     },
     role: {
       type: String,
