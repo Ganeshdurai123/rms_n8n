@@ -12,7 +12,7 @@ This roadmap delivers a centralized request management system where internal tea
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation + Authentication** - Docker Compose infrastructure, JWT auth, RBAC, and user management
+- [x] **Phase 1: Foundation + Authentication** - Docker Compose infrastructure, JWT auth, RBAC, and user management
 - [ ] **Phase 2: Programs + Dynamic Fields** - Program CRUD with field configuration, boundaries, and access control
 - [ ] **Phase 3: Request Lifecycle + Audit** - Request CRUD, state machine, comments, attachments, history, and audit trail
 - [ ] **Phase 4: Real-Time Events** - Socket.IO with JWT auth, program-scoped rooms, and mutation broadcasting
@@ -37,8 +37,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Docker Compose infrastructure (7 services), Express skeleton, core middleware (Zod validation, pagination, error handling, Redis cache)
-- [ ] 01-02-PLAN.md — Authentication system (register, login, JWT access/refresh tokens, HttpOnly cookies, token family reuse detection, logout with server-side invalidation)
-- [ ] 01-03-PLAN.md — RBAC authorization middleware, user management CRUD (admin-only), ProgramMember model for user-program assignment
+- [x] 01-02-PLAN.md — Authentication system (register, login, JWT access/refresh tokens, HttpOnly cookies, token family reuse detection, logout with server-side invalidation)
+- [x] 01-03-PLAN.md — RBAC authorization middleware, user management CRUD (admin-only), ProgramMember model for user-program assignment
 
 ### Phase 2: Programs + Dynamic Fields
 **Goal**: Admins and managers can create and configure programs that define the organizational structure, field schemas, and access boundaries for requests

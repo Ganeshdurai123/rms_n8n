@@ -14,13 +14,13 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTH-03**: User can refresh expired access token using refresh token (HttpOnly cookie)
 - [x] **AUTH-04**: User session persists across browser refresh via stored tokens
 - [x] **AUTH-05**: User can log out (invalidates refresh token server-side)
-- [ ] **AUTH-06**: System enforces RBAC with 4 roles: admin, manager, team_member, client
+- [x] **AUTH-06**: System enforces RBAC with 4 roles: admin, manager, team_member, client
 
 ### User Management
 
-- [ ] **USER-01**: Admin can create new users and assign roles
-- [ ] **USER-02**: Admin can view, edit, and deactivate user accounts
-- [ ] **USER-03**: Admin can assign users to programs with specific roles
+- [x] **USER-01**: Admin can create new users and assign roles
+- [x] **USER-02**: Admin can view, edit, and deactivate user accounts
+- [x] **USER-03**: Admin can assign users to programs with specific roles
 
 ### Programs
 
@@ -166,10 +166,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 1 | Complete |
 | AUTH-05 | Phase 1 | Complete |
-| AUTH-06 | Phase 1 | Pending |
-| USER-01 | Phase 1 | Pending |
-| USER-02 | Phase 1 | Pending |
-| USER-03 | Phase 1 | Pending |
+| AUTH-06 | Phase 1 | Complete |
+| USER-01 | Phase 1 | Complete |
+| USER-02 | Phase 1 | Complete |
+| USER-03 | Phase 1 | Complete |
 | PROG-01 | Phase 2 | Pending |
 | PROG-02 | Phase 2 | Pending |
 | PROG-03 | Phase 2 | Pending |

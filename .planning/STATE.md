@@ -5,32 +5,32 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 1 - Foundation + Authentication
+**Current focus:** Phase 1 - Foundation + Authentication (COMPLETE)
 
 ## Current Position
 
-Phase: 1 of 8 (Foundation + Authentication)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-02-20 -- Completed 01-02-PLAN.md (JWT auth with refresh token rotation, 5 auth endpoints, Passport JWT)
+Phase: 1 of 8 (Foundation + Authentication) -- COMPLETE
+Plan: 3 of 3 in current phase (all plans complete)
+Status: Phase Complete
+Last activity: 2026-02-20 -- Completed 01-03-PLAN.md (RBAC authorization, user management CRUD, ProgramMember model, admin seed)
 
-Progress: [██░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 13%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 7.5min
-- Total execution time: 0.25 hours
+- Total plans completed: 3
+- Average duration: 8.7min
+- Total execution time: 0.43 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-authentication | 2 | 15min | 7.5min |
+| 01-foundation-authentication | 3 | 26min | 8.7min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (7min), 01-02 (8min)
+- Last 5 plans: 01-01 (7min), 01-02 (8min), 01-03 (11min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -54,6 +54,10 @@ Recent decisions affecting current work:
 - 01-02: Logout does NOT require authenticate middleware -- identity from refresh token cookie so expired-access-token users can log out
 - 01-02: Refresh token bcrypt rounds 10 (vs 12 for passwords) since tokens are already high-entropy
 - 01-02: Auth routes mounted directly on app, not apiRouter, for clean /api/v1/auth path
+- 01-03: authorize middleware is centralized factory -- no inline role checks anywhere (per PITFALLS.md Pitfall 4)
+- 01-03: ProgramMember is separate collection with compound unique index (userId+programId), not embedded
+- 01-03: Deactivation is soft delete + all refresh token revocation for immediate session termination
+- 01-03: Router-level middleware for authenticate+authorize on all user routes rather than per-route
 
 ### Pending Todos
 
@@ -68,5 +72,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 01-02-PLAN.md (authentication plan)
+Stopped at: Completed 01-03-PLAN.md (RBAC + user management -- Phase 1 complete)
 Resume file: None
