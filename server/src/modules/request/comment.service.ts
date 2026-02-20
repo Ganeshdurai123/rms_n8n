@@ -1,0 +1,112 @@
+import { Comment, ICommentDocument } from './comment.model.js';
+import { Request } from './request.model.js';
+import { createAuditEntry } from '../audit/audit.utils.js';
+import { NotFoundError, ForbiddenError } from '../../shared/errors.js';
+import type { Role } from '../../shared/types.js';
+import type { ListCommentsQuery } from './comment.schema.js';
+
+/**
+ * Add a comment to a request.
+ * Verifies request exists, creates comment, logs audit entry.
+ */
+export async function addComment(
+  requestId: string,
+  content: string,
+  authorId: string,
+  programId: string,
+): Promise<ICommentDocument> {
+  // Verify request exists
+  const request = await Request.findById(requestId);
+  if (!request) {
+    throw new NotFoundError('Request not found');
+  }
+
+  // Create the comment
+  const comment = await Comment.create({
+    requestId,
+    authorId,
+    content,
+  });
+
+  // Populate author details for the response
+  const populated = await Comment.findById(comment._id)
+    .populate('authorId', 'firstName lastName email')
+    .lean();
+
+  // Audit log: comment added
+  await createAuditEntry({
+    action: 'comment.added',
+    entityType: 'comment',
+    entityId: comment._id.toString(),
+    requestId,
+    programId,
+    performedBy: authorId,
+    after: { content },
+  });
+
+  return populated as unknown as ICommentDocument;
+}
+
+/**
+ * Get paginated comments for a request, sorted by createdAt ascending (timeline order).
+ */
+export async function getComments(
+  requestId: string,
+  query: ListCommentsQuery,
+) {
+  const page = query.page;
+  const limit = query.limit;
+  const skip = (page - 1) * limit;
+
+  const [comments, total] = await Promise.all([
+    Comment.find({ requestId })
+      .populate('authorId', 'firstName lastName email')
+      .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Comment.countDocuments({ requestId }),
+  ]);
+
+  return { comments, total, page, limit };
+}
+
+/**
+ * Delete a comment.
+ * Only the comment author or an admin/manager can delete.
+ */
+export async function deleteComment(
+  commentId: string,
+  requestId: string,
+  userId: string,
+  userRole: Role,
+  programId: string,
+): Promise<void> {
+  const comment = await Comment.findOne({ _id: commentId, requestId });
+
+  if (!comment) {
+    throw new NotFoundError('Comment not found');
+  }
+
+  // Authorization: only author or admin/manager can delete
+  const isAuthor = comment.authorId.toString() === userId;
+  const isPrivileged = ['admin', 'manager'].includes(userRole);
+
+  if (!isAuthor && !isPrivileged) {
+    throw new ForbiddenError('Only the comment author or an admin/manager can delete this comment');
+  }
+
+  // Delete the comment
+  await Comment.findByIdAndDelete(commentId);
+
+  // Audit log: comment deleted
+  await createAuditEntry({
+    action: 'comment.deleted',
+    entityType: 'comment',
+    entityId: commentId,
+    requestId,
+    programId,
+    performedBy: userId,
+    before: { content: comment.content, authorId: comment.authorId.toString() },
+  });
+}

@@ -11,6 +11,7 @@ import {
   listRequestsQuerySchema,
   requestParamsSchema,
 } from './request.schema.js';
+import { commentRouter } from './comment.routes.js';
 
 const router = Router({ mergeParams: true });
 
@@ -65,5 +66,8 @@ router.patch(
   authorizeProgram({ roles: ['manager'] }),
   requestController.assign,
 );
+
+// Mount comment sub-resource routes
+router.use('/:requestId/comments', commentRouter);
 
 export { router as requestRouter };
