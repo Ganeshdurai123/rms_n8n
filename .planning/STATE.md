@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 1 of 8 (Foundation + Authentication)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-20 -- Completed 01-01-PLAN.md (Docker Compose infrastructure, Express skeleton, core middleware)
+Last activity: 2026-02-20 -- Completed 01-02-PLAN.md (JWT auth with refresh token rotation, 5 auth endpoints, Passport JWT)
 
-Progress: [█░░░░░░░░░] 5%
+Progress: [██░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 7min
-- Total execution time: 0.1 hours
+- Total plans completed: 2
+- Average duration: 7.5min
+- Total execution time: 0.25 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-authentication | 1 | 7min | 7min |
+| 01-foundation-authentication | 2 | 15min | 7.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (7min)
-- Trend: baseline
+- Last 5 plans: 01-01 (7min), 01-02 (8min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -50,6 +50,10 @@ Recent decisions affecting current work:
 - 01-01: Separate JWT_ACCESS_SECRET and JWT_REFRESH_SECRET in env validation (per PITFALLS.md)
 - 01-01: CORS origin set to validated env.CLIENT_URL for cookie-based auth (not wildcard)
 - 01-01: Nginx /api/v1/internal/ block before /api/ rule (per PITFALLS.md Pitfall 2)
+- 01-02: Used nanoid@3 (CJS) instead of nanoid@5 (ESM-only) for NodeNext module compatibility
+- 01-02: Logout does NOT require authenticate middleware -- identity from refresh token cookie so expired-access-token users can log out
+- 01-02: Refresh token bcrypt rounds 10 (vs 12 for passwords) since tokens are already high-entropy
+- 01-02: Auth routes mounted directly on app, not apiRouter, for clean /api/v1/auth path
 
 ### Pending Todos
 
@@ -64,5 +68,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 01-01-PLAN.md (infrastructure plan)
+Stopped at: Completed 01-02-PLAN.md (authentication plan)
 Resume file: None

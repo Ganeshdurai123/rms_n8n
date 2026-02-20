@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can register with email and password
-- [ ] **AUTH-02**: User can log in and receive JWT access token (15min) and refresh token (7d)
-- [ ] **AUTH-03**: User can refresh expired access token using refresh token (HttpOnly cookie)
-- [ ] **AUTH-04**: User session persists across browser refresh via stored tokens
-- [ ] **AUTH-05**: User can log out (invalidates refresh token server-side)
+- [x] **AUTH-01**: User can register with email and password
+- [x] **AUTH-02**: User can log in and receive JWT access token (15min) and refresh token (7d)
+- [x] **AUTH-03**: User can refresh expired access token using refresh token (HttpOnly cookie)
+- [x] **AUTH-04**: User session persists across browser refresh via stored tokens
+- [x] **AUTH-05**: User can log out (invalidates refresh token server-side)
 - [ ] **AUTH-06**: System enforces RBAC with 4 roles: admin, manager, team_member, client
 
 ### User Management
@@ -161,11 +161,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
+| AUTH-05 | Phase 1 | Complete |
 | AUTH-06 | Phase 1 | Pending |
 | USER-01 | Phase 1 | Pending |
 | USER-02 | Phase 1 | Pending |
