@@ -8,6 +8,7 @@ import { connectDB, disconnectDB } from './config/db.js';
 import redis from './config/redis.js';
 import logger from './config/logger.js';
 import { seedAdmin } from './config/seed.js';
+import { initSocketIO } from './config/socket.js';
 
 const server = http.createServer(app);
 
@@ -26,6 +27,10 @@ async function start(): Promise<void> {
     const pong = await redis.ping();
     logger.info(`Redis ping: ${pong}`);
 
+    // 4.5. Initialize Socket.IO
+    initSocketIO(server);
+    logger.info('Socket.IO initialized');
+
     // 5. Start HTTP server
     server.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT}`);
@@ -39,6 +44,16 @@ async function start(): Promise<void> {
 // Graceful shutdown
 async function shutdown(signal: string): Promise<void> {
   logger.info(`${signal} received. Starting graceful shutdown...`);
+
+  // Close Socket.IO before HTTP server
+  try {
+    const { getIO } = await import('./config/socket.js');
+    const ioInstance = getIO();
+    ioInstance.close();
+    logger.info('Socket.IO closed');
+  } catch {
+    /* Socket.IO not initialized — nothing to close */
+  }
 
   server.close(() => {
     logger.info('HTTP server closed');
