@@ -9,6 +9,7 @@ import passport from './config/passport.js';
 import { NotFoundError } from './shared/errors.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
+import { userRouter } from './modules/user/user.routes.js';
 
 const app = express();
 
@@ -59,12 +60,15 @@ app.use('/api/v1', apiRouter);
 // 11. Auth routes
 app.use('/api/v1/auth', authRouter);
 
-// 12. 404 handler - any unmatched route
+// 12. User management routes (admin-only, requires auth + authorize)
+app.use('/api/v1/users', userRouter);
+
+// 13. 404 handler - any unmatched route
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
 });
 
-// 13. Global error handler (must be last)
+// 14. Global error handler (must be last)
 app.use(errorHandler);
 
 export { app, apiRouter };

@@ -7,6 +7,7 @@ import { env } from './config/env.js';
 import { connectDB, disconnectDB } from './config/db.js';
 import redis from './config/redis.js';
 import logger from './config/logger.js';
+import { seedAdmin } from './config/seed.js';
 
 const server = http.createServer(app);
 
@@ -18,11 +19,14 @@ async function start(): Promise<void> {
     // 2. Connect to MongoDB
     await connectDB();
 
-    // 3. Verify Redis connection
+    // 3. Seed default admin user (first boot only)
+    await seedAdmin();
+
+    // 4. Verify Redis connection
     const pong = await redis.ping();
     logger.info(`Redis ping: ${pong}`);
 
-    // 4. Start HTTP server
+    // 5. Start HTTP server
     server.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT}`);
     });
