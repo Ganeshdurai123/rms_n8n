@@ -1,0 +1,154 @@
+import { z } from 'zod';
+
+/**
+ * Zod schema for a single field definition within a program.
+ * Validates that dropdown-type fields include at least one option.
+ */
+export const fieldDefinitionSchema = z
+  .object({
+    key: z
+      .string()
+      .regex(
+        /^[a-z][a-z0-9_]*$/,
+        'Key must start with a lowercase letter and contain only lowercase letters, numbers, and underscores',
+      )
+      .max(50),
+    label: z.string().min(1, 'Label is required').max(100).trim(),
+    type: z.enum([
+      'text',
+      'number',
+      'date',
+      'dropdown',
+      'checkbox',
+      'file_upload',
+    ]),
+    required: z.boolean().default(false),
+    options: z.array(z.string().trim().max(200)).optional(),
+    placeholder: z.string().max(200).trim().optional(),
+    order: z.number().int().min(0),
+  })
+  .refine(
+    (data) => {
+      if (data.type === 'dropdown') {
+        return data.options !== undefined && data.options.length >= 1;
+      }
+      return true;
+    },
+    {
+      message: 'Dropdown fields must have at least one option',
+      path: ['options'],
+    },
+  );
+
+export type FieldDefinitionInput = z.infer<typeof fieldDefinitionSchema>;
+
+/**
+ * Schema for creating a new program (POST /api/v1/programs).
+ * Validates unique field keys within the fieldDefinitions array.
+ * Validates that endDate is after startDate when both are provided.
+ */
+export const createProgramSchema = z.object({
+  name: z.string().min(2, 'Program name must be at least 2 characters').max(100).trim(),
+  description: z.string().max(2000).trim().optional(),
+  fieldDefinitions: z
+    .array(fieldDefinitionSchema)
+    .default([])
+    .refine(
+      (fields) => {
+        const keys = fields.map((f) => f.key);
+        return new Set(keys).size === keys.length;
+      },
+      {
+        message: 'Field definition keys must be unique within a program',
+      },
+    ),
+  settings: z
+    .object({
+      allowClientSubmission: z.boolean().default(true),
+      requireApproval: z.boolean().default(true),
+      maxActiveRequests: z.number().int().min(0).optional(),
+    })
+    .default({}),
+  timeframes: z
+    .object({
+      startDate: z.coerce.date().optional(),
+      endDate: z.coerce.date().optional(),
+    })
+    .refine(
+      (data) => {
+        if (data.startDate && data.endDate) {
+          return data.endDate > data.startDate;
+        }
+        return true;
+      },
+      {
+        message: 'End date must be after start date',
+        path: ['endDate'],
+      },
+    )
+    .default({}),
+});
+
+export type CreateProgramInput = z.infer<typeof createProgramSchema>;
+
+/**
+ * Schema for updating an existing program (PATCH /api/v1/programs/:programId).
+ * All top-level fields are optional.
+ * When updating fieldDefinitions, send the complete array (not a partial merge).
+ */
+export const updateProgramSchema = z.object({
+  name: z.string().min(2).max(100).trim().optional(),
+  description: z.string().max(2000).trim().optional(),
+  fieldDefinitions: z
+    .array(fieldDefinitionSchema)
+    .refine(
+      (fields) => {
+        const keys = fields.map((f) => f.key);
+        return new Set(keys).size === keys.length;
+      },
+      {
+        message: 'Field definition keys must be unique within a program',
+      },
+    )
+    .optional(),
+  settings: z
+    .object({
+      allowClientSubmission: z.boolean().optional(),
+      requireApproval: z.boolean().optional(),
+      maxActiveRequests: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  timeframes: z
+    .object({
+      startDate: z.coerce.date().optional(),
+      endDate: z.coerce.date().optional(),
+    })
+    .refine(
+      (data) => {
+        if (data.startDate && data.endDate) {
+          return data.endDate > data.startDate;
+        }
+        return true;
+      },
+      {
+        message: 'End date must be after start date',
+        path: ['endDate'],
+      },
+    )
+    .optional(),
+});
+
+export type UpdateProgramInput = z.infer<typeof updateProgramSchema>;
+
+/**
+ * Schema for query parameters when listing programs.
+ * Supports pagination, status filter, and text search.
+ */
+export const listProgramsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(['active', 'archived']).optional(),
+  search: z.string().max(100).optional(),
+});
+
+export type ListProgramsQuery = z.infer<typeof listProgramsQuerySchema>;
