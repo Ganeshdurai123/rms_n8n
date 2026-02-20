@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 1 - Foundation + Authentication (COMPLETE)
+**Current focus:** Phase 2 - Programs + Dynamic Fields (IN PROGRESS)
 
 ## Current Position
 
-Phase: 1 of 8 (Foundation + Authentication) -- COMPLETE
-Plan: 4 of 4 in current phase (all plans complete, including gap closure)
-Status: Phase Complete
-Last activity: 2026-02-20 -- Completed 01-04-PLAN.md (client/ scaffolding gap closure -- React 18 + Vite + Tailwind + shadcn/ui)
+Phase: 2 of 8 (Programs + Dynamic Fields)
+Plan: 1 of 2 in current phase (02-01 complete)
+Status: In Progress
+Last activity: 2026-02-20 -- Completed 02-01-PLAN.md (Program CRUD with dynamic field definitions)
 
-Progress: [██░░░░░░░░] 13%
+Progress: [██░░░░░░░░] 19%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 7.3min
-- Total execution time: 0.48 hours
+- Total plans completed: 5
+- Average duration: 6.6min
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-authentication | 4 | 29min | 7.3min |
+| 02-programs-dynamic-fields | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (7min), 01-02 (8min), 01-03 (11min), 01-04 (3min)
-- Trend: stable
+- Last 5 plans: 01-02 (8min), 01-03 (11min), 01-04 (3min), 02-01 (4min)
+- Trend: stable/improving
 
 *Updated after each plan completion*
 
@@ -60,6 +61,10 @@ Recent decisions affecting current work:
 - 01-03: Router-level middleware for authenticate+authorize on all user routes rather than per-route
 - 01-04: Used import.meta.url + fileURLToPath instead of __dirname in vite.config.ts (ESM compatibility)
 - 01-04: Added @types/node for Node.js path module resolution in Vite config TypeScript
+- 02-01: Embedded subdocuments for fieldDefinitions (not separate collection) per ARCHITECTURE.md Pattern 2
+- 02-01: escapeRegex utility for safe case-insensitive name uniqueness checks in RegExp constructor
+- 02-01: Suppressed Mongoose auto _id on fieldDefinition subdocuments -- key field serves as identifier
+- 02-01: Redis caching with CACHE_TTL_CONFIG for single program reads and CACHE_TTL_LIST for list queries
 
 ### Pending Todos
 
@@ -74,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 01-04-PLAN.md (client/ scaffolding gap closure -- Phase 1 fully complete)
+Stopped at: Completed 02-01-PLAN.md (Program CRUD with dynamic field definitions)
 Resume file: None
