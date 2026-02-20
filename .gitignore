@@ -1,1 +1,29 @@
-.planning/
+# Dependencies
+node_modules/
+
+# Environment variables (secrets)
+.env
+
+# Build output
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker volumes
+mongo_data/
+redis_data/
+n8n_data/
+n8n_db_data/
