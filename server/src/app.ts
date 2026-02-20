@@ -5,8 +5,10 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { env } from './config/env.js';
+import passport from './config/passport.js';
 import { NotFoundError } from './shared/errors.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { authRouter } from './modules/auth/auth.routes.js';
 
 const app = express();
 
@@ -38,7 +40,10 @@ if (env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// 8. Health check route
+// 8. Passport initialization (JWT strategy, no sessions)
+app.use(passport.initialize());
+
+// 9. Health check route
 app.get('/api/v1/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -47,16 +52,19 @@ app.get('/api/v1/health', (_req, res) => {
   });
 });
 
-// 9. API router placeholder
+// 10. API router placeholder
 const apiRouter = Router();
 app.use('/api/v1', apiRouter);
 
-// 10. 404 handler - any unmatched route
+// 11. Auth routes
+app.use('/api/v1/auth', authRouter);
+
+// 12. 404 handler - any unmatched route
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
 });
 
-// 11. Global error handler (must be last)
+// 13. Global error handler (must be last)
 app.use(errorHandler);
 
 export { app, apiRouter };
