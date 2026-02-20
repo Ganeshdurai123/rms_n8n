@@ -10,6 +10,7 @@ import { NotFoundError } from './shared/errors.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { userRouter } from './modules/user/user.routes.js';
+import { programRouter } from './modules/program/program.routes.js';
 
 const app = express();
 
@@ -63,12 +64,15 @@ app.use('/api/v1/auth', authRouter);
 // 12. User management routes (admin-only, requires auth + authorize)
 app.use('/api/v1/users', userRouter);
 
-// 13. 404 handler - any unmatched route
+// 13. Program management routes (admin/manager, requires auth + authorize)
+app.use('/api/v1/programs', programRouter);
+
+// 14. 404 handler - any unmatched route
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
 });
 
-// 14. Global error handler (must be last)
+// 15. Global error handler (must be last)
 app.use(errorHandler);
 
 export { app, apiRouter };
