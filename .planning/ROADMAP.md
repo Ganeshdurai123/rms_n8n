@@ -13,7 +13,7 @@ This roadmap delivers a centralized request management system where internal tea
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation + Authentication** - Docker Compose infrastructure, JWT auth, RBAC, and user management
-- [ ] **Phase 2: Programs + Dynamic Fields** - Program CRUD with field configuration, boundaries, and access control
+- [x] **Phase 2: Programs + Dynamic Fields** - Program CRUD with field configuration, boundaries, and access control
 - [ ] **Phase 3: Request Lifecycle + Audit** - Request CRUD, state machine, comments, attachments, history, and audit trail
 - [ ] **Phase 4: Real-Time Events** - Socket.IO with JWT auth, program-scoped rooms, and mutation broadcasting
 - [ ] **Phase 5: n8n Integration + Notifications** - Webhook outbox, n8n workflows, internal API, in-app and email notifications
@@ -158,8 +158,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation + Authentication | 1/3 | In Progress | - |
-| 2. Programs + Dynamic Fields | 0/2 | Planned | - |
+| 1. Foundation + Authentication | 4/4 | Complete | 2026-02-20 |
+| 2. Programs + Dynamic Fields | 2/2 | Complete | 2026-02-20 |
 | 3. Request Lifecycle + Audit | 0/3 | Not started | - |
 | 4. Real-Time Events | 0/2 | Not started | - |
 | 5. n8n Integration + Notifications | 0/3 | Not started | - |
