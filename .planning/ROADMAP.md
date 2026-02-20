@@ -33,12 +33,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can refresh an expired access token without re-logging in, and can log out which invalidates the session server-side
   4. Admin can create users, assign roles (admin/manager/team_member/client), edit accounts, and deactivate users
   5. Protected API endpoints reject unauthenticated requests and enforce role-based access (e.g., only admins can manage users)
-**Plans**: 3 plans in 3 waves
+**Plans**: 4 plans (3 original + 1 gap closure)
 
 Plans:
 - [x] 01-01-PLAN.md — Docker Compose infrastructure (7 services), Express skeleton, core middleware (Zod validation, pagination, error handling, Redis cache)
 - [x] 01-02-PLAN.md — Authentication system (register, login, JWT access/refresh tokens, HttpOnly cookies, token family reuse detection, logout with server-side invalidation)
 - [x] 01-03-PLAN.md — RBAC authorization middleware, user management CRUD (admin-only), ProgramMember model for user-program assignment
+- [ ] 01-04-PLAN.md — [GAP CLOSURE] Client scaffolding (React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui new-york) to unblock Docker Compose cold start
 
 ### Phase 2: Programs + Dynamic Fields
 **Goal**: Admins and managers can create and configure programs that define the organizational structure, field schemas, and access boundaries for requests

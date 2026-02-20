@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 1 of 8 (Foundation + Authentication) -- COMPLETE
-Plan: 3 of 3 in current phase (all plans complete)
+Plan: 4 of 4 in current phase (all plans complete, including gap closure)
 Status: Phase Complete
-Last activity: 2026-02-20 -- Completed 01-03-PLAN.md (RBAC authorization, user management CRUD, ProgramMember model, admin seed)
+Last activity: 2026-02-20 -- Completed 01-04-PLAN.md (client/ scaffolding gap closure -- React 18 + Vite + Tailwind + shadcn/ui)
 
 Progress: [██░░░░░░░░] 13%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 8.7min
-- Total execution time: 0.43 hours
+- Total plans completed: 4
+- Average duration: 7.3min
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-authentication | 3 | 26min | 8.7min |
+| 01-foundation-authentication | 4 | 29min | 7.3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (7min), 01-02 (8min), 01-03 (11min)
+- Last 5 plans: 01-01 (7min), 01-02 (8min), 01-03 (11min), 01-04 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -58,6 +58,8 @@ Recent decisions affecting current work:
 - 01-03: ProgramMember is separate collection with compound unique index (userId+programId), not embedded
 - 01-03: Deactivation is soft delete + all refresh token revocation for immediate session termination
 - 01-03: Router-level middleware for authenticate+authorize on all user routes rather than per-route
+- 01-04: Used import.meta.url + fileURLToPath instead of __dirname in vite.config.ts (ESM compatibility)
+- 01-04: Added @types/node for Node.js path module resolution in Vite config TypeScript
 
 ### Pending Todos
 
@@ -72,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 01-03-PLAN.md (RBAC + user management -- Phase 1 complete)
+Stopped at: Completed 01-04-PLAN.md (client/ scaffolding gap closure -- Phase 1 fully complete)
 Resume file: None
