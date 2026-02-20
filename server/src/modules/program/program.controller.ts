@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import * as programService from './program.service.js';
 import { paginatedResponse } from '../../middleware/pagination.js';
+import type { Role } from '../../shared/types.js';
 
 /**
  * POST /api/v1/programs
@@ -21,7 +22,8 @@ export async function createProgram(
 
 /**
  * GET /api/v1/programs
- * Admin or manager views paginated list of programs.
+ * All authenticated users can list programs.
+ * Access-scoped: non-admin users see only programs they are members of.
  */
 export async function getPrograms(
   req: Request,
@@ -31,6 +33,8 @@ export async function getPrograms(
   try {
     const { programs, total, page, limit } = await programService.getPrograms(
       req.query as any,
+      req.user!._id,
+      req.user!.role as Role,
     );
     res.status(200).json(paginatedResponse(programs, total, page, limit));
   } catch (err) {

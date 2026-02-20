@@ -4,6 +4,7 @@ import { User } from '../auth/auth.model.js';
 import { AppError, NotFoundError } from '../../shared/errors.js';
 import { cacheGet, cacheSet, cacheInvalidate, CACHE_TTL_CONFIG, CACHE_TTL_LIST } from '../../shared/cache.js';
 import type { IProgramDocument } from './program.model.js';
+import type { Role } from '../../shared/types.js';
 import type { CreateProgramInput, UpdateProgramInput, ListProgramsQuery, AddMemberInput, ListMembersQuery } from './program.schema.js';
 
 /**
@@ -65,10 +66,15 @@ export async function getProgramById(programId: string): Promise<IProgramDocumen
 
 /**
  * Get paginated list of programs with optional filters.
- * Supports filtering by status and text search on name/description.
+ * Access-scoped: non-admin users see ONLY programs they are members of (PROG-06).
+ * Admin users see all programs.
+ * Manager users see programs they are members of (as manager) PLUS programs they created.
  */
-export async function getPrograms(query: ListProgramsQuery) {
-  const cacheKey = `programs:list:${JSON.stringify(query)}`;
+export async function getPrograms(query: ListProgramsQuery, userId: string, userRole: Role) {
+  // Cache key includes userId for non-admin users (access-scoped results)
+  const cacheKey = userRole === 'admin'
+    ? `programs:list:admin:${JSON.stringify(query)}`
+    : `programs:list:${userId}:${JSON.stringify(query)}`;
   const cached = await cacheGet<{ programs: IProgramDocument[]; total: number; page: number; limit: number }>(cacheKey);
 
   if (cached) {
@@ -77,16 +83,46 @@ export async function getPrograms(query: ListProgramsQuery) {
 
   const filter: Record<string, unknown> = {};
 
+  // Access scoping: non-admin users see only their programs
+  if (userRole !== 'admin') {
+    // Get all programIds where user has an active membership
+    const memberships = await ProgramMember.find({ userId, isActive: true })
+      .select('programId')
+      .lean();
+    const memberProgramIds = memberships.map((m) => m.programId);
+
+    if (userRole === 'manager') {
+      // Managers see programs they are members of PLUS programs they created
+      filter.$or = [
+        { _id: { $in: memberProgramIds } },
+        { createdBy: userId },
+      ];
+    } else {
+      // team_member and client roles: only see programs they are members of
+      filter._id = { $in: memberProgramIds };
+    }
+  }
+
   if (query.status) {
     filter.status = query.status;
   }
 
   if (query.search) {
     const searchRegex = { $regex: query.search, $options: 'i' };
-    filter.$or = [
-      { name: searchRegex },
-      { description: searchRegex },
-    ];
+    // If we already have $or from access scoping, use $and to combine
+    if (filter.$or) {
+      const accessOr = filter.$or;
+      delete filter.$or;
+      filter.$and = [
+        { $or: accessOr as Record<string, unknown>[] },
+        { $or: [{ name: searchRegex }, { description: searchRegex }] },
+      ];
+    } else {
+      filter.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+      ];
+    }
   }
 
   const page = query.page;
@@ -175,6 +211,31 @@ export async function archiveProgram(programId: string): Promise<IProgramDocumen
   await cacheInvalidate('programs:list:*');
 
   return program;
+}
+
+// --- Boundary Enforcement ---
+
+/**
+ * Check if a program's timeframe allows submission-related actions.
+ * Throws an AppError if the program is archived, hasn't started, or has ended.
+ * Reusable utility for Phase 3 (Request module) to enforce submission boundaries.
+ */
+export async function checkProgramTimeframe(programId: string): Promise<void> {
+  const program = await getProgramById(programId);
+
+  if (program.status === 'archived') {
+    throw new AppError('Program is archived and not accepting submissions', 400);
+  }
+
+  const now = new Date();
+
+  if (program.timeframes?.startDate && new Date(program.timeframes.startDate) > now) {
+    throw new AppError('Program has not started accepting submissions yet', 400);
+  }
+
+  if (program.timeframes?.endDate && new Date(program.timeframes.endDate) < now) {
+    throw new AppError('Program submission period has ended', 400);
+  }
 }
 
 // --- Member Management ---
