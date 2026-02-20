@@ -45,14 +45,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **REQ-01**: User can create a new request within a program (status: draft)
 - [x] **REQ-02**: Request form renders dynamic fields based on program configuration
-- [ ] **REQ-03**: User can submit a draft request (draft -> submitted)
-- [ ] **REQ-04**: Manager can move request through lifecycle states (submitted -> in_review -> approved/rejected -> completed)
+- [x] **REQ-03**: User can submit a draft request (draft -> submitted)
+- [x] **REQ-04**: Manager can move request through lifecycle states (submitted -> in_review -> approved/rejected -> completed)
 - [x] **REQ-05**: System validates state transitions (only allowed transitions by authorized roles)
 - [ ] **REQ-06**: User can add comments to a request with activity timeline
 - [ ] **REQ-07**: User can upload file attachments to a request (with type and size validation)
 - [ ] **REQ-08**: User can download file attachments from a request
 - [x] **REQ-09**: System tracks complete history of all changes to a request (field edits, status changes, assignments)
-- [ ] **REQ-10**: Manager can assign/reassign requests to team members
+- [x] **REQ-10**: Manager can assign/reassign requests to team members
 - [ ] **REQ-11**: User can view request detail page with all fields, comments, attachments, and history
 
 ### Client Collaboration
@@ -178,14 +178,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROG-06 | Phase 2 | Complete |
 | REQ-01 | Phase 3 | Complete |
 | REQ-02 | Phase 3 | Complete |
-| REQ-03 | Phase 3 | Pending |
-| REQ-04 | Phase 3 | Pending |
+| REQ-03 | Phase 3 | Complete |
+| REQ-04 | Phase 3 | Complete |
 | REQ-05 | Phase 3 | Complete |
 | REQ-06 | Phase 3 | Pending |
 | REQ-07 | Phase 3 | Pending |
 | REQ-08 | Phase 3 | Pending |
 | REQ-09 | Phase 3 | Complete |
-| REQ-10 | Phase 3 | Pending |
+| REQ-10 | Phase 3 | Complete |
 | REQ-11 | Phase 3 | Pending |
 | AUDIT-01 | Phase 3 | Complete |
 | AUDIT-02 | Phase 3 | Pending |

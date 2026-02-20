@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 3 of 8 (Request Lifecycle + Audit)
-Plan: 1 of 3 in current phase (03-01 complete)
+Plan: 2 of 3 in current phase (03-02 complete)
 Status: In Progress
-Last activity: 2026-02-20 -- Completed 03-01-PLAN.md (Request lifecycle data foundation)
+Last activity: 2026-02-20 -- Completed 03-02-PLAN.md (Request CRUD + State Transitions + Assignment + Audit)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 35%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 7.6min
-- Total execution time: 0.87 hours
+- Total plans completed: 8
+- Average duration: 7min
+- Total execution time: 0.92 hours
 
 **By Phase:**
 
@@ -29,13 +29,14 @@ Progress: [███░░░░░░░] 30%
 |-------|-------|-------|----------|
 | 01-foundation-authentication | 4 | 29min | 7.3min |
 | 02-programs-dynamic-fields | 2 | 21min | 10.5min |
-| 03-request-lifecycle-audit | 1 | 2min | 2min |
+| 03-request-lifecycle-audit | 2 | 5min | 2.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-04 (3min), 02-01 (4min), 02-02 (17min), 03-01 (2min)
+- Last 5 plans: 02-01 (4min), 02-02 (17min), 03-01 (2min), 03-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 03 P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,10 @@ Recent decisions affecting current work:
 - 03-01: State machine uses Record<RequestStatus, RequestStatus[]> for transition map with string-key role authorization
 - 03-01: Audit utility returns null on failure (fire-and-forget) so audit errors never break main operations
 - 03-01: REQUEST_STATUSES and AUDIT_ACTIONS exported as const arrays for reuse across schemas and models
+- 03-02: Dynamic field validation via validateFields helper in service layer -- checks required, type, dropdown options, rejects unknown keys
+- 03-02: Access scoping in getRequests: clients see createdBy:userId, team_members see createdBy OR assignedTo, admin/manager see all
+- 03-02: Creator-only submit rule: draft->submitted and rejected->submitted require request.createdBy === userId
+- 03-02: Assignment restricted to active program members with team_member or manager role via ProgramMember lookup
 
 ### Pending Todos
 
@@ -88,5 +93,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-01-PLAN.md (Request lifecycle data foundation)
+Stopped at: Completed 03-02-PLAN.md (Request CRUD + State Transitions + Assignment + Audit)
 Resume file: None
