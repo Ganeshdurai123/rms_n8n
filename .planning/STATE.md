@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 2 - Programs + Dynamic Fields (IN PROGRESS)
+**Current focus:** Phase 2 - Programs + Dynamic Fields (COMPLETE)
 
 ## Current Position
 
 Phase: 2 of 8 (Programs + Dynamic Fields)
-Plan: 1 of 2 in current phase (02-01 complete)
-Status: In Progress
-Last activity: 2026-02-20 -- Completed 02-01-PLAN.md (Program CRUD with dynamic field definitions)
+Plan: 2 of 2 in current phase (02-02 complete -- phase complete)
+Status: Phase Complete
+Last activity: 2026-02-20 -- Completed 02-02-PLAN.md (Program access scoping and member management)
 
-Progress: [██░░░░░░░░] 19%
+Progress: [██░░░░░░░░] 23%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 6.6min
-- Total execution time: 0.55 hours
+- Total plans completed: 6
+- Average duration: 8.3min
+- Total execution time: 0.83 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-authentication | 4 | 29min | 7.3min |
-| 02-programs-dynamic-fields | 1 | 4min | 4min |
+| 02-programs-dynamic-fields | 2 | 21min | 10.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (8min), 01-03 (11min), 01-04 (3min), 02-01 (4min)
-- Trend: stable/improving
+- Last 5 plans: 01-03 (11min), 01-04 (3min), 02-01 (4min), 02-02 (17min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -65,6 +65,10 @@ Recent decisions affecting current work:
 - 02-01: escapeRegex utility for safe case-insensitive name uniqueness checks in RegExp constructor
 - 02-01: Suppressed Mongoose auto _id on fieldDefinition subdocuments -- key field serves as identifier
 - 02-01: Redis caching with CACHE_TTL_CONFIG for single program reads and CACHE_TTL_LIST for list queries
+- 02-02: authorizeProgram middleware factory with optional roles array for fine-grained program-level permission checks
+- 02-02: Access-scoped listing: managers see memberships + created programs, team_member/client see only memberships
+- 02-02: Cache keys include userId for non-admin program list queries to prevent cross-user cache leakage
+- 02-02: Router-level authorize removed; per-route middleware applied for flexible authorization layering
 
 ### Pending Todos
 
@@ -79,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 02-01-PLAN.md (Program CRUD with dynamic field definitions)
+Stopped at: Completed 02-02-PLAN.md (Program access scoping and member management) -- Phase 2 complete
 Resume file: None

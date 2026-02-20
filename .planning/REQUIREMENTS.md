@@ -26,10 +26,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PROG-01**: Admin/manager can create a program with name, description, and settings
 - [x] **PROG-02**: Admin/manager can configure dynamic fields per program (text, number, date, dropdown, checkbox, file upload)
-- [ ] **PROG-03**: Admin/manager can configure program boundaries (who can access, submission rules)
+- [x] **PROG-03**: Admin/manager can configure program boundaries (who can access, submission rules)
 - [x] **PROG-04**: Admin/manager can configure program timeframes
 - [x] **PROG-05**: Admin/manager can edit and archive programs
-- [ ] **PROG-06**: Users see only programs they have access to
+- [x] **PROG-06**: Users see only programs they have access to
 
 ### Sheets
 
@@ -172,10 +172,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | USER-03 | Phase 1 | Complete |
 | PROG-01 | Phase 2 | Complete |
 | PROG-02 | Phase 2 | Complete |
-| PROG-03 | Phase 2 | Pending |
+| PROG-03 | Phase 2 | Complete |
 | PROG-04 | Phase 2 | Complete |
 | PROG-05 | Phase 2 | Complete |
-| PROG-06 | Phase 2 | Pending |
+| PROG-06 | Phase 2 | Complete |
 | REQ-01 | Phase 3 | Pending |
 | REQ-02 | Phase 3 | Pending |
 | REQ-03 | Phase 3 | Pending |
