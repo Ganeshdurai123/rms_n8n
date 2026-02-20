@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { userRouter } from './modules/user/user.routes.js';
 import { programRouter } from './modules/program/program.routes.js';
+import { requestRouter } from './modules/request/request.routes.js';
 
 const app = express();
 
@@ -67,12 +68,15 @@ app.use('/api/v1/users', userRouter);
 // 13. Program management routes (admin/manager, requires auth + authorize)
 app.use('/api/v1/programs', programRouter);
 
-// 14. 404 handler - any unmatched route
+// 14. Request routes (nested under programs, uses mergeParams)
+app.use('/api/v1/programs/:programId/requests', requestRouter);
+
+// 15. 404 handler - any unmatched route
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
 });
 
-// 15. Global error handler (must be last)
+// 16. Global error handler (must be last)
 app.use(errorHandler);
 
 export { app, apiRouter };
