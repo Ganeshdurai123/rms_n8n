@@ -50,11 +50,11 @@ Plans:
   2. Admin/manager can configure dynamic fields on a program (text, number, date, dropdown, checkbox, file upload) and those definitions persist
   3. Admin/manager can configure program boundaries (who can access) and timeframes, and the system enforces them
   4. Users see only the programs they have been granted access to -- no leakage of program names or data across boundaries
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Program model with embedded dynamic field definitions, Zod schemas, CRUD service/controller/routes (create, list, get, update, archive)
+- [ ] 02-02-PLAN.md — authorizeProgram middleware, program member management, access-scoped program listing (PROG-06), timeframe boundary enforcement
 
 ### Phase 3: Request Lifecycle + Audit
 **Goal**: Users can create, submit, and track requests through their full lifecycle within programs, with comments, file attachments, and a complete audit trail of every change
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation + Authentication | 1/3 | In Progress | - |
-| 2. Programs + Dynamic Fields | 0/2 | Not started | - |
+| 2. Programs + Dynamic Fields | 0/2 | Planned | - |
 | 3. Request Lifecycle + Audit | 0/3 | Not started | - |
 | 4. Real-Time Events | 0/2 | Not started | - |
 | 5. n8n Integration + Notifications | 0/3 | Not started | - |
