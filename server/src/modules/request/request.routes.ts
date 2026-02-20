@@ -13,6 +13,7 @@ import {
 } from './request.schema.js';
 import { commentRouter } from './comment.routes.js';
 import { attachmentRouter } from './attachment.routes.js';
+import { listAuditLogsQuerySchema } from '../audit/audit.schema.js';
 
 const router = Router({ mergeParams: true });
 
@@ -66,6 +67,21 @@ router.patch(
   validate(assignRequestSchema),
   authorizeProgram({ roles: ['manager'] }),
   requestController.assign,
+);
+
+// GET /programs/:programId/requests/:requestId/detail -- aggregated request detail
+router.get(
+  '/:requestId/detail',
+  validate(requestParamsSchema, 'params'),
+  requestController.getDetail,
+);
+
+// GET /programs/:programId/requests/:requestId/audit -- per-request audit trail (any program member)
+router.get(
+  '/:requestId/audit',
+  validate(requestParamsSchema, 'params'),
+  validate(listAuditLogsQuerySchema, 'query'),
+  requestController.getAuditTrail,
 );
 
 // Mount comment sub-resource routes

@@ -1,5 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import * as requestService from './request.service.js';
+import { getRequestDetail } from './requestDetail.service.js';
+import { getRequestAuditTrail } from '../audit/audit.service.js';
 import { paginatedResponse } from '../../middleware/pagination.js';
 import type { Role } from '../../shared/types.js';
 
@@ -123,6 +125,43 @@ export async function assign(
       req.user!._id,
     );
     res.status(200).json({ data: request });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/programs/:programId/requests/:requestId/detail
+ * Get aggregated request detail with comments, attachments, and audit trail.
+ */
+export async function getDetail(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await getRequestDetail(req.params.requestId as string);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/programs/:programId/requests/:requestId/audit
+ * Get per-request audit trail (accessible to any program member).
+ */
+export async function getAuditTrail(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { auditLogs, total, page, limit } = await getRequestAuditTrail(
+      req.params.requestId as string,
+      req.query as any,
+    );
+    res.status(200).json(paginatedResponse(auditLogs as any[], total, page, limit));
   } catch (err) {
     next(err);
   }
