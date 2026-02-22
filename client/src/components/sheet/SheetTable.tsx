@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -10,8 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronUp, ChevronDown, Check, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { RequestItem, FieldDefinition } from '@/lib/types';
+import type { RequestItem, FieldDefinition, Role } from '@/lib/types';
 import type { SheetQuery } from './useSheetData';
+import { InlineCreateRow } from './InlineCreateRow';
+import { InlineEditRow } from './InlineEditRow';
+import { SheetRowActions } from './SheetRowActions';
 
 interface SheetTableProps {
   requests: RequestItem[];
@@ -20,7 +24,13 @@ interface SheetTableProps {
   onToggleSort: (column: string) => void;
   onRowClick?: (request: RequestItem) => void;
   isLoading: boolean;
-  renderRowActions?: (request: RequestItem) => React.ReactNode;
+  programId: string;
+  showCreateRow?: boolean;
+  onCreateDone?: () => void;
+  onCreateCancel?: () => void;
+  onRefresh: () => void;
+  userRole: Role;
+  userId: string;
 }
 
 const STATUS_VARIANT: Record<string, string> = {
@@ -143,13 +153,25 @@ export function SheetTable({
   onToggleSort,
   onRowClick,
   isLoading,
-  renderRowActions,
+  programId,
+  showCreateRow,
+  onCreateDone,
+  onCreateCancel,
+  onRefresh,
+  userRole,
+  userId,
 }: SheetTableProps) {
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+
   const sortedDefs = [...fieldDefinitions].sort(
     (a, b) => a.order - b.order,
   );
 
-  const hasActions = !!renderRowActions;
+  // Always show actions column for inline CRUD
+  const hasActions = true;
+
+  // Total column count for spanning
+  const totalColumns = FIXED_COLUMNS.length + sortedDefs.length + (hasActions ? 1 : 0);
 
   // Loading state: skeleton rows
   if (isLoading) {
@@ -163,7 +185,7 @@ export function SheetTable({
             {sortedDefs.map((def) => (
               <TableHead key={def.key}>{def.label}</TableHead>
             ))}
-            {hasActions && <TableHead />}
+            {hasActions && <TableHead className="w-[60px]" />}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -191,8 +213,8 @@ export function SheetTable({
     );
   }
 
-  // Empty state
-  if (requests.length === 0) {
+  // Empty state (but still show create row if active)
+  if (requests.length === 0 && !showCreateRow) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <p className="text-lg font-medium">No requests found</p>
@@ -244,96 +266,148 @@ export function SheetTable({
               </TableHead>
             );
           })}
-          {hasActions && <TableHead />}
+          {hasActions && <TableHead className="w-[60px]" />}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {requests.map((req) => (
-          <TableRow
-            key={req._id}
-            className={cn(onRowClick && 'cursor-pointer')}
-            onClick={onRowClick ? () => onRowClick(req) : undefined}
-          >
-            {/* Title */}
-            <TableCell className="font-medium max-w-[250px] truncate">
-              {req.title}
+        {/* Inline create row at top */}
+        {showCreateRow && onCreateDone && onCreateCancel && (
+          <InlineCreateRow
+            programId={programId}
+            fieldDefinitions={fieldDefinitions}
+            onCreated={() => {
+              onCreateDone();
+              onRefresh();
+            }}
+            onCancel={onCreateCancel}
+          />
+        )}
+
+        {/* Data rows (or inline edit row) */}
+        {requests.length === 0 && showCreateRow ? (
+          <TableRow>
+            <TableCell
+              colSpan={totalColumns}
+              className="text-center text-muted-foreground py-8"
+            >
+              No existing requests. Create one above.
             </TableCell>
-
-            {/* Status */}
-            <TableCell>
-              <Badge
-                className={cn(
-                  'capitalize',
-                  STATUS_VARIANT[req.status] || '',
-                )}
-                variant="secondary"
-              >
-                {req.status.replace('_', ' ')}
-              </Badge>
-            </TableCell>
-
-            {/* Priority */}
-            <TableCell>
-              <Badge
-                variant={PRIORITY_VARIANT[req.priority] || 'default'}
-                className={cn(
-                  'capitalize',
-                  PRIORITY_EXTRA_CLASS[req.priority] || '',
-                )}
-              >
-                {req.priority}
-              </Badge>
-            </TableCell>
-
-            {/* Assigned To */}
-            <TableCell>
-              {formatUserName(
-                req.assignedTo as
-                  | string
-                  | {
-                      _id: string;
-                      firstName: string;
-                      lastName: string;
-                    }
-                  | null
-                  | undefined,
-                'Unassigned',
-              )}
-            </TableCell>
-
-            {/* Created By */}
-            <TableCell>
-              {formatUserName(
-                req.createdBy as
-                  | string
-                  | {
-                      _id: string;
-                      firstName: string;
-                      lastName: string;
-                    }
-                  | null
-                  | undefined,
-              )}
-            </TableCell>
-
-            {/* Created At */}
-            <TableCell>{formatDate(req.createdAt)}</TableCell>
-
-            {/* Dynamic field columns */}
-            {sortedDefs.map((def) => (
-              <TableCell key={def.key}>
-                {formatFieldValue(req.fields[def.key], def.type)}
-              </TableCell>
-            ))}
-
-            {/* Actions column */}
-            {hasActions && (
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                {renderRowActions(req)}
-              </TableCell>
-            )}
           </TableRow>
-        ))}
+        ) : (
+          requests.map((req) => {
+            // If this row is being edited, render the inline edit component
+            if (editingRowId === req._id) {
+              return (
+                <InlineEditRow
+                  key={req._id}
+                  request={req}
+                  programId={programId}
+                  fieldDefinitions={fieldDefinitions}
+                  onSaved={() => {
+                    setEditingRowId(null);
+                    onRefresh();
+                  }}
+                  onCancel={() => setEditingRowId(null)}
+                />
+              );
+            }
+
+            // Normal data row
+            return (
+              <TableRow
+                key={req._id}
+                className={cn(onRowClick && 'cursor-pointer')}
+                onClick={onRowClick ? () => onRowClick(req) : undefined}
+              >
+                {/* Title */}
+                <TableCell className="font-medium max-w-[250px] truncate">
+                  {req.title}
+                </TableCell>
+
+                {/* Status */}
+                <TableCell>
+                  <Badge
+                    className={cn(
+                      'capitalize',
+                      STATUS_VARIANT[req.status] || '',
+                    )}
+                    variant="secondary"
+                  >
+                    {req.status.replace('_', ' ')}
+                  </Badge>
+                </TableCell>
+
+                {/* Priority */}
+                <TableCell>
+                  <Badge
+                    variant={PRIORITY_VARIANT[req.priority] || 'default'}
+                    className={cn(
+                      'capitalize',
+                      PRIORITY_EXTRA_CLASS[req.priority] || '',
+                    )}
+                  >
+                    {req.priority}
+                  </Badge>
+                </TableCell>
+
+                {/* Assigned To */}
+                <TableCell>
+                  {formatUserName(
+                    req.assignedTo as
+                      | string
+                      | {
+                          _id: string;
+                          firstName: string;
+                          lastName: string;
+                        }
+                      | null
+                      | undefined,
+                    'Unassigned',
+                  )}
+                </TableCell>
+
+                {/* Created By */}
+                <TableCell>
+                  {formatUserName(
+                    req.createdBy as
+                      | string
+                      | {
+                          _id: string;
+                          firstName: string;
+                          lastName: string;
+                        }
+                      | null
+                      | undefined,
+                  )}
+                </TableCell>
+
+                {/* Created At */}
+                <TableCell>{formatDate(req.createdAt)}</TableCell>
+
+                {/* Dynamic field columns */}
+                {sortedDefs.map((def) => (
+                  <TableCell key={def.key}>
+                    {formatFieldValue(req.fields[def.key], def.type)}
+                  </TableCell>
+                ))}
+
+                {/* Actions column */}
+                {hasActions && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <SheetRowActions
+                      request={req}
+                      programId={programId}
+                      onEdit={() => setEditingRowId(req._id)}
+                      onDeleted={onRefresh}
+                      userRole={userRole}
+                      userId={userId}
+                    />
+                  </TableCell>
+                )}
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );

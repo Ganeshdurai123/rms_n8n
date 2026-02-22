@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import type { Program } from '@/lib/types';
 import { useSheetData } from '@/components/sheet/useSheetData';
 import { SheetTable } from '@/components/sheet/SheetTable';
@@ -8,7 +9,8 @@ import { SheetToolbar } from '@/components/sheet/SheetToolbar';
 import { SheetPagination } from '@/components/sheet/SheetPagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ProgramMember {
   _id: string;
@@ -18,10 +20,12 @@ interface ProgramMember {
 
 export function SheetViewPage() {
   const { programId } = useParams<{ programId: string }>();
+  const { user } = useAuth();
   const [program, setProgram] = useState<Program | null>(null);
   const [programLoading, setProgramLoading] = useState(true);
   const [programError, setProgramError] = useState<string | null>(null);
   const [members, setMembers] = useState<ProgramMember[]>([]);
+  const [showCreateRow, setShowCreateRow] = useState(false);
 
   const {
     requests,
@@ -123,6 +127,59 @@ export function SheetViewPage() {
     };
   }, [programId]);
 
+  // CSV Export handler
+  const handleExport = useCallback(async () => {
+    if (!programId) return;
+
+    try {
+      // Build query params from current filter state (no page/limit)
+      const params: Record<string, string> = {
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+      };
+
+      if (query.status) params.status = query.status;
+      if (query.priority) params.priority = query.priority;
+      if (query.assignedTo) params.assignedTo = query.assignedTo;
+      if (query.search) params.search = query.search;
+      if (query.createdAfter) params.createdAfter = query.createdAfter;
+      if (query.createdBefore) params.createdBefore = query.createdBefore;
+
+      // Custom field filters
+      if (query.fields) {
+        for (const [key, value] of Object.entries(query.fields)) {
+          if (value) {
+            params[`fields[${key}]`] = value;
+          }
+        }
+      }
+
+      const response = await api.get(
+        `/programs/${programId}/requests/export`,
+        { params, responseType: 'blob' },
+      );
+
+      // Create blob and trigger download
+      const blob = new Blob([response.data as BlobPart], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `requests-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('CSV exported successfully');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to export CSV';
+      toast.error(message);
+    }
+  }, [programId, query]);
+
   // Loading state for program config
   if (programLoading) {
     return (
@@ -179,6 +236,13 @@ export function SheetViewPage() {
             Sheet View - {pagination.total} requests
           </p>
         </div>
+        <Button
+          onClick={() => setShowCreateRow(true)}
+          disabled={showCreateRow}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New Request
+        </Button>
       </div>
 
       {/* Toolbar */}
@@ -189,6 +253,7 @@ export function SheetViewPage() {
           onFieldFilterChange={setFieldFilter}
           onSearchChange={setSearch}
           onDateRangeChange={setDateRange}
+          onExport={handleExport}
           programMembers={members}
           fieldDefinitions={program.fieldDefinitions}
         />
@@ -215,6 +280,16 @@ export function SheetViewPage() {
           query={query}
           onToggleSort={toggleSort}
           isLoading={isLoading}
+          programId={programId || ''}
+          showCreateRow={showCreateRow}
+          onCreateDone={() => {
+            setShowCreateRow(false);
+            refresh();
+          }}
+          onCreateCancel={() => setShowCreateRow(false)}
+          onRefresh={refresh}
+          userRole={user?.role || 'client'}
+          userId={user?._id || ''}
         />
       </div>
 
