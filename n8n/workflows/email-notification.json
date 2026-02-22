@@ -1,0 +1,387 @@
+{
+  "name": "RMS Email Notification Dispatch",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "rms-events",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "rms-events"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "request.status_changed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status_changed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "request.assigned",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "assigned"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "comment.added",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "comment_added"
+            }
+          ],
+          "fallbackOutput": {
+            "name": "discard"
+          }
+        },
+        "options": {}
+      },
+      "id": "switch-event-type",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.assignedTo?.email || $json.data.createdBy?.email || '' }}",
+        "subject": "=Request status changed: {{ $json.data.request?.title || $json.data.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <h2 style=\"color: #2563eb;\">Request Status Changed</h2>\n  <p>A request has been updated in your program.</p>\n  <table style=\"width: 100%; border-collapse: collapse; margin: 16px 0;\">\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Request:</td><td style=\"padding: 8px;\">{{ $json.data.request?.title || $json.data.title || 'N/A' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">New Status:</td><td style=\"padding: 8px;\">{{ $json.data.to || $json.data.status || 'N/A' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Changed by:</td><td style=\"padding: 8px;\">{{ $json.performedBy?.name || 'System' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Time:</td><td style=\"padding: 8px;\">{{ $json.timestamp }}</td></tr>\n  </table>\n  <p style=\"margin-top: 16px;\"><a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;\">View Request</a></p>\n</div>",
+        "options": {}
+      },
+      "id": "email-status-changed",
+      "name": "Email: Status Changed",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [700, 140],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURE_ME",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.assignedTo?.email || '' }}",
+        "subject": "=You have been assigned: {{ $json.data.request?.title || $json.data.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <h2 style=\"color: #2563eb;\">Request Assigned to You</h2>\n  <p>You have been assigned a request in your program.</p>\n  <table style=\"width: 100%; border-collapse: collapse; margin: 16px 0;\">\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Request:</td><td style=\"padding: 8px;\">{{ $json.data.request?.title || $json.data.title || 'N/A' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Status:</td><td style=\"padding: 8px;\">{{ $json.data.status || 'N/A' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Assigned by:</td><td style=\"padding: 8px;\">{{ $json.performedBy?.name || 'System' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Time:</td><td style=\"padding: 8px;\">{{ $json.timestamp }}</td></tr>\n  </table>\n  <p style=\"margin-top: 16px;\"><a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;\">View Request</a></p>\n</div>",
+        "options": {}
+      },
+      "id": "email-assigned",
+      "name": "Email: Assignment",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [700, 300],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURE_ME",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.assignedTo?.email || $json.data.createdBy?.email || '' }}",
+        "subject": "=New comment on: {{ $json.data.request?.title || $json.data.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <h2 style=\"color: #2563eb;\">New Comment Added</h2>\n  <p>A new comment was added to a request in your program.</p>\n  <table style=\"width: 100%; border-collapse: collapse; margin: 16px 0;\">\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Request:</td><td style=\"padding: 8px;\">{{ $json.data.request?.title || $json.data.title || 'N/A' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Comment by:</td><td style=\"padding: 8px;\">{{ $json.performedBy?.name || 'System' }}</td></tr>\n    <tr><td style=\"padding: 8px; font-weight: bold;\">Time:</td><td style=\"padding: 8px;\">{{ $json.timestamp }}</td></tr>\n  </table>\n  <p style=\"margin-top: 16px;\"><a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;\">View Request</a></p>\n</div>",
+        "options": {}
+      },
+      "id": "email-comment-added",
+      "name": "Email: Comment Added",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [700, 460],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURE_ME",
+          "name": "SMTP Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"{{ $json.data.assignedTo?.userId || $json.data.createdBy?.userId || '' }}\",\n  \"type\": \"request.status_changed\",\n  \"title\": \"Email sent: Status changed\",\n  \"message\": \"Email notification sent for status change on request '{{ $json.data.request?.title || $json.data.title || '' }}'\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-status-changed",
+      "name": "Create Notification: Status Changed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 140]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"{{ $json.data.assignedTo?.userId || '' }}\",\n  \"type\": \"request.assigned\",\n  \"title\": \"Email sent: Assignment\",\n  \"message\": \"Email notification sent for assignment on request '{{ $json.data.request?.title || $json.data.title || '' }}'\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-assigned",
+      "name": "Create Notification: Assigned",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"{{ $json.data.assignedTo?.userId || $json.data.createdBy?.userId || '' }}\",\n  \"type\": \"comment.added\",\n  \"title\": \"Email sent: New comment\",\n  \"message\": \"Email notification sent for new comment on request '{{ $json.data.request?.title || $json.data.title || '' }}'\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-comment-added",
+      "name": "Create Notification: Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, event: $json.eventType }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route by Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Event Type": {
+      "main": [
+        [
+          {
+            "node": "Email: Status Changed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: Assignment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: Comment Added",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Email: Status Changed": {
+      "main": [
+        [
+          {
+            "node": "Create Notification: Status Changed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Assignment": {
+      "main": [
+        [
+          {
+            "node": "Create Notification: Assigned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Comment Added": {
+      "main": [
+        [
+          {
+            "node": "Create Notification: Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Notification: Status Changed": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Notification: Assigned": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Notification: Comment": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "pinData": {},
+  "versionId": "",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "name": "RMS",
+      "createdAt": "",
+      "updatedAt": ""
+    }
+  ],
+  "active": false
+}
