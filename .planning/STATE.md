@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 5 of 8 (n8n Integration & Notifications)
-Plan: 2 of 4 in current phase (05-02 complete)
+Plan: 3 of 4 in current phase (05-03 complete)
 Status: In Progress
-Last activity: 2026-02-22 -- Completed 05-02-PLAN.md (In-App Notification System)
+Last activity: 2026-02-22 -- Completed 05-03-PLAN.md (Webhook Dispatch & Notification Wiring)
 
-Progress: [██████░░░░] 65%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 7min
-- Total execution time: 1.57 hours
+- Total execution time: 1.65 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [██████░░░░] 65%
 | 02-programs-dynamic-fields | 2 | 21min | 10.5min |
 | 03-request-lifecycle-audit | 3 | 24min | 8min |
 | 04-real-time-events | 2 | 6min | 3min |
-| 05-n8n-integration-notifications | 2 | 14min | 7min |
+| 05-n8n-integration-notifications | 3 | 19min | 6.3min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (19min), 04-01 (4min), 04-02 (2min), 05-01 (2min), 05-02 (12min)
+- Last 5 plans: 04-01 (4min), 04-02 (2min), 05-01 (2min), 05-02 (12min), 05-03 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -42,6 +42,7 @@ Progress: [██████░░░░] 65%
 | Phase 04 P02 | 2min | 2 tasks | 3 files |
 | Phase 05 P01 | 2min | 2 tasks | 7 files |
 | Phase 05 P02 | 12min | 2 tasks | 8 files |
+| Phase 05 P03 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,10 @@ Recent decisions affecting current work:
 - 05-02: Fire-and-forget createNotification for internal use vs throwing createNotificationFromInternal for n8n internal API
 - 05-02: read-all route mounted before parameterized :notificationId routes to prevent Express misparse
 - 05-02: Notification routes require only JWT auth, not role-based authorization -- all users manage their own notifications
+- 05-03: Webhook enqueue calls placed inside existing getPerformerName().then() blocks to reuse performer data and avoid double DB lookups
+- 05-03: Notifications only for high-signal events: status changes, assignments, comments -- not creates, updates, or attachments
+- 05-03: Self-notification suppressed: assignee not notified on self-assignment, creator not notified on own transition
+- 05-03: Outbox processor interval set to 10 seconds for reasonable dispatch latency without excessive polling
 
 ### Pending Todos
 
@@ -120,5 +125,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Re-executed 05-01-PLAN.md (Webhook Outbox & Internal API) -- decisions recorded
+Stopped at: Completed 05-03-PLAN.md (Webhook Dispatch & Notification Wiring)
 Resume file: None
