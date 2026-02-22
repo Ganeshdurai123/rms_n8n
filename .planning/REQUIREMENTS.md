@@ -76,7 +76,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **NOTIF-01**: User receives in-app notifications (bell icon with unread count)
 - [x] **NOTIF-02**: In-app notifications update in real-time via Socket.IO
-- [ ] **NOTIF-03**: User receives email notifications for key events (status changes, assignments, comments) via n8n
+- [x] **NOTIF-03**: User receives email notifications for key events (status changes, assignments, comments) via n8n
 - [x] **NOTIF-04**: User can mark notifications as read/unread
 
 ### n8n Integration
@@ -86,8 +86,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **N8N-03**: System exposes internal API (/api/v1/internal/) for n8n callbacks with shared-secret auth
 - [x] **N8N-04**: System exposes POST /api/v1/internal/socket-emit for n8n to push real-time events
 - [x] **N8N-05**: System maintains typed event catalog defining all webhook payloads
-- [ ] **N8N-06**: n8n workflows handle email dispatch for all notification events
-- [ ] **N8N-07**: n8n workflows handle scheduled reminder checks
+- [x] **N8N-06**: n8n workflows handle email dispatch for all notification events
+- [x] **N8N-07**: n8n workflows handle scheduled reminder checks
 
 ### Real-Time
 
@@ -199,11 +199,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | N8N-03 | Phase 5 | Complete |
 | N8N-04 | Phase 5 | Complete |
 | N8N-05 | Phase 5 | Complete |
-| N8N-06 | Phase 5 | Pending |
-| N8N-07 | Phase 5 | Pending |
+| N8N-06 | Phase 5 | Complete |
+| N8N-07 | Phase 5 | Complete |
 | NOTIF-01 | Phase 5 | Complete |
 | NOTIF-02 | Phase 5 | Complete |
-| NOTIF-03 | Phase 5 | Pending |
+| NOTIF-03 | Phase 5 | Complete |
 | NOTIF-04 | Phase 5 | Complete |
 | SHEET-01 | Phase 6 | Pending |
 | SHEET-02 | Phase 6 | Pending |

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 5 - n8n Integration & Notifications (IN PROGRESS)
+**Current focus:** Phase 5 - n8n Integration & Notifications (COMPLETE)
 
 ## Current Position
 
 Phase: 5 of 8 (n8n Integration & Notifications)
-Plan: 3 of 4 in current phase (05-03 complete)
-Status: In Progress
-Last activity: 2026-02-22 -- Completed 05-03-PLAN.md (Webhook Dispatch & Notification Wiring)
+Plan: 4 of 4 in current phase (05-04 complete -- PHASE COMPLETE)
+Status: Phase 5 Complete
+Last activity: 2026-02-22 -- Completed 05-04-PLAN.md (n8n Workflow Templates & Internal API Callbacks)
 
-Progress: [███████░░░] 70%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 7min
-- Total execution time: 1.65 hours
+- Total execution time: 1.77 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [███████░░░] 70%
 | 02-programs-dynamic-fields | 2 | 21min | 10.5min |
 | 03-request-lifecycle-audit | 3 | 24min | 8min |
 | 04-real-time-events | 2 | 6min | 3min |
-| 05-n8n-integration-notifications | 3 | 19min | 6.3min |
+| 05-n8n-integration-notifications | 4 | 26min | 6.5min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (4min), 04-02 (2min), 05-01 (2min), 05-02 (12min), 05-03 (5min)
+- Last 5 plans: 04-02 (2min), 05-01 (2min), 05-02 (12min), 05-03 (5min), 05-04 (7min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -43,6 +43,7 @@ Progress: [███████░░░] 70%
 | Phase 05 P01 | 2min | 2 tasks | 7 files |
 | Phase 05 P02 | 12min | 2 tasks | 8 files |
 | Phase 05 P03 | 5min | 2 tasks | 4 files |
+| Phase 05 P04 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,10 @@ Recent decisions affecting current work:
 - 05-03: Notifications only for high-signal events: status changes, assignments, comments -- not creates, updates, or attachments
 - 05-03: Self-notification suppressed: assignee not notified on self-assignment, creator not notified on own transition
 - 05-03: Outbox processor interval set to 10 seconds for reasonable dispatch latency without excessive polling
+- 05-04: n8n workflow JSONs are importable templates with placeholder SMTP credentials -- user configures in n8n credential manager
+- 05-04: getPendingReminders uses 48-hour staleness threshold for submitted/in_review requests, limited to 100 results
+- 05-04: createNotificationHandler validates notification type against NOTIFICATION_TYPES enum to reject invalid types from n8n
+- 05-04: Both n8n workflows set active: false by default so users must configure SMTP before activation
 
 ### Pending Todos
 
@@ -125,5 +130,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 05-03-PLAN.md (Webhook Dispatch & Notification Wiring)
+Stopped at: Completed 05-04-PLAN.md (n8n Workflow Templates & Internal API Callbacks) -- Phase 5 complete
 Resume file: None
