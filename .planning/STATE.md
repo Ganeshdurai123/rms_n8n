@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 4 - Real-Time Events (COMPLETE)
+**Current focus:** Phase 5 - n8n Integration & Notifications (IN PROGRESS)
 
 ## Current Position
 
-Phase: 4 of 8 (Real-Time Events) -- COMPLETE
-Plan: 2 of 2 in current phase (04-02 complete)
-Status: Phase Complete
-Last activity: 2026-02-22 -- Completed 04-02-PLAN.md (Mutation Broadcasting)
+Phase: 5 of 8 (n8n Integration & Notifications)
+Plan: 2 of 4 in current phase (05-02 complete)
+Status: In Progress
+Last activity: 2026-02-22 -- Completed 05-02-PLAN.md (In-App Notification System)
 
-Progress: [██████░░░░] 55%
+Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 13
 - Average duration: 7min
-- Total execution time: 1.34 hours
+- Total execution time: 1.57 hours
 
 **By Phase:**
 
@@ -31,14 +31,17 @@ Progress: [██████░░░░] 55%
 | 02-programs-dynamic-fields | 2 | 21min | 10.5min |
 | 03-request-lifecycle-audit | 3 | 24min | 8min |
 | 04-real-time-events | 2 | 6min | 3min |
+| 05-n8n-integration-notifications | 2 | 14min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3min), 03-03 (19min), 04-01 (4min), 04-02 (2min)
+- Last 5 plans: 03-03 (19min), 04-01 (4min), 04-02 (2min), 05-01 (2min), 05-02 (12min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 04 P01 | 4min | 2 tasks | 5 files |
 | Phase 04 P02 | 2min | 2 tasks | 3 files |
+| Phase 05 P01 | 2min | 2 tasks | 7 files |
+| Phase 05 P02 | 12min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -95,6 +98,10 @@ Recent decisions affecting current work:
 - 04-02: getPerformerName helper duplicated in each service file to avoid circular imports between service modules
 - 04-02: Fire-and-forget via .then().catch(() => {}) pattern ensures socket emissions never delay HTTP responses or throw errors
 - 04-02: Updated data property includes mutation-specific context (changedFields, from/to status, previousAssignee) for rich client updates
+- 05-02: User-targeted socket emission via io.sockets.sockets iteration (not program rooms) since notifications are per-user
+- 05-02: Fire-and-forget createNotification for internal use vs throwing createNotificationFromInternal for n8n internal API
+- 05-02: read-all route mounted before parameterized :notificationId routes to prevent Express misparse
+- 05-02: Notification routes require only JWT auth, not role-based authorization -- all users manage their own notifications
 
 ### Pending Todos
 
@@ -109,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 04-02-PLAN.md (Mutation Broadcasting) -- Phase 4 complete
+Stopped at: Completed 05-02-PLAN.md (In-App Notification System)
 Resume file: None

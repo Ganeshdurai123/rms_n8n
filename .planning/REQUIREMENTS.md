@@ -74,10 +74,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Notifications
 
-- [ ] **NOTIF-01**: User receives in-app notifications (bell icon with unread count)
-- [ ] **NOTIF-02**: In-app notifications update in real-time via Socket.IO
+- [x] **NOTIF-01**: User receives in-app notifications (bell icon with unread count)
+- [x] **NOTIF-02**: In-app notifications update in real-time via Socket.IO
 - [ ] **NOTIF-03**: User receives email notifications for key events (status changes, assignments, comments) via n8n
-- [ ] **NOTIF-04**: User can mark notifications as read/unread
+- [x] **NOTIF-04**: User can mark notifications as read/unread
 
 ### n8n Integration
 
@@ -201,10 +201,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | N8N-05 | Phase 5 | Pending |
 | N8N-06 | Phase 5 | Pending |
 | N8N-07 | Phase 5 | Pending |
-| NOTIF-01 | Phase 5 | Pending |
-| NOTIF-02 | Phase 5 | Pending |
+| NOTIF-01 | Phase 5 | Complete |
+| NOTIF-02 | Phase 5 | Complete |
 | NOTIF-03 | Phase 5 | Pending |
-| NOTIF-04 | Phase 5 | Pending |
+| NOTIF-04 | Phase 5 | Complete |
 | SHEET-01 | Phase 6 | Pending |
 | SHEET-02 | Phase 6 | Pending |
 | SHEET-03 | Phase 6 | Pending |
