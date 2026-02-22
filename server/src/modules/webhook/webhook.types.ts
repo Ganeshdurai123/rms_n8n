@@ -20,6 +20,7 @@ export const WEBHOOK_EVENT_TYPES = [
   'request.updated',
   'request.status_changed',
   'request.assigned',
+  'request.deleted',
   'comment.added',
   'comment.deleted',
   'attachment.uploaded',

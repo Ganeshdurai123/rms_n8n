@@ -250,6 +250,32 @@ export async function getRequests(
     filter.priority = query.priority;
   }
 
+  // Date range filters
+  if (query.createdAfter || query.createdBefore) {
+    const createdAtFilter: Record<string, unknown> = {};
+    if (query.createdAfter) {
+      createdAtFilter.$gte = query.createdAfter;
+    }
+    if (query.createdBefore) {
+      createdAtFilter.$lte = query.createdBefore;
+    }
+    filter.createdAt = createdAtFilter;
+  }
+
+  // Custom field filtering (dot-notation into request.fields Map)
+  if (query.fields && typeof query.fields === 'object') {
+    for (const [key, value] of Object.entries(query.fields)) {
+      // Cast checkbox-style strings to booleans for proper Map matching
+      if (value === 'true') {
+        filter[`fields.${key}`] = true;
+      } else if (value === 'false') {
+        filter[`fields.${key}`] = false;
+      } else {
+        filter[`fields.${key}`] = value;
+      }
+    }
+  }
+
   // Text search on title and description
   if (query.search) {
     const searchRegex = { $regex: query.search, $options: 'i' };
@@ -266,6 +292,11 @@ export async function getRequests(
     }
   }
 
+  // Dynamic sort
+  const sortField = query.sortBy || 'createdAt';
+  const sortDirection: 1 | -1 = query.sortOrder === 'asc' ? 1 : -1;
+  const sortObj: Record<string, 1 | -1> = { [sortField]: sortDirection };
+
   const page = query.page;
   const limit = query.limit;
   const skip = (page - 1) * limit;
@@ -276,7 +307,7 @@ export async function getRequests(
       .populate('assignedTo', 'firstName lastName email')
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort(sortObj)
       .lean(),
     Request.countDocuments(filter),
   ]);
@@ -604,4 +635,216 @@ export async function assignRequest(
   }).catch(() => {});
 
   return updated;
+}
+
+/**
+ * Delete a draft request.
+ * Only draft requests can be deleted, and only by the creator or an admin.
+ * Creates audit entry, invalidates caches, and emits real-time event.
+ */
+export async function deleteRequest(
+  requestId: string,
+  userId: string,
+  userRole: Role,
+): Promise<IRequestDocument> {
+  const request = await Request.findById(requestId);
+
+  if (!request) {
+    throw new NotFoundError('Request not found');
+  }
+
+  // Only draft requests can be deleted
+  if (request.status !== 'draft') {
+    throw new AppError('Only draft requests can be deleted', 400);
+  }
+
+  // Only the creator or admin can delete
+  if (userRole !== 'admin' && request.createdBy.toString() !== userId) {
+    throw new ForbiddenError('Only the request creator or an admin can delete a request');
+  }
+
+  // Capture before snapshot
+  const before = request.toObject();
+  const programId = request.programId.toString();
+
+  // Delete the request document
+  await Request.findByIdAndDelete(requestId);
+
+  // Audit log: request deleted
+  await createAuditEntry({
+    action: 'request.deleted',
+    entityType: 'request',
+    entityId: requestId,
+    requestId,
+    programId,
+    performedBy: userId,
+    before,
+  });
+
+  // Invalidate caches
+  await cacheInvalidate(`requests:${requestId}`);
+  await cacheInvalidate('requests:list:*');
+
+  // Emit real-time event + webhook (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(programId, 'request:deleted', {
+      event: 'request:deleted',
+      programId,
+      requestId,
+      data: { request: before },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    enqueueWebhookEvent('request.deleted', {
+      eventType: 'request.deleted',
+      programId,
+      requestId,
+      data: { request: before },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
+
+  return request;
+}
+
+/**
+ * Escape a CSV field value: wrap in double quotes if it contains commas, quotes, or newlines.
+ * Inner double quotes are doubled per CSV spec (RFC 4180).
+ */
+function escapeCsvField(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+/**
+ * Export filtered requests as CSV with dynamic field columns from program config.
+ * Reuses the same filter-building logic as getRequests but without pagination.
+ */
+export async function exportRequestsCsv(
+  query: ListRequestsQuery,
+  programId: string,
+  userId: string,
+  userRole: Role,
+): Promise<string> {
+  // Get program with field definitions
+  const program = await getProgramById(programId);
+
+  // Build filter (same as getRequests)
+  const filter: Record<string, unknown> = { programId };
+
+  // Access scoping by role
+  if (userRole === 'client') {
+    filter.createdBy = userId;
+  } else if (userRole === 'team_member') {
+    filter.$or = [{ createdBy: userId }, { assignedTo: userId }];
+  }
+
+  // Optional filters
+  if (query.status) {
+    filter.status = query.status;
+  }
+  if (query.assignedTo) {
+    filter.assignedTo = query.assignedTo;
+  }
+  if (query.priority) {
+    filter.priority = query.priority;
+  }
+
+  // Date range filters
+  if (query.createdAfter || query.createdBefore) {
+    const createdAtFilter: Record<string, unknown> = {};
+    if (query.createdAfter) {
+      createdAtFilter.$gte = query.createdAfter;
+    }
+    if (query.createdBefore) {
+      createdAtFilter.$lte = query.createdBefore;
+    }
+    filter.createdAt = createdAtFilter;
+  }
+
+  // Custom field filtering
+  if (query.fields && typeof query.fields === 'object') {
+    for (const [key, value] of Object.entries(query.fields)) {
+      if (value === 'true') {
+        filter[`fields.${key}`] = true;
+      } else if (value === 'false') {
+        filter[`fields.${key}`] = false;
+      } else {
+        filter[`fields.${key}`] = value;
+      }
+    }
+  }
+
+  // Text search on title and description
+  if (query.search) {
+    const searchRegex = { $regex: query.search, $options: 'i' };
+    if (filter.$or) {
+      const accessOr = filter.$or;
+      delete filter.$or;
+      filter.$and = [
+        { $or: accessOr as Record<string, unknown>[] },
+        { $or: [{ title: searchRegex }, { description: searchRegex }] },
+      ];
+    } else {
+      filter.$or = [{ title: searchRegex }, { description: searchRegex }];
+    }
+  }
+
+  // Dynamic sort (same as getRequests)
+  const sortField = query.sortBy || 'createdAt';
+  const sortDirection: 1 | -1 = query.sortOrder === 'asc' ? 1 : -1;
+  const sortObj: Record<string, 1 | -1> = { [sortField]: sortDirection };
+
+  // Fetch ALL matching requests (no pagination)
+  const requests = await Request.find(filter)
+    .populate('createdBy', 'firstName lastName email')
+    .populate('assignedTo', 'firstName lastName email')
+    .sort(sortObj)
+    .lean();
+
+  // Build CSV
+  const fieldDefs = program.fieldDefinitions || [];
+  const staticHeaders = [
+    'Title',
+    'Description',
+    'Status',
+    'Priority',
+    'Assigned To',
+    'Created By',
+    'Created At',
+    'Updated At',
+  ];
+  const dynamicHeaders = fieldDefs.map((def) => def.label);
+  const headerRow = [...staticHeaders, ...dynamicHeaders].map(escapeCsvField).join(',');
+
+  const dataRows = requests.map((req) => {
+    const assignedTo = req.assignedTo as unknown as { firstName: string; lastName: string } | null;
+    const createdBy = req.createdBy as unknown as { firstName: string; lastName: string } | null;
+
+    const staticValues = [
+      req.title || '',
+      req.description || '',
+      req.status || '',
+      req.priority || '',
+      assignedTo ? `${assignedTo.firstName} ${assignedTo.lastName}` : '',
+      createdBy ? `${createdBy.firstName} ${createdBy.lastName}` : '',
+      req.createdAt ? new Date(req.createdAt).toISOString() : '',
+      req.updatedAt ? new Date(req.updatedAt).toISOString() : '',
+    ];
+
+    // Dynamic field values from the request.fields Map
+    const dynamicValues = fieldDefs.map((def) => {
+      // After .lean(), Map becomes a plain object
+      const fieldsObj = req.fields as unknown as Record<string, unknown> | undefined;
+      const val = fieldsObj ? fieldsObj[def.key] : undefined;
+      return val !== undefined && val !== null ? String(val) : '';
+    });
+
+    return [...staticValues, ...dynamicValues].map(escapeCsvField).join(',');
+  });
+
+  return [headerRow, ...dataRows].join('\n');
 }

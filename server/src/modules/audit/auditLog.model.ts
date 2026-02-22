@@ -8,6 +8,7 @@ export const AUDIT_ACTIONS = [
   'request.updated',
   'request.status_changed',
   'request.assigned',
+  'request.deleted',
   'request.field_edited',
   'comment.added',
   'comment.deleted',

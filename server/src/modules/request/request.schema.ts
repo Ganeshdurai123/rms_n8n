@@ -82,7 +82,8 @@ export type AssignRequestInput = z.infer<typeof assignRequestSchema>;
 
 /**
  * Schema for query parameters when listing requests.
- * Supports pagination, status/priority/assignment filtering, and text search.
+ * Supports pagination, status/priority/assignment filtering, text search,
+ * sorting, date range filtering, and custom field filtering.
  */
 export const listRequestsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -91,6 +92,11 @@ export const listRequestsQuerySchema = z.object({
   assignedTo: z.string().regex(objectIdRegex, 'Invalid user ID').optional(),
   priority: z.enum(REQUEST_PRIORITIES).optional(),
   search: z.string().max(100).optional(),
+  sortBy: z.enum(['title', 'status', 'priority', 'createdAt', 'updatedAt', 'assignedTo']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  createdAfter: z.coerce.date().optional(),
+  createdBefore: z.coerce.date().optional(),
+  fields: z.record(z.string(), z.string()).optional(),
 });
 
 export type ListRequestsQuery = z.infer<typeof listRequestsQuerySchema>;

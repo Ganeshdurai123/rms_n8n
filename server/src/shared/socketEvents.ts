@@ -15,6 +15,7 @@ export type SocketEventName =
   | 'request:updated'
   | 'request:status_changed'
   | 'request:assigned'
+  | 'request:deleted'
   | 'comment:added'
   | 'comment:deleted'
   | 'attachment:uploaded'
@@ -50,6 +51,7 @@ export interface ServerToClientEvents {
   'request:updated': (payload: SocketEventPayload) => void;
   'request:status_changed': (payload: SocketEventPayload) => void;
   'request:assigned': (payload: SocketEventPayload) => void;
+  'request:deleted': (payload: SocketEventPayload) => void;
   'comment:added': (payload: SocketEventPayload) => void;
   'comment:deleted': (payload: SocketEventPayload) => void;
   'attachment:uploaded': (payload: SocketEventPayload) => void;
