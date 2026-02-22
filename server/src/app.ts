@@ -13,6 +13,8 @@ import { userRouter } from './modules/user/user.routes.js';
 import { programRouter } from './modules/program/program.routes.js';
 import { requestRouter } from './modules/request/request.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
+import { notificationRouter } from './modules/notification/notification.routes.js';
+import { internalRouter } from './modules/internal/internal.routes.js';
 
 const app = express();
 
@@ -75,12 +77,18 @@ app.use('/api/v1/programs/:programId/requests', requestRouter);
 // 15. Admin audit log routes (admin-only)
 app.use('/api/v1/admin/audit', auditRouter);
 
-// 16. 404 handler - any unmatched route
+// 16. Notification routes (authenticated users manage their own notifications)
+app.use('/api/v1/notifications', notificationRouter);
+
+// 17. Internal API routes (n8n -> Express, shared-secret auth, nginx-blocked externally)
+app.use('/api/v1/internal', internalRouter);
+
+// 18. 404 handler - any unmatched route
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
 });
 
-// 17. Global error handler (must be last)
+// 19. Global error handler (must be last)
 app.use(errorHandler);
 
 export { app, apiRouter };
