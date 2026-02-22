@@ -98,12 +98,13 @@ Plans:
   3. User sees a notification bell with unread count that updates in real-time when new notifications arrive, and can mark notifications as read/unread
   4. User receives email notifications for status changes, assignments, and comments -- dispatched by n8n, not the Express backend
   5. n8n executes scheduled workflows (reminder checks) without any cron or job queue in the Express process
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Webhook outbox model, typed event catalog (all 9 mutation types), internal API with shared-secret auth, socket-emit endpoint for n8n
+- [ ] 05-02-PLAN.md — Notification Mongoose model, CRUD API (list, unread count, mark read/unread), real-time Socket.IO notification delivery
+- [ ] 05-03-PLAN.md — Wire webhook dispatch and in-app notifications into all 8 mutation paths, start outbox processor on server boot
+- [ ] 05-04-PLAN.md — n8n workflow JSON templates (email notifications + scheduled reminders), internal API callback endpoints, setup documentation
 
 ### Phase 6: Sheet Views
 **Goal**: Users can view and manage requests in a tabular spreadsheet-like interface with dynamic columns, inline editing, and data export -- the primary daily working surface
@@ -162,7 +163,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Programs + Dynamic Fields | 2/2 | Complete | 2026-02-20 |
 | 3. Request Lifecycle + Audit | 3/3 | Complete | 2026-02-20 |
 | 4. Real-Time Events | 2/2 | Complete | 2026-02-22 |
-| 5. n8n Integration + Notifications | 0/3 | Not started | - |
+| 5. n8n Integration + Notifications | 0/4 | Not started | - |
 | 6. Sheet Views | 0/2 | Not started | - |
 | 7. Request Books | 0/2 | Not started | - |
 | 8. Client Collaboration | 0/2 | Not started | - |
