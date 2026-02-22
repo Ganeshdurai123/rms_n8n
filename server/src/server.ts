@@ -9,8 +9,12 @@ import redis from './config/redis.js';
 import logger from './config/logger.js';
 import { seedAdmin } from './config/seed.js';
 import { initSocketIO } from './config/socket.js';
+import { startOutboxProcessor, stopOutboxProcessor } from './modules/webhook/webhook.service.js';
 
 const server = http.createServer(app);
+
+// Module-scope handle for the outbox processor interval (for clean shutdown)
+let outboxHandle: NodeJS.Timeout | null = null;
 
 async function start(): Promise<void> {
   try {
@@ -31,6 +35,10 @@ async function start(): Promise<void> {
     initSocketIO(server);
     logger.info('Socket.IO initialized');
 
+    // 4.6. Start webhook outbox processor
+    outboxHandle = startOutboxProcessor(10_000); // Process every 10 seconds
+    logger.info('Webhook outbox processor started');
+
     // 5. Start HTTP server
     server.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT}`);
@@ -44,6 +52,12 @@ async function start(): Promise<void> {
 // Graceful shutdown
 async function shutdown(signal: string): Promise<void> {
   logger.info(`${signal} received. Starting graceful shutdown...`);
+
+  // Stop outbox processor
+  if (outboxHandle) {
+    stopOutboxProcessor(outboxHandle);
+    logger.info('Webhook outbox processor stopped');
+  }
 
   // Close Socket.IO before HTTP server
   try {
