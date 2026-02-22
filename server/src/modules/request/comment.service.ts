@@ -1,9 +1,23 @@
 import { Comment, ICommentDocument } from './comment.model.js';
 import { Request } from './request.model.js';
 import { createAuditEntry } from '../audit/audit.utils.js';
+import { User } from '../auth/auth.model.js';
 import { NotFoundError, ForbiddenError } from '../../shared/errors.js';
+import { emitToProgram } from '../../config/socket.js';
+import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { Role } from '../../shared/types.js';
 import type { ListCommentsQuery } from './comment.schema.js';
+
+/**
+ * Look up a user's display name for socket event payloads.
+ */
+async function getPerformerName(userId: string): Promise<{ userId: string; name: string }> {
+  const user = await User.findById(userId).select('firstName lastName').lean();
+  return {
+    userId,
+    name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+  };
+}
 
 /**
  * Add a comment to a request.
@@ -43,6 +57,18 @@ export async function addComment(
     performedBy: authorId,
     after: { content },
   });
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(authorId).then((performer) => {
+    emitToProgram(programId, 'comment:added', {
+      event: 'comment:added',
+      programId,
+      requestId,
+      data: { comment: populated },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 
   return populated as unknown as ICommentDocument;
 }
@@ -109,4 +135,16 @@ export async function deleteComment(
     performedBy: userId,
     before: { content: comment.content, authorId: comment.authorId.toString() },
   });
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(programId, 'comment:deleted', {
+      event: 'comment:deleted',
+      programId,
+      requestId,
+      data: { commentId },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 }

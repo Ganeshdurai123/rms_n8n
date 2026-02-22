@@ -5,9 +5,23 @@ import { nanoid } from 'nanoid';
 import { Attachment, IAttachmentDocument, ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './attachment.model.js';
 import { Request as RequestModel } from './request.model.js';
 import { createAuditEntry } from '../audit/audit.utils.js';
+import { User } from '../auth/auth.model.js';
 import { NotFoundError, ForbiddenError, ValidationError, AppError } from '../../shared/errors.js';
+import { emitToProgram } from '../../config/socket.js';
+import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { Role } from '../../shared/types.js';
 import type { ListAttachmentsQuery } from './attachment.schema.js';
+
+/**
+ * Look up a user's display name for socket event payloads.
+ */
+async function getPerformerName(userId: string): Promise<{ userId: string; name: string }> {
+  const user = await User.findById(userId).select('firstName lastName').lean();
+  return {
+    userId,
+    name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Multer storage configuration
@@ -102,6 +116,18 @@ export async function uploadAttachment(
     },
   });
 
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(uploadedBy).then((performer) => {
+    emitToProgram(programId, 'attachment:uploaded', {
+      event: 'attachment:uploaded',
+      programId,
+      requestId,
+      data: { attachment: attachment.toObject() },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
+
   return attachment;
 }
 
@@ -191,4 +217,16 @@ export async function deleteAttachment(
     performedBy: userId,
     before: { originalName: attachment.originalName },
   });
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(programId, 'attachment:deleted', {
+      event: 'attachment:deleted',
+      programId,
+      requestId,
+      data: { attachmentId },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 }
