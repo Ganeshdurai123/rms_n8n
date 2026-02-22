@@ -91,10 +91,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Real-Time
 
-- [ ] **RT-01**: System maintains Socket.IO rooms per programId
+- [x] **RT-01**: System maintains Socket.IO rooms per programId
 - [ ] **RT-02**: All request mutations broadcast updates to relevant program rooms
-- [ ] **RT-03**: Socket.IO connection requires valid JWT authentication
-- [ ] **RT-04**: System handles client reconnection gracefully (catch-up on missed events)
+- [x] **RT-03**: Socket.IO connection requires valid JWT authentication
+- [x] **RT-04**: System handles client reconnection gracefully (catch-up on missed events)
 
 ### Audit
 
@@ -190,10 +190,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUDIT-01 | Phase 3 | Complete |
 | AUDIT-02 | Phase 3 | Complete |
 | AUDIT-03 | Phase 3 | Complete |
-| RT-01 | Phase 4 | Pending |
+| RT-01 | Phase 4 | Complete |
 | RT-02 | Phase 4 | Pending |
-| RT-03 | Phase 4 | Pending |
-| RT-04 | Phase 4 | Pending |
+| RT-03 | Phase 4 | Complete |
+| RT-04 | Phase 4 | Complete |
 | N8N-01 | Phase 5 | Pending |
 | N8N-02 | Phase 5 | Pending |
 | N8N-03 | Phase 5 | Pending |

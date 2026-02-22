@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation + Authentication** - Docker Compose infrastructure, JWT auth, RBAC, and user management
 - [x] **Phase 2: Programs + Dynamic Fields** - Program CRUD with field configuration, boundaries, and access control
-- [ ] **Phase 3: Request Lifecycle + Audit** - Request CRUD, state machine, comments, attachments, history, and audit trail
+- [x] **Phase 3: Request Lifecycle + Audit** - Request CRUD, state machine, comments, attachments, history, and audit trail
 - [ ] **Phase 4: Real-Time Events** - Socket.IO with JWT auth, program-scoped rooms, and mutation broadcasting
 - [ ] **Phase 5: n8n Integration + Notifications** - Webhook outbox, n8n workflows, internal API, in-app and email notifications
 - [ ] **Phase 6: Sheet Views** - Tabular request display with dynamic columns, inline CRUD, filtering, search, and CSV export
@@ -70,8 +70,8 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Request, Comment, Attachment, AuditLog Mongoose models, Zod schemas, state machine transitions, audit utility
-- [ ] 03-02-PLAN.md — Request CRUD service/controller/routes, status transitions, assignment/reassignment, audit logging on all mutations
-- [ ] 03-03-PLAN.md — Comment CRUD, file attachments with multer upload/download, request detail aggregation, admin audit log API, per-request audit trail
+- [x] 03-02-PLAN.md — Request CRUD service/controller/routes, status transitions, assignment/reassignment, audit logging on all mutations
+- [x] 03-03-PLAN.md — Comment CRUD, file attachments with multer upload/download, request detail aggregation, admin audit log API, per-request audit trail
 
 ### Phase 4: Real-Time Events
 **Goal**: Connected users receive instant updates when requests change within their programs, without polling or manual refresh
@@ -82,11 +82,11 @@ Plans:
   2. Users are automatically joined to Socket.IO rooms for their assigned programs, and events are scoped to those rooms (no global broadcasts)
   3. When a request is created, updated, or transitions state, all connected users in that program's room see the update in real-time without refreshing
   4. If a user's connection drops and reconnects, they gracefully catch up on missed changes
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [x] 04-01-PLAN.md — Socket.IO server setup with JWT auth middleware, program-scoped room management, Redis-backed reconnection catch-up, typed event catalog
+- [ ] 04-02-PLAN.md — Wire emitToProgram into all 8 mutation paths (request CRUD, transitions, assignments, comments, attachments) for real-time broadcasting
 
 ### Phase 5: n8n Integration + Notifications
 **Goal**: The system reliably delivers webhook events to n8n for all async processing, n8n handles email dispatch and scheduled tasks, and users receive both in-app and email notifications for key events
@@ -160,8 +160,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation + Authentication | 4/4 | Complete | 2026-02-20 |
 | 2. Programs + Dynamic Fields | 2/2 | Complete | 2026-02-20 |
-| 3. Request Lifecycle + Audit | 2/3 | In Progress | - |
-| 4. Real-Time Events | 0/2 | Not started | - |
+| 3. Request Lifecycle + Audit | 3/3 | Complete | 2026-02-20 |
+| 4. Real-Time Events | 1/2 | In Progress | - |
 | 5. n8n Integration + Notifications | 0/3 | Not started | - |
 | 6. Sheet Views | 0/2 | Not started | - |
 | 7. Request Books | 0/2 | Not started | - |
