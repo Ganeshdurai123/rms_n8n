@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import * as requestService from './request.service.js';
 import { getRequestDetail } from './requestDetail.service.js';
 import { getRequestAuditTrail } from '../audit/audit.service.js';
+import { getProgramById } from '../program/program.service.js';
 import { paginatedResponse } from '../../middleware/pagination.js';
 import type { Role } from '../../shared/types.js';
 
@@ -162,6 +163,53 @@ export async function getAuditTrail(
       req.query as any,
     );
     res.status(200).json(paginatedResponse(auditLogs as any[], total, page, limit));
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/programs/:programId/requests/export
+ * Export filtered requests as CSV with dynamic field columns from program config.
+ */
+export async function exportCsv(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const csv = await requestService.exportRequestsCsv(
+      req.query as any,
+      req.params.programId as string,
+      req.user!._id,
+      req.user!.role as Role,
+    );
+    const program = await getProgramById(req.params.programId as string);
+    const filename = `${program.name.replace(/[^a-z0-9]/gi, '_')}_requests_${new Date().toISOString().slice(0, 10)}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(csv);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/v1/programs/:programId/requests/:requestId
+ * Delete a draft request (creator or admin only).
+ */
+export async function remove(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await requestService.deleteRequest(
+      req.params.requestId as string,
+      req.user!._id,
+      req.user!.role as Role,
+    );
+    res.status(200).json({ message: 'Request deleted successfully' });
   } catch (err) {
     next(err);
   }

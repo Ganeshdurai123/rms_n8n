@@ -37,6 +37,13 @@ router.get(
   requestController.list,
 );
 
+// GET /programs/:programId/requests/export -- CSV export (before /:requestId to prevent misparse)
+router.get(
+  '/export',
+  validate(listRequestsQuerySchema, 'query'),
+  requestController.exportCsv,
+);
+
 // GET /programs/:programId/requests/:requestId -- get single request
 router.get(
   '/:requestId',
@@ -50,6 +57,13 @@ router.patch(
   validate(requestParamsSchema, 'params'),
   validate(updateRequestSchema),
   requestController.update,
+);
+
+// DELETE /programs/:programId/requests/:requestId -- delete draft request (creator or admin)
+router.delete(
+  '/:requestId',
+  validate(requestParamsSchema, 'params'),
+  requestController.remove,
 );
 
 // PATCH /programs/:programId/requests/:requestId/transition -- change status
