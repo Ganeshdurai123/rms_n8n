@@ -82,10 +82,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### n8n Integration
 
 - [ ] **N8N-01**: Express backend fires webhook POST to n8n after every mutation (fire-and-forget)
-- [ ] **N8N-02**: System implements webhook outbox pattern for reliable event delivery
-- [ ] **N8N-03**: System exposes internal API (/api/v1/internal/) for n8n callbacks with shared-secret auth
-- [ ] **N8N-04**: System exposes POST /api/v1/internal/socket-emit for n8n to push real-time events
-- [ ] **N8N-05**: System maintains typed event catalog defining all webhook payloads
+- [x] **N8N-02**: System implements webhook outbox pattern for reliable event delivery
+- [x] **N8N-03**: System exposes internal API (/api/v1/internal/) for n8n callbacks with shared-secret auth
+- [x] **N8N-04**: System exposes POST /api/v1/internal/socket-emit for n8n to push real-time events
+- [x] **N8N-05**: System maintains typed event catalog defining all webhook payloads
 - [ ] **N8N-06**: n8n workflows handle email dispatch for all notification events
 - [ ] **N8N-07**: n8n workflows handle scheduled reminder checks
 
@@ -195,10 +195,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RT-03 | Phase 4 | Complete |
 | RT-04 | Phase 4 | Complete |
 | N8N-01 | Phase 5 | Pending |
-| N8N-02 | Phase 5 | Pending |
-| N8N-03 | Phase 5 | Pending |
-| N8N-04 | Phase 5 | Pending |
-| N8N-05 | Phase 5 | Pending |
+| N8N-02 | Phase 5 | Complete |
+| N8N-03 | Phase 5 | Complete |
+| N8N-04 | Phase 5 | Complete |
+| N8N-05 | Phase 5 | Complete |
 | N8N-06 | Phase 5 | Pending |
 | N8N-07 | Phase 5 | Pending |
 | NOTIF-01 | Phase 5 | Complete |

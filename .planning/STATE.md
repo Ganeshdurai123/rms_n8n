@@ -98,6 +98,10 @@ Recent decisions affecting current work:
 - 04-02: getPerformerName helper duplicated in each service file to avoid circular imports between service modules
 - 04-02: Fire-and-forget via .then().catch(() => {}) pattern ensures socket emissions never delay HTTP responses or throw errors
 - 04-02: Updated data property includes mutation-specific context (changedFields, from/to status, previousAssignee) for rich client updates
+- 05-01: Outbox stores events even when N8N_WEBHOOK_BASE_URL is unset -- events accumulate for later dispatch
+- 05-01: Exponential backoff uses retryCount * 30s formula for simple, predictable retry spacing
+- 05-01: internalAuth uses crypto.timingSafeEqual with Buffer.from() and length pre-check to prevent timing attacks
+- 05-01: Socket-emit constructs SocketEventPayload from n8n request body to satisfy typed Socket.IO emit signature
 - 05-02: User-targeted socket emission via io.sockets.sockets iteration (not program rooms) since notifications are per-user
 - 05-02: Fire-and-forget createNotification for internal use vs throwing createNotificationFromInternal for n8n internal API
 - 05-02: read-all route mounted before parameterized :notificationId routes to prevent Express misparse
@@ -116,5 +120,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 05-02-PLAN.md (In-App Notification System)
+Stopped at: Re-executed 05-01-PLAN.md (Webhook Outbox & Internal API) -- decisions recorded
 Resume file: None
