@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 6 of 8 (Sheet Views)
-Plan: 1 of 4 in current phase (06-01 complete)
+Plan: 2 of 4 in current phase (06-02 complete)
 Status: Executing Phase 6
-Last activity: 2026-02-23 -- Completed 06-01-PLAN.md (Sort, Filter, CSV Export, Delete)
+Last activity: 2026-02-22 -- Completed 06-02-PLAN.md (Client Bootstrap: Auth, Routing, Layout)
 
 Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 7min
-- Total execution time: 1.82 hours
+- Total execution time: 2.05 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [████████░░] 80%
 | 03-request-lifecycle-audit | 3 | 24min | 8min |
 | 04-real-time-events | 2 | 6min | 3min |
 | 05-n8n-integration-notifications | 4 | 26min | 6.5min |
-| 06-sheet-views | 1 | 3min | 3min |
+| 06-sheet-views | 2 | 17min | 8.5min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (2min), 05-02 (12min), 05-03 (5min), 05-04 (7min), 06-01 (3min)
+- Last 5 plans: 05-02 (12min), 05-03 (5min), 05-04 (7min), 06-01 (3min), 06-02 (14min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -46,6 +46,7 @@ Progress: [████████░░] 80%
 | Phase 05 P03 | 5min | 2 tasks | 4 files |
 | Phase 05 P04 | 7min | 2 tasks | 5 files |
 | Phase 06 P01 | 3min | 2 tasks | 7 files |
+| Phase 06 P02 | 14min | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,10 @@ Recent decisions affecting current work:
 - 06-01: CSV escaping follows RFC 4180 -- double-quote wrapping for commas, quotes, or newlines with inner quotes doubled
 - 06-01: GET /export route placed before /:requestId to prevent Express misparse of 'export' as requestId
 - 06-01: Sort type explicitly annotated as Record<string, 1 | -1> to satisfy Mongoose SortOrder type constraint
+- 06-02: Access token stored in module-level variable (not localStorage) -- prevents XSS token theft
+- 06-02: Refresh interceptor uses isRefreshing flag + failedQueue to prevent simultaneous refresh attempts and replay queued requests
+- 06-02: AuthProvider checks session on mount via GET /auth/me -- supports page refresh without re-login
+- 06-02: shadcn CLI resolved @ alias literally on Windows -- manually relocated generated files from client/@/ to client/src/
 
 ### Pending Todos
 
@@ -135,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed 06-01-PLAN.md (Sort, Filter, CSV Export, Delete)
+Last session: 2026-02-22
+Stopped at: Completed 06-02-PLAN.md (Client Bootstrap: Auth, Routing, Layout)
 Resume file: None

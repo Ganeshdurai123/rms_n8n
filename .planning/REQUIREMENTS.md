@@ -33,7 +33,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Sheets
 
-- [ ] **SHEET-01**: User can view requests in a tabular sheet view with dynamic columns from program config
+- [x] **SHEET-01**: User can view requests in a tabular sheet view with dynamic columns from program config
 - [ ] **SHEET-02**: User can perform inline row CRUD (create, edit, delete) in the sheet view
 - [x] **SHEET-03**: User can sort columns in the sheet view
 - [x] **SHEET-04**: User can filter rows by status, assignee, date range, and custom field values
@@ -205,7 +205,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTIF-02 | Phase 5 | Complete |
 | NOTIF-03 | Phase 5 | Complete |
 | NOTIF-04 | Phase 5 | Complete |
-| SHEET-01 | Phase 6 | Pending |
+| SHEET-01 | Phase 6 | Complete |
 | SHEET-02 | Phase 6 | Pending |
 | SHEET-03 | Phase 6 | Complete |
 | SHEET-04 | Phase 6 | Complete |
