@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { internalAuth } from '../../middleware/internalAuth.js';
-import { healthCheck, socketEmit } from './internal.controller.js';
+import {
+  healthCheck,
+  socketEmit,
+  createNotificationHandler,
+  getPendingReminders,
+} from './internal.controller.js';
 
 // ---------------------------------------------------------------------------
 // Internal API Router
@@ -22,5 +27,11 @@ internalRouter.get('/health', healthCheck);
 
 // POST /api/v1/internal/socket-emit -- push typed events to program rooms
 internalRouter.post('/socket-emit', socketEmit);
+
+// POST /api/v1/internal/notifications -- n8n creates in-app notifications after email dispatch
+internalRouter.post('/notifications', createNotificationHandler);
+
+// GET /api/v1/internal/pending-reminders -- n8n checks for stale requests needing reminder emails
+internalRouter.get('/pending-reminders', getPendingReminders);
 
 export { internalRouter };
