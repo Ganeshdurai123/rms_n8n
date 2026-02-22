@@ -37,7 +37,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SHEET-02**: User can perform inline row CRUD (create, edit, delete) in the sheet view
 - [x] **SHEET-03**: User can sort columns in the sheet view
 - [x] **SHEET-04**: User can filter rows by status, assignee, date range, and custom field values
-- [ ] **SHEET-05**: User can search requests by keyword within a sheet
+- [x] **SHEET-05**: User can search requests by keyword within a sheet
 - [x] **SHEET-06**: Sheet view supports pagination (page, limit, total)
 - [x] **SHEET-07**: User can export current sheet view (with applied filters) as CSV
 
@@ -209,7 +209,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHEET-02 | Phase 6 | Pending |
 | SHEET-03 | Phase 6 | Complete |
 | SHEET-04 | Phase 6 | Complete |
-| SHEET-05 | Phase 6 | Pending |
+| SHEET-05 | Phase 6 | Complete |
 | SHEET-06 | Phase 6 | Complete |
 | SHEET-07 | Phase 6 | Complete |
 | BOOK-01 | Phase 7 | Pending |
