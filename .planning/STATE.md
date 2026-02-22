@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 5 - n8n Integration & Notifications (COMPLETE)
+**Current focus:** Phase 6 - Sheet Views
 
 ## Current Position
 
-Phase: 5 of 8 (n8n Integration & Notifications)
-Plan: 4 of 4 in current phase (05-04 complete -- PHASE COMPLETE)
-Status: Phase 5 Complete
-Last activity: 2026-02-22 -- Completed 05-04-PLAN.md (n8n Workflow Templates & Internal API Callbacks)
+Phase: 6 of 8 (Sheet Views)
+Plan: 1 of 4 in current phase (06-01 complete)
+Status: Executing Phase 6
+Last activity: 2026-02-23 -- Completed 06-01-PLAN.md (Sort, Filter, CSV Export, Delete)
 
-Progress: [███████░░░] 75%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 7min
-- Total execution time: 1.77 hours
+- Total execution time: 1.82 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [███████░░░] 75%
 | 03-request-lifecycle-audit | 3 | 24min | 8min |
 | 04-real-time-events | 2 | 6min | 3min |
 | 05-n8n-integration-notifications | 4 | 26min | 6.5min |
+| 06-sheet-views | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2min), 05-01 (2min), 05-02 (12min), 05-03 (5min), 05-04 (7min)
+- Last 5 plans: 05-01 (2min), 05-02 (12min), 05-03 (5min), 05-04 (7min), 06-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -44,6 +45,7 @@ Progress: [███████░░░] 75%
 | Phase 05 P02 | 12min | 2 tasks | 8 files |
 | Phase 05 P03 | 5min | 2 tasks | 4 files |
 | Phase 05 P04 | 7min | 2 tasks | 5 files |
+| Phase 06 P01 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -116,6 +118,10 @@ Recent decisions affecting current work:
 - 05-04: getPendingReminders uses 48-hour staleness threshold for submitted/in_review requests, limited to 100 results
 - 05-04: createNotificationHandler validates notification type against NOTIFICATION_TYPES enum to reject invalid types from n8n
 - 05-04: Both n8n workflows set active: false by default so users must configure SMTP before activation
+- 06-01: Checkbox field filter values cast from string 'true'/'false' to boolean for proper MongoDB Map matching
+- 06-01: CSV escaping follows RFC 4180 -- double-quote wrapping for commas, quotes, or newlines with inner quotes doubled
+- 06-01: GET /export route placed before /:requestId to prevent Express misparse of 'export' as requestId
+- 06-01: Sort type explicitly annotated as Record<string, 1 | -1> to satisfy Mongoose SortOrder type constraint
 
 ### Pending Todos
 
@@ -129,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 05-04-PLAN.md (n8n Workflow Templates & Internal API Callbacks) -- Phase 5 complete
+Last session: 2026-02-23
+Stopped at: Completed 06-01-PLAN.md (Sort, Filter, CSV Export, Delete)
 Resume file: None

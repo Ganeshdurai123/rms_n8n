@@ -35,11 +35,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **SHEET-01**: User can view requests in a tabular sheet view with dynamic columns from program config
 - [ ] **SHEET-02**: User can perform inline row CRUD (create, edit, delete) in the sheet view
-- [ ] **SHEET-03**: User can sort columns in the sheet view
-- [ ] **SHEET-04**: User can filter rows by status, assignee, date range, and custom field values
+- [x] **SHEET-03**: User can sort columns in the sheet view
+- [x] **SHEET-04**: User can filter rows by status, assignee, date range, and custom field values
 - [ ] **SHEET-05**: User can search requests by keyword within a sheet
-- [ ] **SHEET-06**: Sheet view supports pagination (page, limit, total)
-- [ ] **SHEET-07**: User can export current sheet view (with applied filters) as CSV
+- [x] **SHEET-06**: Sheet view supports pagination (page, limit, total)
+- [x] **SHEET-07**: User can export current sheet view (with applied filters) as CSV
 
 ### Requests
 
@@ -207,11 +207,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTIF-04 | Phase 5 | Complete |
 | SHEET-01 | Phase 6 | Pending |
 | SHEET-02 | Phase 6 | Pending |
-| SHEET-03 | Phase 6 | Pending |
-| SHEET-04 | Phase 6 | Pending |
+| SHEET-03 | Phase 6 | Complete |
+| SHEET-04 | Phase 6 | Complete |
 | SHEET-05 | Phase 6 | Pending |
-| SHEET-06 | Phase 6 | Pending |
-| SHEET-07 | Phase 6 | Pending |
+| SHEET-06 | Phase 6 | Complete |
+| SHEET-07 | Phase 6 | Complete |
 | BOOK-01 | Phase 7 | Pending |
 | BOOK-02 | Phase 7 | Pending |
 | BOOK-03 | Phase 7 | Pending |
