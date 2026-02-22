@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Programs + Dynamic Fields** - Program CRUD with field configuration, boundaries, and access control
 - [x] **Phase 3: Request Lifecycle + Audit** - Request CRUD, state machine, comments, attachments, history, and audit trail
 - [x] **Phase 4: Real-Time Events** - Socket.IO with JWT auth, program-scoped rooms, and mutation broadcasting
-- [ ] **Phase 5: n8n Integration + Notifications** - Webhook outbox, n8n workflows, internal API, in-app and email notifications
+- [x] **Phase 5: n8n Integration + Notifications** - Webhook outbox, n8n workflows, internal API, in-app and email notifications
 - [ ] **Phase 6: Sheet Views** - Tabular request display with dynamic columns, inline CRUD, filtering, search, and CSV export
 - [ ] **Phase 7: Request Books** - Excel/CSV bulk import with field mapping, validation preview, and batch creation
 - [ ] **Phase 8: Client Collaboration** - Client-restricted views, scoped data access, activity feed, and real-time updates
@@ -115,11 +115,13 @@ Plans:
   2. User can create, edit, and delete request rows inline within the sheet view without navigating to separate pages
   3. User can sort by any column, filter by status/assignee/date range/custom fields, and search by keyword -- all within the sheet
   4. Sheet view is paginated (page, limit, total displayed) and user can export the current filtered view as CSV
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Backend API enhancements: sortBy/sortOrder query params, date range filters, CSV export endpoint, delete request endpoint
+- [ ] 06-02-PLAN.md — Client foundation: React Router, Axios API client with JWT refresh, auth context, login page, layout shell, program list page
+- [ ] 06-03-PLAN.md — Sheet view core: dynamic data table with program field columns, sortable headers, filter toolbar, search, pagination
+- [ ] 06-04-PLAN.md — Inline CRUD and CSV export: create/edit/delete request rows inline, confirmation dialogs, CSV download button
 
 ### Phase 7: Request Books
 **Goal**: Users can bulk-import existing request data from Excel/CSV files into programs, with guided field mapping and validation, replacing manual data entry for migration and ongoing batch workflows
@@ -163,7 +165,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Programs + Dynamic Fields | 2/2 | Complete | 2026-02-20 |
 | 3. Request Lifecycle + Audit | 3/3 | Complete | 2026-02-20 |
 | 4. Real-Time Events | 2/2 | Complete | 2026-02-22 |
-| 5. n8n Integration + Notifications | 0/4 | Not started | - |
-| 6. Sheet Views | 0/2 | Not started | - |
+| 5. n8n Integration + Notifications | 4/4 | Complete | 2026-02-22 |
+| 6. Sheet Views | 0/4 | Not started | - |
 | 7. Request Books | 0/2 | Not started | - |
 | 8. Client Collaboration | 0/2 | Not started | - |
