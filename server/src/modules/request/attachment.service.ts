@@ -8,6 +8,7 @@ import { createAuditEntry } from '../audit/audit.utils.js';
 import { User } from '../auth/auth.model.js';
 import { NotFoundError, ForbiddenError, ValidationError, AppError } from '../../shared/errors.js';
 import { emitToProgram } from '../../config/socket.js';
+import { enqueueWebhookEvent } from '../webhook/webhook.service.js';
 import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { Role } from '../../shared/types.js';
 import type { ListAttachmentsQuery } from './attachment.schema.js';
@@ -116,7 +117,7 @@ export async function uploadAttachment(
     },
   });
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook (fire-and-forget)
   getPerformerName(uploadedBy).then((performer) => {
     emitToProgram(programId, 'attachment:uploaded', {
       event: 'attachment:uploaded',
@@ -126,6 +127,15 @@ export async function uploadAttachment(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('attachment.uploaded', {
+      eventType: 'attachment.uploaded',
+      programId,
+      requestId,
+      data: { attachment: attachment.toObject() },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // No notification for attachment upload (low signal-to-noise)
   }).catch(() => {});
 
   return attachment;
@@ -218,7 +228,7 @@ export async function deleteAttachment(
     before: { originalName: attachment.originalName },
   });
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook (fire-and-forget)
   getPerformerName(userId).then((performer) => {
     emitToProgram(programId, 'attachment:deleted', {
       event: 'attachment:deleted',
@@ -228,5 +238,14 @@ export async function deleteAttachment(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('attachment.deleted', {
+      eventType: 'attachment.deleted',
+      programId,
+      requestId,
+      data: { attachmentId },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // No notification for attachment deletion
   }).catch(() => {});
 }

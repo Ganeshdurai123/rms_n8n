@@ -7,6 +7,8 @@ import { User } from '../auth/auth.model.js';
 import { AppError, NotFoundError, ValidationError, ForbiddenError } from '../../shared/errors.js';
 import { cacheGet, cacheSet, cacheInvalidate, CACHE_TTL_CONFIG, CACHE_TTL_LIST } from '../../shared/cache.js';
 import { emitToProgram } from '../../config/socket.js';
+import { enqueueWebhookEvent } from '../webhook/webhook.service.js';
+import { createNotification } from '../notification/notification.service.js';
 import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { IFieldDefinition } from '../program/program.model.js';
 import type { Role } from '../../shared/types.js';
@@ -147,7 +149,7 @@ export async function createRequest(
   // Invalidate request list cache
   await cacheInvalidate('requests:list:*');
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook (fire-and-forget)
   getPerformerName(userId).then((performer) => {
     emitToProgram(data.programId, 'request:created', {
       event: 'request:created',
@@ -157,6 +159,15 @@ export async function createRequest(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('request.created', {
+      eventType: 'request.created',
+      programId: data.programId,
+      requestId: request._id.toString(),
+      data: { request: request.toObject() },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // No notification for request creation (creator doesn't need to notify themselves)
   }).catch(() => {});
 
   return request;
@@ -352,7 +363,7 @@ export async function updateRequest(
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook (fire-and-forget)
   getPerformerName(userId).then((performer) => {
     emitToProgram(request.programId.toString(), 'request:updated', {
       event: 'request:updated',
@@ -362,6 +373,15 @@ export async function updateRequest(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('request.updated', {
+      eventType: 'request.updated',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), changedFields: Object.keys(data) },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // No notification for update (only draft requests can be updated, by creator)
   }).catch(() => {});
 
   return updated;
@@ -435,7 +455,7 @@ export async function transitionRequest(
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook + notifications (fire-and-forget)
   getPerformerName(userId).then((performer) => {
     emitToProgram(request.programId.toString(), 'request:status_changed', {
       event: 'request:status_changed',
@@ -445,6 +465,38 @@ export async function transitionRequest(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('request.status_changed', {
+      eventType: 'request.status_changed',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // Notify the request creator (if they didn't perform the transition)
+    const creatorId = request.createdBy.toString();
+    if (creatorId !== userId) {
+      createNotification({
+        userId: creatorId,
+        type: 'request.status_changed',
+        title: 'Request status changed',
+        message: `Request "${request.title}" moved from ${beforeStatus} to ${targetStatus}`,
+        programId: request.programId.toString(),
+        requestId: requestId,
+      });
+    }
+    // Notify the assignee (if different from performer)
+    const assigneeId = request.assignedTo?.toString();
+    if (assigneeId && assigneeId !== userId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'request.status_changed',
+        title: 'Request status changed',
+        message: `Request "${request.title}" moved from ${beforeStatus} to ${targetStatus}`,
+        programId: request.programId.toString(),
+        requestId: requestId,
+      });
+    }
   }).catch(() => {});
 
   return updated;
@@ -519,7 +571,7 @@ export async function assignRequest(
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook + notification (fire-and-forget)
   getPerformerName(performedByUserId).then((performer) => {
     emitToProgram(request.programId.toString(), 'request:assigned', {
       event: 'request:assigned',
@@ -529,6 +581,26 @@ export async function assignRequest(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('request.assigned', {
+      eventType: 'request.assigned',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // Notify the assignee
+    if (assignedToUserId !== performedByUserId) {
+      createNotification({
+        userId: assignedToUserId,
+        type: 'request.assigned',
+        title: 'Request assigned to you',
+        message: `You have been assigned to "${request.title}"`,
+        programId: request.programId.toString(),
+        requestId: requestId,
+        metadata: { programId: request.programId.toString(), requestId: requestId },
+      });
+    }
   }).catch(() => {});
 
   return updated;

@@ -4,6 +4,8 @@ import { createAuditEntry } from '../audit/audit.utils.js';
 import { User } from '../auth/auth.model.js';
 import { NotFoundError, ForbiddenError } from '../../shared/errors.js';
 import { emitToProgram } from '../../config/socket.js';
+import { enqueueWebhookEvent } from '../webhook/webhook.service.js';
+import { createNotification } from '../notification/notification.service.js';
 import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { Role } from '../../shared/types.js';
 import type { ListCommentsQuery } from './comment.schema.js';
@@ -58,7 +60,7 @@ export async function addComment(
     after: { content },
   });
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook + notification (fire-and-forget)
   getPerformerName(authorId).then((performer) => {
     emitToProgram(programId, 'comment:added', {
       event: 'comment:added',
@@ -68,6 +70,26 @@ export async function addComment(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('comment.added', {
+      eventType: 'comment.added',
+      programId,
+      requestId,
+      data: { comment: populated },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // Notify the request creator (if different from comment author)
+    const requestCreatorId = request.createdBy.toString();
+    if (requestCreatorId !== authorId) {
+      createNotification({
+        userId: requestCreatorId,
+        type: 'comment.added',
+        title: 'New comment on your request',
+        message: `${performer.name} commented on "${request.title}"`,
+        programId,
+        requestId,
+      });
+    }
   }).catch(() => {});
 
   return populated as unknown as ICommentDocument;
@@ -136,7 +158,7 @@ export async function deleteComment(
     before: { content: comment.content, authorId: comment.authorId.toString() },
   });
 
-  // Emit real-time event (fire-and-forget)
+  // Emit real-time event + webhook (fire-and-forget)
   getPerformerName(userId).then((performer) => {
     emitToProgram(programId, 'comment:deleted', {
       event: 'comment:deleted',
@@ -146,5 +168,14 @@ export async function deleteComment(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
+    enqueueWebhookEvent('comment.deleted', {
+      eventType: 'comment.deleted',
+      programId,
+      requestId,
+      data: { commentId },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+    // No notification for comment deletion
   }).catch(() => {});
 }
