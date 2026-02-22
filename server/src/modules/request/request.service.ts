@@ -3,11 +3,25 @@ import { canUserTransition } from './stateMachine.js';
 import { createAuditEntry } from '../audit/audit.utils.js';
 import { getProgramById, checkProgramTimeframe } from '../program/program.service.js';
 import { ProgramMember } from '../user/programMember.model.js';
+import { User } from '../auth/auth.model.js';
 import { AppError, NotFoundError, ValidationError, ForbiddenError } from '../../shared/errors.js';
 import { cacheGet, cacheSet, cacheInvalidate, CACHE_TTL_CONFIG, CACHE_TTL_LIST } from '../../shared/cache.js';
+import { emitToProgram } from '../../config/socket.js';
+import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { IFieldDefinition } from '../program/program.model.js';
 import type { Role } from '../../shared/types.js';
 import type { CreateRequestInput, UpdateRequestInput, ListRequestsQuery } from './request.schema.js';
+
+/**
+ * Look up a user's display name for socket event payloads.
+ */
+async function getPerformerName(userId: string): Promise<{ userId: string; name: string }> {
+  const user = await User.findById(userId).select('firstName lastName').lean();
+  return {
+    userId,
+    name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+  };
+}
 
 /**
  * Validate dynamic field values against a program's field definitions.
@@ -132,6 +146,18 @@ export async function createRequest(
 
   // Invalidate request list cache
   await cacheInvalidate('requests:list:*');
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(data.programId, 'request:created', {
+      event: 'request:created',
+      programId: data.programId,
+      requestId: request._id.toString(),
+      data: { request: request.toObject() },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 
   return request;
 }
@@ -326,6 +352,18 @@ export async function updateRequest(
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
 
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(request.programId.toString(), 'request:updated', {
+      event: 'request:updated',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), changedFields: Object.keys(data) },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
+
   return updated;
 }
 
@@ -396,6 +434,18 @@ export async function transitionRequest(
   // Invalidate caches
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(userId).then((performer) => {
+    emitToProgram(request.programId.toString(), 'request:status_changed', {
+      event: 'request:status_changed',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 
   return updated;
 }
@@ -468,6 +518,18 @@ export async function assignRequest(
   // Invalidate caches
   await cacheInvalidate(`requests:${requestId}`);
   await cacheInvalidate('requests:list:*');
+
+  // Emit real-time event (fire-and-forget)
+  getPerformerName(performedByUserId).then((performer) => {
+    emitToProgram(request.programId.toString(), 'request:assigned', {
+      event: 'request:assigned',
+      programId: request.programId.toString(),
+      requestId: requestId,
+      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      performedBy: performer,
+      timestamp: new Date().toISOString(),
+    });
+  }).catch(() => {});
 
   return updated;
 }
