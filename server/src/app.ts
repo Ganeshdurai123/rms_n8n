@@ -16,6 +16,7 @@ import { auditRouter } from './modules/audit/audit.routes.js';
 import { notificationRouter } from './modules/notification/notification.routes.js';
 import { internalRouter } from './modules/internal/internal.routes.js';
 import { chainRouter } from './modules/chain/chain.routes.js';
+import { reportRouter } from './modules/report/report.routes.js';
 
 const app = express();
 
@@ -86,6 +87,9 @@ app.use('/api/v1/notifications', notificationRouter);
 
 // 17. Internal API routes (n8n -> Express, shared-secret auth, nginx-blocked externally)
 app.use('/api/v1/internal', internalRouter);
+
+// 18b. Report routes (authenticated users can generate and view reports)
+app.use('/api/v1/reports', reportRouter);
 
 // 18. 404 handler - any unmatched route
 app.use((_req, _res, next) => {

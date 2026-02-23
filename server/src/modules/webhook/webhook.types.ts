@@ -25,6 +25,7 @@ export const WEBHOOK_EVENT_TYPES = [
   'comment.deleted',
   'attachment.uploaded',
   'attachment.deleted',
+  'report.requested',
 ] as const;
 
 export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
