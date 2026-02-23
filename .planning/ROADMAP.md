@@ -180,7 +180,11 @@ Plans:
   2. When a request in a chain is completed, the next request in the sequence auto-transitions from draft to submitted
   3. User can view chain status on request detail page showing all steps with their status (done/active/pending)
   4. Sheet view shows chain membership as a column, and chain progress is visible at a glance
-**Plans**: TBD (to be created by /gsd:plan-phase 10)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Backend: RequestChain model, chain CRUD API, auto-transition on completion, chain context in request detail
+- [ ] 10-02-PLAN.md — Frontend: ChainStatusPanel on request detail page, Chain column in sheet view table
 
 ### Phase 11: HSSP Compliance
 **Goal**: Health & Safety compliance programs can define checklist fields, track completion status across requests, and provide structured review views for compliance monitoring
@@ -241,8 +245,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 9. Due Dates & Reminders | 0/3 | Planned | - |
-| 10. Sequential Request Chains | 0/? | Not started | - |
+| 9. Due Dates & Reminders | 0/3 | Complete    | 2026-02-23 |
+| 10. Sequential Request Chains | 0/2 | Not started | - |
 | 11. HSSP Compliance | 0/? | Not started | - |
 | 12. Reports & Dashboard | 0/? | Not started | - |
 | 13. Enhanced Program Boundaries | 0/? | Not started | - |
