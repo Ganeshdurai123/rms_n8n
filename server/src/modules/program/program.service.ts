@@ -107,6 +107,10 @@ export async function getPrograms(query: ListProgramsQuery, userId: string, user
     filter.status = query.status;
   }
 
+  if (query.complianceType) {
+    filter.complianceType = query.complianceType;
+  }
+
   if (query.search) {
     const searchRegex = { $regex: query.search, $options: 'i' };
     // If we already have $or from access scoping, use $and to combine

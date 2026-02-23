@@ -9,6 +9,7 @@ export const FIELD_TYPES = [
   'date',
   'dropdown',
   'checkbox',
+  'checklist',
   'file_upload',
 ] as const;
 
@@ -24,6 +25,7 @@ export interface IFieldDefinition {
   type: FieldType;
   required: boolean;
   options?: string[];
+  items?: string[];
   placeholder?: string;
   order: number;
 }
@@ -33,6 +35,12 @@ export interface IFieldDefinition {
  */
 export const PROGRAM_STATUSES = ['active', 'archived'] as const;
 export type ProgramStatus = (typeof PROGRAM_STATUSES)[number];
+
+/**
+ * Compliance types for program tagging (e.g., HSSP).
+ */
+export const COMPLIANCE_TYPES = ['hssp'] as const;
+export type ComplianceType = (typeof COMPLIANCE_TYPES)[number];
 
 /**
  * Due date configuration for a program.
@@ -62,6 +70,7 @@ export interface IProgramDocument extends Document {
     endDate?: Date;
   };
   dueDateConfig: IDueDateConfig;
+  complianceType?: ComplianceType;
   status: ProgramStatus;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -104,6 +113,10 @@ const fieldDefinitionSchema = new Schema<IFieldDefinition>(
     options: {
       type: [String],
       default: undefined, // Only meaningful for dropdown type
+    },
+    items: {
+      type: [String],
+      default: undefined, // Only meaningful for checklist type
     },
     placeholder: {
       type: String,
@@ -178,6 +191,14 @@ const programSchema = new Schema<IProgramDocument>(
         type: String,
         default: undefined,
       },
+    },
+    complianceType: {
+      type: String,
+      enum: {
+        values: COMPLIANCE_TYPES,
+        message: 'Invalid compliance type: {VALUE}',
+      },
+      default: undefined,
     },
     status: {
       type: String,

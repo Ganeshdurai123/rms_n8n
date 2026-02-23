@@ -20,10 +20,12 @@ export const fieldDefinitionSchema = z
       'date',
       'dropdown',
       'checkbox',
+      'checklist',
       'file_upload',
     ]),
     required: z.boolean().default(false),
     options: z.array(z.string().trim().max(200)).optional(),
+    items: z.array(z.string().trim().min(1).max(200)).optional(),
     placeholder: z.string().max(200).trim().optional(),
     order: z.number().int().min(0),
   })
@@ -37,6 +39,18 @@ export const fieldDefinitionSchema = z
     {
       message: 'Dropdown fields must have at least one option',
       path: ['options'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.type === 'checklist') {
+        return data.items !== undefined && data.items.length >= 1;
+      }
+      return true;
+    },
+    {
+      message: 'Checklist fields must have at least one item',
+      path: ['items'],
     },
   );
 
@@ -59,6 +73,7 @@ const dueDateConfigSchema = z.object({
 export const createProgramSchema = z.object({
   name: z.string().min(2, 'Program name must be at least 2 characters').max(100).trim(),
   description: z.string().max(2000).trim().optional(),
+  complianceType: z.enum(['hssp']).optional(),
   fieldDefinitions: z
     .array(fieldDefinitionSchema)
     .default([])
@@ -124,6 +139,7 @@ export type CreateProgramInput = z.infer<typeof createProgramSchema>;
 export const updateProgramSchema = z.object({
   name: z.string().min(2).max(100).trim().optional(),
   description: z.string().max(2000).trim().optional(),
+  complianceType: z.enum(['hssp']).nullish(),
   fieldDefinitions: z
     .array(fieldDefinitionSchema)
     .refine(
@@ -193,6 +209,7 @@ export const listProgramsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z.enum(['active', 'archived']).optional(),
+  complianceType: z.enum(['hssp']).optional(),
   search: z.string().max(100).optional(),
 });
 
