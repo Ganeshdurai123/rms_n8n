@@ -251,6 +251,47 @@ export async function validateImportRows(
           break;
         }
 
+        case 'checklist': {
+          // For imports, checklist values should be a JSON string representing Array<{label: string, checked: boolean}>
+          try {
+            const parsed = JSON.parse(strValue);
+            if (!Array.isArray(parsed)) {
+              errors.push({
+                row: rowNumber,
+                field: def.key,
+                message: `Field "${def.label}" must be a JSON array of {label, checked} items`,
+              });
+              rowHasError = true;
+            } else {
+              for (let j = 0; j < parsed.length; j++) {
+                const item = parsed[j];
+                if (
+                  !item ||
+                  typeof item !== 'object' ||
+                  typeof item.label !== 'string' ||
+                  typeof item.checked !== 'boolean'
+                ) {
+                  errors.push({
+                    row: rowNumber,
+                    field: def.key,
+                    message: `Field "${def.label}" item at index ${j} must have { label: string, checked: boolean }`,
+                  });
+                  rowHasError = true;
+                  break;
+                }
+              }
+            }
+          } catch {
+            errors.push({
+              row: rowNumber,
+              field: def.key,
+              message: `Field "${def.label}" must be valid JSON representing a checklist array`,
+            });
+            rowHasError = true;
+          }
+          break;
+        }
+
         case 'file_upload':
           // Skip file_upload fields for import -- cannot bulk-import files
           break;
@@ -334,6 +375,13 @@ function coerceFieldValue(rawValue: unknown, def: IFieldDefinition): unknown {
       const lower = strValue.toLowerCase();
       return ['true', 'yes', '1'].includes(lower);
     }
+
+    case 'checklist':
+      try {
+        return JSON.parse(strValue);
+      } catch {
+        return undefined;
+      }
 
     case 'file_upload':
       return undefined; // Cannot import files

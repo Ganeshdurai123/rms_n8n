@@ -94,6 +94,25 @@ function validateFields(
         }
         break;
 
+      case 'checklist':
+        if (!Array.isArray(value)) {
+          throw new ValidationError(`Field "${def.label}" (${def.key}) must be an array of checklist items`);
+        }
+        for (let i = 0; i < value.length; i++) {
+          const item = value[i] as Record<string, unknown>;
+          if (
+            !item ||
+            typeof item !== 'object' ||
+            typeof item.label !== 'string' ||
+            typeof item.checked !== 'boolean'
+          ) {
+            throw new ValidationError(
+              `Field "${def.label}" (${def.key}) item at index ${i} must have { label: string, checked: boolean }`,
+            );
+          }
+        }
+        break;
+
       case 'file_upload':
         // File upload values are validated at the attachment layer
         if (typeof value !== 'string') {
@@ -125,6 +144,29 @@ function computeDueDate(program: IProgramDocument, fields?: Record<string, unkno
   // Fall back to defaultOffsetDays from now
   const offset = program.dueDateConfig.defaultOffsetDays ?? 30;
   return new Date(Date.now() + offset * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Compute checklist completion stats from a checklist field value.
+ * Returns { total, checked, percentage } or zeroes if value is not a valid checklist array.
+ */
+export function computeChecklistCompletion(value: unknown): { total: number; checked: number; percentage: number } {
+  if (!Array.isArray(value)) {
+    return { total: 0, checked: 0, percentage: 0 };
+  }
+
+  const total = value.length;
+  if (total === 0) {
+    return { total: 0, checked: 0, percentage: 0 };
+  }
+
+  const checked = value.filter(
+    (item: unknown) =>
+      item && typeof item === 'object' && (item as Record<string, unknown>).checked === true,
+  ).length;
+
+  const percentage = Math.round((checked / total) * 100);
+  return { total, checked, percentage };
 }
 
 /**
@@ -916,11 +958,99 @@ export async function exportRequestsCsv(
       // After .lean(), Map becomes a plain object
       const fieldsObj = req.fields as unknown as Record<string, unknown> | undefined;
       const val = fieldsObj ? fieldsObj[def.key] : undefined;
-      return val !== undefined && val !== null ? String(val) : '';
+      if (val === undefined || val === null) return '';
+      // Format checklist fields as "X/Y (Z%)" instead of raw JSON
+      if (def.type === 'checklist') {
+        const completion = computeChecklistCompletion(val);
+        return `${completion.checked}/${completion.total} (${completion.percentage}%)`;
+      }
+      return String(val);
     });
 
     return [...staticValues, ...dynamicValues].map(escapeCsvField).join(',');
   });
 
   return [headerRow, ...dataRows].join('\n');
+}
+
+/**
+ * Get compliance review data for a program: per-request checklist completion and aggregate stats.
+ * Access-scoped the same way as getRequests (client sees own, team_member sees own+assigned, admin/manager sees all).
+ */
+export async function getComplianceReview(
+  programId: string,
+  userId: string,
+  userRole: Role,
+) {
+  // Fetch program with field definitions
+  const program = await getProgramById(programId);
+
+  // Identify checklist field definitions
+  const checklistFields = program.fieldDefinitions.filter((fd) => fd.type === 'checklist');
+
+  if (checklistFields.length === 0) {
+    return {
+      checklistFields: [],
+      requests: [],
+      summary: { totalRequests: 0, averageCompletion: 0 },
+    };
+  }
+
+  // Build access-scoped filter (same logic as getRequests)
+  const filter: Record<string, unknown> = { programId };
+  if (userRole === 'client') {
+    filter.createdBy = userId;
+  } else if (userRole === 'team_member') {
+    filter.$or = [{ createdBy: userId }, { assignedTo: userId }];
+  }
+  // admin and manager see all requests in the program
+
+  // Fetch all requests (no pagination) with lean for performance
+  const requests = await Request.find(filter).lean();
+
+  // Compute per-request checklist completions
+  const requestResults = requests.map((req) => {
+    const fieldsObj = req.fields as unknown as Record<string, unknown> | undefined;
+    const completions: Record<string, { total: number; checked: number; percentage: number }> = {};
+
+    let totalPercentage = 0;
+    for (const fd of checklistFields) {
+      const val = fieldsObj ? fieldsObj[fd.key] : undefined;
+      const completion = computeChecklistCompletion(val);
+      completions[fd.key] = completion;
+      totalPercentage += completion.percentage;
+    }
+
+    const overallPercentage =
+      checklistFields.length > 0 ? Math.round(totalPercentage / checklistFields.length) : 0;
+
+    return {
+      requestId: req._id.toString(),
+      title: req.title,
+      status: req.status,
+      completions,
+      overallPercentage,
+    };
+  });
+
+  // Compute aggregate summary
+  const averageCompletion =
+    requestResults.length > 0
+      ? Math.round(
+          requestResults.reduce((sum, r) => sum + r.overallPercentage, 0) / requestResults.length,
+        )
+      : 0;
+
+  return {
+    checklistFields: checklistFields.map((f) => ({
+      key: f.key,
+      label: f.label,
+      items: f.items,
+    })),
+    requests: requestResults,
+    summary: {
+      totalRequests: requestResults.length,
+      averageCompletion,
+    },
+  };
 }

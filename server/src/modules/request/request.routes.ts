@@ -45,6 +45,12 @@ router.get(
   requestController.exportCsv,
 );
 
+// GET /programs/:programId/requests/compliance-review -- compliance review aggregation (before /:requestId to prevent misparse)
+router.get(
+  '/compliance-review',
+  requestController.getComplianceReview,
+);
+
 // Mount import sub-resource routes (before /:requestId to prevent 'import' being parsed as requestId)
 // Restricted to manager role (admin bypasses authorizeProgram automatically)
 router.use('/import', authorizeProgram({ roles: ['manager'] }), importRouter);

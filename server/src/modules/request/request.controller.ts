@@ -203,6 +203,27 @@ export async function exportCsv(
 }
 
 /**
+ * GET /api/v1/programs/:programId/requests/compliance-review
+ * Get compliance review data with checklist completion stats for a program.
+ */
+export async function getComplianceReview(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await requestService.getComplianceReview(
+      req.params.programId as string,
+      req.user!._id,
+      req.user!.role as Role,
+    );
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * DELETE /api/v1/programs/:programId/requests/:requestId
  * Delete a draft request (creator or admin only).
  */
