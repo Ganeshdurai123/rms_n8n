@@ -8,6 +8,7 @@ import { SheetViewPage } from '@/pages/SheetViewPage';
 import { ImportWizardPage } from '@/pages/ImportWizardPage';
 import { ImportHistoryPage } from '@/pages/ImportHistoryPage';
 import { RequestDetailPage } from '@/pages/RequestDetailPage';
+import { CalendarViewPage } from '@/pages/CalendarViewPage';
 
 export default function App() {
   return (
@@ -21,6 +22,10 @@ export default function App() {
               <Route
                 path="/programs/:programId/sheet"
                 element={<SheetViewPage />}
+              />
+              <Route
+                path="/programs/:programId/calendar"
+                element={<CalendarViewPage />}
               />
               <Route
                 path="/programs/:programId/import/history"
