@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,8 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, X, Download } from 'lucide-react';
-import type { FieldDefinition } from '@/lib/types';
+import { Search, X, Download, Upload } from 'lucide-react';
+import type { FieldDefinition, Role } from '@/lib/types';
 import type { SheetQuery } from './useSheetData';
 
 interface SheetToolbarProps {
@@ -20,6 +21,8 @@ interface SheetToolbarProps {
   onExport?: () => void;
   programMembers?: { _id: string; firstName: string; lastName: string }[];
   fieldDefinitions?: FieldDefinition[];
+  programId?: string;
+  userRole?: Role;
 }
 
 const STATUS_OPTIONS = [
@@ -49,7 +52,12 @@ export function SheetToolbar({
   onExport,
   programMembers,
   fieldDefinitions,
+  programId,
+  userRole,
 }: SheetToolbarProps) {
+  const navigate = useNavigate();
+  const canImport = userRole === 'admin' || userRole === 'manager';
+
   const hasActiveFilters =
     query.status ||
     query.priority ||
@@ -242,6 +250,19 @@ export function SheetToolbar({
         >
           <X className="h-4 w-4 mr-1" />
           Clear
+        </Button>
+      )}
+
+      {/* Import button (admin/manager only) */}
+      {canImport && programId && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => navigate(`/programs/${programId}/import`)}
+          className="h-9"
+        >
+          <Upload className="h-4 w-4 mr-1" />
+          Import
         </Button>
       )}
 

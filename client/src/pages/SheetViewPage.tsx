@@ -256,6 +256,8 @@ export function SheetViewPage() {
           onExport={handleExport}
           programMembers={members}
           fieldDefinitions={program.fieldDefinitions}
+          programId={programId}
+          userRole={user?.role}
         />
       </div>
 
