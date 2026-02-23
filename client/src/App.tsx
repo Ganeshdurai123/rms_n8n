@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/pages/LoginPage';
 import { ProgramListPage } from '@/pages/ProgramListPage';
 import { SheetViewPage } from '@/pages/SheetViewPage';
+import { ImportWizardPage } from '@/pages/ImportWizardPage';
 
 export default function App() {
   return (
@@ -18,6 +19,10 @@ export default function App() {
               <Route
                 path="/programs/:programId/sheet"
                 element={<SheetViewPage />}
+              />
+              <Route
+                path="/programs/:programId/import"
+                element={<ImportWizardPage />}
               />
               <Route path="/" element={<Navigate to="/programs" replace />} />
             </Route>

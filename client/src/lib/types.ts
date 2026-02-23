@@ -64,3 +64,40 @@ export interface PaginatedResponse<T> {
     pages: number;
   };
 }
+
+// ---------- Import Types ----------
+
+export interface ImportUploadResult {
+  importJobId: string;
+  columns: string[];
+  sampleRows: Record<string, unknown>[];
+  totalRows: number;
+}
+
+export interface ImportValidationResult {
+  importJobId: string;
+  totalRows: number;
+  validCount: number;
+  errorCount: number;
+  errors: Array<{ row: number; field: string; message: string }>;
+  validRows: Array<{ title: string; description?: string; fields: Record<string, unknown> }>;
+}
+
+export interface ImportExecuteResult {
+  importJobId: string;
+  successCount: number;
+  errorCount: number;
+  totalRows: number;
+}
+
+export interface ImportJob {
+  _id: string;
+  programId: string;
+  performedBy: string | { _id: string; firstName: string; lastName: string; email: string };
+  originalFilename: string;
+  status: 'pending' | 'validated' | 'completed' | 'failed';
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  createdAt: string;
+}
