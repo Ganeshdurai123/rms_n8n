@@ -47,6 +47,16 @@ function formatDate(dateStr: string): string {
   }
 }
 
+function getDueDateIndicator(dueDate: string): { label: string; className: string } {
+  const due = new Date(dueDate);
+  const now = new Date();
+  const diffMs = due.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return { label: `${Math.abs(diffDays)}d overdue`, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' };
+  if (diffDays <= 3) return { label: `Due in ${diffDays}d`, className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' };
+  return { label: `Due in ${diffDays}d`, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' };
+}
+
 function formatFieldValue(value: unknown, type: string): string {
   if (value === undefined || value === null) return '-';
   switch (type) {
@@ -123,6 +133,23 @@ export function RequestInfo({ detail }: RequestInfoProps) {
             <span className="text-muted-foreground">Last Updated</span>
             <p className="font-medium">{formatDate(request.updatedAt)}</p>
           </div>
+          {request.dueDate && (() => {
+            const indicator = getDueDateIndicator(request.dueDate);
+            return (
+              <div>
+                <span className="text-muted-foreground">Due Date</span>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">{formatDate(request.dueDate)}</p>
+                  <Badge
+                    variant="secondary"
+                    className={cn('text-[10px] px-1.5 py-0', indicator.className)}
+                  >
+                    {indicator.label}
+                  </Badge>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {sortedDefs.length > 0 && (

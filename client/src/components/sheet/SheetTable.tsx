@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Table,
   TableHeader,
@@ -112,6 +112,17 @@ function formatFieldValue(
   }
 }
 
+function getDueDateIndicator(dueDate?: string): { label: string; className: string } | null {
+  if (!dueDate) return null;
+  const due = new Date(dueDate);
+  const now = new Date();
+  const diffMs = due.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return { label: `${Math.abs(diffDays)}d overdue`, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' };
+  if (diffDays <= 3) return { label: `Due in ${diffDays}d`, className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' };
+  return null;
+}
+
 function SortIndicator({
   column,
   query,
@@ -170,8 +181,14 @@ export function SheetTable({
   // Always show actions column for inline CRUD
   const hasActions = true;
 
+  // Show Due Date column only if at least one request has a dueDate
+  const hasDueDate = useMemo(
+    () => requests.some((req) => !!req.dueDate),
+    [requests],
+  );
+
   // Total column count for spanning
-  const totalColumns = FIXED_COLUMNS.length + sortedDefs.length + (hasActions ? 1 : 0);
+  const totalColumns = FIXED_COLUMNS.length + (hasDueDate ? 1 : 0) + sortedDefs.length + (hasActions ? 1 : 0);
 
   // Loading state: skeleton rows
   if (isLoading) {
@@ -246,6 +263,15 @@ export function SheetTable({
               )}
             </TableHead>
           ))}
+          {hasDueDate && (
+            <TableHead
+              className="cursor-pointer select-none group hover:text-foreground"
+              onClick={() => onToggleSort('dueDate')}
+            >
+              Due Date
+              <SortIndicator column="dueDate" query={query} />
+            </TableHead>
+          )}
           {sortedDefs.map((def) => {
             const sortable = SORTABLE_FIELD_TYPES.has(def.type);
             return (
@@ -383,6 +409,31 @@ export function SheetTable({
 
                 {/* Created At */}
                 <TableCell>{formatDate(req.createdAt)}</TableCell>
+
+                {/* Due Date */}
+                {hasDueDate && (
+                  <TableCell>
+                    {req.dueDate ? (
+                      <div className="flex items-center gap-1.5">
+                        <span>{formatDate(req.dueDate)}</span>
+                        {(() => {
+                          const indicator = getDueDateIndicator(req.dueDate);
+                          if (!indicator) return null;
+                          return (
+                            <Badge
+                              variant="secondary"
+                              className={cn('text-[10px] px-1.5 py-0', indicator.className)}
+                            >
+                              {indicator.label}
+                            </Badge>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                )}
 
                 {/* Dynamic field columns */}
                 {sortedDefs.map((def) => (
