@@ -148,11 +148,12 @@ Plans:
   2. Client can create and submit requests within their assigned programs and view the status and full history of their own requests
   3. Client can add comments and file attachments to their requests and sees an activity feed of updates within their program
   4. Client receives real-time Socket.IO updates when their requests change, scoped to their program rooms only
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Backend client access guard rails: ownership checks on request detail, comment/attachment deletion, import route restriction
+- [ ] 08-02-PLAN.md — Request detail page with comments timeline, file attachments, audit history, and navigation from sheet view
+- [ ] 08-03-PLAN.md — Socket.IO client integration, client-aware UI restrictions, and program activity feed
 
 ## Progress
 
