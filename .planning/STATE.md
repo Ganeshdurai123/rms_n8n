@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 6 - Sheet Views (COMPLETE)
+**Current focus:** Phase 7 - Request Books
 
 ## Current Position
 
-Phase: 6 of 8 (Sheet Views)
-Plan: 4 of 4 in current phase (06-04 complete -- Phase 6 DONE)
-Status: Phase 6 Complete
-Last activity: 2026-02-23 -- Completed 06-04-PLAN.md (Inline CRUD Operations and CSV Export)
+Phase: 7 of 8 (Request Books)
+Plan: 1 of 3 in current phase (07-01 complete)
+Status: Executing
+Last activity: 2026-02-23 -- Completed 07-01-PLAN.md (Bulk Import Backend API)
 
-Progress: [████████░░] 83%
+Progress: [████████░░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 7min
-- Total execution time: 2.4 hours
+- Total execution time: 2.5 hours
 
 **By Phase:**
 
@@ -35,7 +35,7 @@ Progress: [████████░░] 83%
 | 06-sheet-views | 4 | 39min | 9.8min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (7min), 06-01 (3min), 06-02 (14min), 06-03 (15min), 06-04 (7min)
+- Last 5 plans: 06-01 (3min), 06-02 (14min), 06-03 (15min), 06-04 (7min), 07-01 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -49,6 +49,7 @@ Progress: [████████░░] 83%
 | Phase 06 P02 | 14min | 2 tasks | 17 files |
 | Phase 06 P03 | 15min | 3 tasks | 11 files |
 | Phase 06 P04 | 7min | 2 tasks | 8 files |
+| Phase 07 P01 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,11 @@ Recent decisions affecting current work:
 - 06-04: SheetRowActions uses Radix AlertDialog (not window.confirm) for delete confirmation -- design system consistency
 - 06-04: CSV export uses blob download pattern with temporary anchor element for cross-browser file download
 - 06-04: Actions column always rendered in table since row actions are integral to sheet view experience
+- 07-01: Renamed ImportJob 'errors' field to 'importErrors' to avoid conflict with Mongoose Document.errors (ValidationError) property
+- 07-01: Store titleColumn/descriptionColumn in columnMapping using reserved __title__/__description__ keys for cross-step state
+- 07-01: File filter accepts both MIME type AND extension check for CSV (sometimes detected as text/plain)
+- 07-01: Import routes mounted before /:requestId in request.routes.ts (same pattern as /export route)
+- 07-01: Row-level validation collects errors instead of throwing -- enables partial import preview
 
 ### Pending Todos
 
@@ -152,5 +158,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 06-04-PLAN.md (Inline CRUD Operations and CSV Export) -- Phase 6 complete
+Stopped at: Completed 07-01-PLAN.md (Bulk Import Backend API)
 Resume file: None

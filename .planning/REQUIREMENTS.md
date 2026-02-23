@@ -66,11 +66,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Request Books
 
-- [ ] **BOOK-01**: User can upload Excel/CSV files for bulk request import
-- [ ] **BOOK-02**: System presents field mapping UI to map file columns to program fields
-- [ ] **BOOK-03**: System shows validation preview with error display before import
-- [ ] **BOOK-04**: User can batch import validated rows as requests into a program
-- [ ] **BOOK-05**: System tracks import history (who imported, when, how many records, errors)
+- [x] **BOOK-01**: User can upload Excel/CSV files for bulk request import
+- [x] **BOOK-02**: System presents field mapping UI to map file columns to program fields
+- [x] **BOOK-03**: System shows validation preview with error display before import
+- [x] **BOOK-04**: User can batch import validated rows as requests into a program
+- [x] **BOOK-05**: System tracks import history (who imported, when, how many records, errors)
 
 ### Notifications
 
@@ -212,11 +212,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHEET-05 | Phase 6 | Complete |
 | SHEET-06 | Phase 6 | Complete |
 | SHEET-07 | Phase 6 | Complete |
-| BOOK-01 | Phase 7 | Pending |
-| BOOK-02 | Phase 7 | Pending |
-| BOOK-03 | Phase 7 | Pending |
-| BOOK-04 | Phase 7 | Pending |
-| BOOK-05 | Phase 7 | Pending |
+| BOOK-01 | Phase 7 | Complete |
+| BOOK-02 | Phase 7 | Complete |
+| BOOK-03 | Phase 7 | Complete |
+| BOOK-04 | Phase 7 | Complete |
+| BOOK-05 | Phase 7 | Complete |
 | CLIENT-01 | Phase 8 | Pending |
 | CLIENT-02 | Phase 8 | Pending |
 | CLIENT-03 | Phase 8 | Pending |
