@@ -132,11 +132,12 @@ Plans:
   2. Before importing, the system shows a validation preview with clear error display (row-level errors with reasons) so the user can review before committing
   3. User can batch-import all validated rows as requests into the program in a single action
   4. The system tracks import history (who, when, how many records, how many errors) and this history is viewable
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Backend: ImportJob model, xlsx dependency, file parsing service, row validation against program fields, batch request creation, import history API
+- [ ] 07-02-PLAN.md — Frontend: Import wizard page with file upload (drag-and-drop), column-to-field mapping UI, validation preview with row-level errors, batch import execution and result summary
+- [ ] 07-03-PLAN.md — Frontend: Import history page with paginated table of past imports, status badges, sheet toolbar integration
 
 ### Phase 8: Client Collaboration
 **Goal**: External client users can access the same application with restricted views, create and track their own requests, and receive real-time updates -- without seeing data from other programs or internal-only information
@@ -167,5 +168,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Real-Time Events | 2/2 | Complete | 2026-02-22 |
 | 5. n8n Integration + Notifications | 4/4 | Complete | 2026-02-22 |
 | 6. Sheet Views | 0/4 | Not started | - |
-| 7. Request Books | 0/2 | Not started | - |
+| 7. Request Books | 0/3 | Not started | - |
 | 8. Client Collaboration | 0/2 | Not started | - |
