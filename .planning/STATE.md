@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 7 - Request Books (Complete)
+**Current focus:** Phase 8 - Client Collaboration (In Progress)
 
 ## Current Position
 
-Phase: 7 of 8 (Request Books)
-Plan: 3 of 3 in current phase (07-03 complete)
-Status: Phase Complete
-Last activity: 2026-02-23 -- Completed 07-03-PLAN.md (Import History UI)
+Phase: 8 of 8 (Client Collaboration)
+Plan: 1 of 3 in current phase (08-01 complete)
+Status: In Progress
+Last activity: 2026-02-23 -- Completed 08-01-PLAN.md (Backend API Hardening)
 
-Progress: [██████████] 92%
+Progress: [███████████] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 7min
-- Total execution time: 2.6 hours
+- Total execution time: 2.65 hours
 
 **By Phase:**
 
@@ -34,9 +34,10 @@ Progress: [██████████] 92%
 | 05-n8n-integration-notifications | 4 | 26min | 6.5min |
 | 06-sheet-views | 4 | 39min | 9.8min |
 | 07-request-books | 3 | 11min | 3.7min |
+| 08-client-collaboration | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-03 (15min), 06-04 (7min), 07-01 (5min), 07-02 (4min), 07-03 (2min)
+- Last 5 plans: 06-04 (7min), 07-01 (5min), 07-02 (4min), 07-03 (2min), 08-01 (3min)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -53,6 +54,7 @@ Progress: [██████████] 92%
 | Phase 07 P01 | 5min | 2 tasks | 8 files |
 | Phase 07 P02 | 4min | 2 tasks | 11 files |
 | Phase 07 P03 | 2min | 1 tasks | 4 files |
+| Phase 08 P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -155,6 +157,10 @@ Recent decisions affecting current work:
 - 07-03: Import History button uses ghost variant in SheetToolbar as secondary action next to primary Import button
 - 07-03: Status badges use outline variant with custom color classes for completed/validated/pending/failed states
 - 07-03: SheetPagination reused from sheet view for consistent pagination UX in import history
+- [Phase 08]: Client ownership checks placed after DB fetch (not query filter) for 403 vs 404 distinction
+- [Phase 08]: getRequestById restructured to unified flow so ownership check applies to both cached and DB-fetched results
+- [Phase 08]: Explicit client checks added before existing isAuthor/isPrivileged logic in comment and attachment delete for clarity
+- [Phase 08]: Import routes restricted via authorizeProgram({ roles: ['manager'] }) -- admin bypasses automatically
 
 ### Pending Todos
 
@@ -169,5 +175,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 07-03-PLAN.md (Import History UI) -- Phase 7 complete
+Stopped at: Completed 08-01-PLAN.md (Backend API Hardening)
 Resume file: None
