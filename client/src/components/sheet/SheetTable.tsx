@@ -187,8 +187,14 @@ export function SheetTable({
     [requests],
   );
 
+  // Show Chain column only if at least one request belongs to a chain
+  const hasChain = useMemo(
+    () => requests.some((req) => !!req.chainId),
+    [requests],
+  );
+
   // Total column count for spanning
-  const totalColumns = FIXED_COLUMNS.length + (hasDueDate ? 1 : 0) + sortedDefs.length + (hasActions ? 1 : 0);
+  const totalColumns = FIXED_COLUMNS.length + (hasDueDate ? 1 : 0) + (hasChain ? 1 : 0) + sortedDefs.length + (hasActions ? 1 : 0);
 
   // Loading state: skeleton rows
   if (isLoading) {
@@ -271,6 +277,9 @@ export function SheetTable({
               Due Date
               <SortIndicator column="dueDate" query={query} />
             </TableHead>
+          )}
+          {hasChain && (
+            <TableHead>Chain</TableHead>
           )}
           {sortedDefs.map((def) => {
             const sortable = SORTABLE_FIELD_TYPES.has(def.type);
@@ -429,6 +438,22 @@ export function SheetTable({
                           );
                         })()}
                       </div>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
+                )}
+
+                {/* Chain */}
+                {hasChain && (
+                  <TableCell>
+                    {req.chainId ? (
+                      <span className="text-xs whitespace-nowrap">
+                        {typeof req.chainId === 'object' ? req.chainId.name : 'Chain'}
+                        {req.chainSequence != null && (
+                          <span className="text-muted-foreground ml-1">(Step {req.chainSequence})</span>
+                        )}
+                      </span>
                     ) : (
                       '-'
                     )}
