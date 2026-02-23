@@ -11,7 +11,7 @@ import { SheetPagination } from '@/components/sheet/SheetPagination';
 import { ActivityFeed } from '@/components/request/ActivityFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Radio, Calendar } from 'lucide-react';
+import { RefreshCw, Plus, Radio, Calendar, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProgramMember {
@@ -252,6 +252,16 @@ export function SheetViewPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {program.complianceType && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/programs/${programId}/compliance-review`)}
+            >
+              <ClipboardCheck className="h-4 w-4 mr-1" />
+              Compliance
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

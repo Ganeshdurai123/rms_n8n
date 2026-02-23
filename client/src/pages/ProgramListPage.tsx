@@ -102,7 +102,14 @@ export function ProgramListPage() {
               <Card className="transition-shadow group-hover:shadow-md">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{program.name}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-lg">{program.name}</CardTitle>
+                      {program.complianceType && (
+                        <Badge variant="outline" className="border-blue-400 text-blue-600 dark:text-blue-400 text-[10px] uppercase">
+                          {program.complianceType}
+                        </Badge>
+                      )}
+                    </div>
                     <Badge
                       variant={
                         program.status === 'active' ? 'default' : 'secondary'

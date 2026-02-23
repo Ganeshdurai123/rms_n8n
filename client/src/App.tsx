@@ -9,6 +9,7 @@ import { ImportWizardPage } from '@/pages/ImportWizardPage';
 import { ImportHistoryPage } from '@/pages/ImportHistoryPage';
 import { RequestDetailPage } from '@/pages/RequestDetailPage';
 import { CalendarViewPage } from '@/pages/CalendarViewPage';
+import { ComplianceReviewPage } from '@/pages/ComplianceReviewPage';
 
 export default function App() {
   return (
@@ -22,6 +23,10 @@ export default function App() {
               <Route
                 path="/programs/:programId/sheet"
                 element={<SheetViewPage />}
+              />
+              <Route
+                path="/programs/:programId/compliance-review"
+                element={<ComplianceReviewPage />}
               />
               <Route
                 path="/programs/:programId/calendar"
