@@ -210,7 +210,11 @@ Plans:
   2. User can generate a program-level report with field value distributions and average lifecycle durations
   3. User can generate an overdue request report listing all requests past their due date with days overdue
   4. Report generation triggers via n8n webhook and results are stored for retrieval — no blocking the UI
-**Plans**: TBD (to be created by /gsd:plan-phase 12)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Backend: ReportJob model, aggregation service (summary/program/overdue), report REST API, internal API for n8n report execution, n8n workflow JSON template
+- [ ] 12-02-PLAN.md — Frontend: Reports page with generate buttons and report list, ReportDetailPage with type-specific result rendering (bar charts, metrics, tables)
 
 ### Phase 13: Enhanced Program Boundaries
 **Goal**: Programs can enforce granular limits (per-user request caps, total active request limits) with clear feedback when boundaries are reached, and admins can monitor boundary utilization
@@ -252,5 +256,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 9. Due Dates & Reminders | 0/3 | Complete    | 2026-02-23 |
 | 10. Sequential Request Chains | 2/2 | Complete    | 2026-02-23 |
 | 11. HSSP Compliance | 2/2 | Complete    | 2026-02-23 |
-| 12. Reports & Dashboard | 0/? | Not started | - |
+| 12. Reports & Dashboard | 0/2 | Not started | - |
 | 13. Enhanced Program Boundaries | 0/? | Not started | - |
