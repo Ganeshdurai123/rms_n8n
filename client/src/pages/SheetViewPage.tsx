@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import type { Program } from '@/lib/types';
@@ -20,6 +20,7 @@ interface ProgramMember {
 
 export function SheetViewPage() {
   const { programId } = useParams<{ programId: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [program, setProgram] = useState<Program | null>(null);
   const [programLoading, setProgramLoading] = useState(true);
@@ -281,6 +282,7 @@ export function SheetViewPage() {
           fieldDefinitions={program.fieldDefinitions}
           query={query}
           onToggleSort={toggleSort}
+          onRowClick={(req) => navigate(`/programs/${programId}/requests/${req._id}`)}
           isLoading={isLoading}
           programId={programId || ''}
           showCreateRow={showCreateRow}

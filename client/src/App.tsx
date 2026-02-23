@@ -7,6 +7,7 @@ import { ProgramListPage } from '@/pages/ProgramListPage';
 import { SheetViewPage } from '@/pages/SheetViewPage';
 import { ImportWizardPage } from '@/pages/ImportWizardPage';
 import { ImportHistoryPage } from '@/pages/ImportHistoryPage';
+import { RequestDetailPage } from '@/pages/RequestDetailPage';
 
 export default function App() {
   return (
@@ -28,6 +29,10 @@ export default function App() {
               <Route
                 path="/programs/:programId/import"
                 element={<ImportWizardPage />}
+              />
+              <Route
+                path="/programs/:programId/requests/:requestId"
+                element={<RequestDetailPage />}
               />
               <Route path="/" element={<Navigate to="/programs" replace />} />
             </Route>
