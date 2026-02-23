@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useSocket } from '@/lib/socket';
 import type { RequestDetail } from '@/lib/types';
 import { RequestInfo } from '@/components/request/RequestInfo';
 import { CommentTimeline } from '@/components/request/CommentTimeline';
 import { AttachmentList } from '@/components/request/AttachmentList';
 import { AuditTimeline } from '@/components/request/AuditTimeline';
+import { ActivityFeed } from '@/components/request/ActivityFeed';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,6 +51,27 @@ export function RequestDetailPage() {
   const handleRefresh = useCallback(() => {
     fetchDetail();
   }, [fetchDetail]);
+
+  // Real-time Socket.IO updates -- re-fetch when events affect this request
+  const socketEvents = useMemo(() => {
+    const refreshIfMatch = (payload: Record<string, unknown>) => {
+      if (payload.requestId === requestId) {
+        fetchDetail();
+      }
+    };
+
+    return {
+      'request:updated': refreshIfMatch,
+      'request:status_changed': refreshIfMatch,
+      'request:assigned': refreshIfMatch,
+      'comment:added': refreshIfMatch,
+      'comment:deleted': refreshIfMatch,
+      'attachment:uploaded': refreshIfMatch,
+      'attachment:deleted': refreshIfMatch,
+    };
+  }, [requestId, fetchDetail]);
+
+  useSocket(socketEvents);
 
   // Loading state
   if (loading) {
@@ -152,6 +175,13 @@ export function RequestDetailPage() {
             <AuditTimeline auditTrail={detail.auditTrail} />
           </TabsContent>
         </Tabs>
+
+        {/* Activity Feed -- recent real-time events in this program */}
+        {programId && (
+          <div className="border rounded-lg p-4 bg-muted/20">
+            <ActivityFeed programId={programId} />
+          </div>
+        )}
       </div>
     </div>
   );

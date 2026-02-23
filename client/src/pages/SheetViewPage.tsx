@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useSocket } from '@/lib/socket';
 import type { Program } from '@/lib/types';
 import { useSheetData } from '@/components/sheet/useSheetData';
 import { SheetTable } from '@/components/sheet/SheetTable';
 import { SheetToolbar } from '@/components/sheet/SheetToolbar';
 import { SheetPagination } from '@/components/sheet/SheetPagination';
+import { ActivityFeed } from '@/components/request/ActivityFeed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus } from 'lucide-react';
+import { RefreshCw, Plus, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProgramMember {
@@ -27,6 +29,7 @@ export function SheetViewPage() {
   const [programError, setProgramError] = useState<string | null>(null);
   const [members, setMembers] = useState<ProgramMember[]>([]);
   const [showCreateRow, setShowCreateRow] = useState(false);
+  const [showActivityFeed, setShowActivityFeed] = useState(false);
 
   const {
     requests,
@@ -181,6 +184,17 @@ export function SheetViewPage() {
     }
   }, [programId, query]);
 
+  // Real-time Socket.IO updates -- refresh sheet data when events arrive
+  const socketEvents = useMemo(() => ({
+    'request:created': () => refresh(),
+    'request:updated': () => refresh(),
+    'request:status_changed': () => refresh(),
+    'request:assigned': () => refresh(),
+    'request:deleted': () => refresh(),
+  }), [refresh]);
+
+  useSocket(socketEvents);
+
   // Loading state for program config
   if (programLoading) {
     return (
@@ -237,13 +251,24 @@ export function SheetViewPage() {
             Sheet View - {pagination.total} requests
           </p>
         </div>
-        <Button
-          onClick={() => setShowCreateRow(true)}
-          disabled={showCreateRow}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Request
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowActivityFeed((v) => !v)}
+            className={showActivityFeed ? 'bg-primary/10' : ''}
+          >
+            <Radio className="h-4 w-4 mr-1" />
+            Activity
+          </Button>
+          <Button
+            onClick={() => setShowCreateRow(true)}
+            disabled={showCreateRow}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Request
+          </Button>
+        </div>
       </div>
 
       {/* Toolbar */}
@@ -305,6 +330,13 @@ export function SheetViewPage() {
           onLimitChange={setLimit}
         />
       </div>
+
+      {/* Activity Feed panel (collapsible) */}
+      {showActivityFeed && programId && (
+        <div className="border-t px-6 py-4 max-h-[240px] overflow-auto bg-muted/30">
+          <ActivityFeed programId={programId} />
+        </div>
+      )}
     </div>
   );
 }

@@ -137,8 +137,8 @@ export function SheetToolbar({
         </SelectContent>
       </Select>
 
-      {/* Assignee filter */}
-      {programMembers && programMembers.length > 0 && (
+      {/* Assignee filter (hidden for client role -- clients see only their own requests) */}
+      {userRole !== 'client' && programMembers && programMembers.length > 0 && (
         <Select
           value={query.assignedTo || '__all__'}
           onValueChange={(val) =>
