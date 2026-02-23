@@ -101,6 +101,26 @@ function formatFieldValue(
       ) : (
         <Minus className="h-4 w-4 text-muted-foreground" />
       );
+    case 'checklist':
+      if (!Array.isArray(value)) return '-';
+      {
+        const total = value.length;
+        const checked = (value as Array<{ label: string; checked: boolean }>).filter(
+          (item) => item.checked,
+        ).length;
+        const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+        return (
+          <span className="text-sm flex items-center gap-1">
+            {percentage === 100 ? (
+              <Check className="h-3.5 w-3.5 text-green-600" />
+            ) : percentage === 0 ? (
+              <Minus className="h-3.5 w-3.5 text-muted-foreground" />
+            ) : null}
+            {checked}/{total}{' '}
+            <span className="text-muted-foreground">({percentage}%)</span>
+          </span>
+        );
+      }
     case 'file_upload':
       return value ? (
         <span className="text-blue-600 underline">File</span>

@@ -13,7 +13,7 @@ import {
 import { Check, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import type { FieldDefinition, RequestPriority } from '@/lib/types';
+import type { FieldDefinition, RequestPriority, ChecklistItem } from '@/lib/types';
 
 interface InlineCreateRowProps {
   programId: string;
@@ -149,6 +149,34 @@ export function InlineCreateRow({
             onChange={(e) => updateField(def.key, e.target.checked)}
             className="h-4 w-4"
           />
+        );
+      case 'checklist':
+        return (
+          <div className="space-y-1 max-h-[120px] overflow-auto">
+            {(def.items || []).map((item) => {
+              const currentVal = (fields[def.key] as ChecklistItem[] | undefined) || [];
+              const itemState = currentVal.find(ci => ci.label === item);
+              const isChecked = itemState?.checked ?? false;
+              return (
+                <label key={item} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-3.5 w-3.5"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const existing = (fields[def.key] as ChecklistItem[] | undefined) ||
+                        (def.items || []).map(i => ({ label: i, checked: false }));
+                      const updated = existing.map(ci =>
+                        ci.label === item ? { ...ci, checked: e.target.checked } : ci
+                      );
+                      updateField(def.key, updated);
+                    }}
+                  />
+                  <span className="truncate">{item}</span>
+                </label>
+              );
+            })}
+          </div>
         );
       default:
         return <span className="text-muted-foreground text-xs">-</span>;

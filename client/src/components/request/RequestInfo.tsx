@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Check, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { RequestDetail, FieldDefinition } from '@/lib/types';
+import type { RequestDetail, FieldDefinition, ChecklistItem } from '@/lib/types';
 
 const STATUS_VARIANT: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
@@ -62,6 +63,14 @@ function formatFieldValue(value: unknown, type: string): string {
   switch (type) {
     case 'checkbox':
       return value === true || value === 'true' ? 'Yes' : 'No';
+    case 'checklist':
+      if (!Array.isArray(value)) return '-';
+      {
+        const total = value.length;
+        const checked = (value as ChecklistItem[]).filter((item) => item.checked).length;
+        const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+        return `${checked} of ${total} completed (${percentage}%)`;
+      }
     case 'date':
       try {
         return new Date(String(value)).toLocaleDateString();
@@ -161,9 +170,24 @@ export function RequestInfo({ detail }: RequestInfoProps) {
                 {sortedDefs.map((def) => (
                   <div key={def.key}>
                     <span className="text-muted-foreground">{def.label}</span>
-                    <p className="font-medium">
-                      {formatFieldValue(request.fields[def.key], def.type)}
-                    </p>
+                    {def.type === 'checklist' && Array.isArray(request.fields[def.key]) ? (
+                      <div className="space-y-0.5 mt-1">
+                        {(request.fields[def.key] as ChecklistItem[]).map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 text-xs">
+                            {item.checked ? (
+                              <Check className="h-3 w-3 text-green-600" />
+                            ) : (
+                              <Minus className="h-3 w-3 text-muted-foreground" />
+                            )}
+                            <span className={item.checked ? '' : 'text-muted-foreground'}>{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="font-medium">
+                        {formatFieldValue(request.fields[def.key], def.type)}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>

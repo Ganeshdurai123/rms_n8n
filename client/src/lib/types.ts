@@ -2,7 +2,9 @@ export type Role = 'admin' | 'manager' | 'team_member' | 'client';
 export type ProgramRole = 'manager' | 'team_member' | 'client';
 export type RequestStatus = 'draft' | 'submitted' | 'in_review' | 'approved' | 'rejected' | 'completed';
 export type RequestPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type FieldType = 'text' | 'number' | 'date' | 'dropdown' | 'checkbox' | 'file_upload';
+export type FieldType = 'text' | 'number' | 'date' | 'dropdown' | 'checkbox' | 'checklist' | 'file_upload';
+
+export type ChecklistItem = { label: string; checked: boolean };
 
 export interface User {
   _id: string;
@@ -19,6 +21,7 @@ export interface FieldDefinition {
   type: FieldType;
   required: boolean;
   options?: string[];
+  items?: string[];
   placeholder?: string;
   order: number;
 }
@@ -42,6 +45,7 @@ export interface Program {
     defaultOffsetDays: number;
     dueDateField?: string;
   };
+  complianceType?: 'hssp' | null;
   status: 'active' | 'archived';
   createdBy: string | { _id: string; firstName: string; lastName: string };
 }
