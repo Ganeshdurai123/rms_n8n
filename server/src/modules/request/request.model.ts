@@ -35,6 +35,8 @@ export interface IRequestDocument extends Document {
   assignedTo?: mongoose.Types.ObjectId;
   priority: RequestPriority;
   dueDate?: Date;
+  chainId?: mongoose.Types.ObjectId;
+  chainSequence?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -102,6 +104,14 @@ const requestSchema = new Schema<IRequestDocument>(
       default: undefined,
       index: true,
     },
+    chainId: {
+      type: Schema.Types.ObjectId,
+      ref: 'RequestChain',
+      index: true,
+    },
+    chainSequence: {
+      type: Number,
+    },
   },
   {
     timestamps: true,
@@ -113,6 +123,7 @@ requestSchema.index({ programId: 1, status: 1 });
 requestSchema.index({ programId: 1, createdAt: -1 });
 requestSchema.index({ assignedTo: 1, status: 1 });
 requestSchema.index({ programId: 1, dueDate: 1 });
+requestSchema.index({ chainId: 1, chainSequence: 1 });
 
 export const Request = mongoose.model<IRequestDocument>(
   'Request',

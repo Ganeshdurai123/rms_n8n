@@ -12,6 +12,7 @@ import { createNotification } from '../notification/notification.service.js';
 import type { SocketEventPayload } from '../../shared/socketEvents.js';
 import type { IFieldDefinition, IProgramDocument } from '../program/program.model.js';
 import type { Role } from '../../shared/types.js';
+import { handleChainProgression } from '../chain/chain.service.js';
 import type { CreateRequestInput, UpdateRequestInput, ListRequestsQuery } from './request.schema.js';
 
 /**
@@ -289,6 +290,9 @@ export async function getRequests(
   if (query.priority) {
     filter.priority = query.priority;
   }
+  if (query.chainId) {
+    filter.chainId = query.chainId;
+  }
 
   // Date range filters
   if (query.createdAfter || query.createdBefore) {
@@ -357,6 +361,7 @@ export async function getRequests(
     Request.find(filter)
       .populate('createdBy', 'firstName lastName email')
       .populate('assignedTo', 'firstName lastName email')
+      .populate('chainId', 'name')
       .skip(skip)
       .limit(limit)
       .sort(sortObj)
@@ -581,6 +586,13 @@ export async function transitionRequest(
       });
     }
   }).catch(() => {});
+
+  // Chain progression: if request completed, advance the chain (fire-and-forget)
+  if (targetStatus === 'completed') {
+    handleChainProgression(requestId, request.programId.toString(), userId)
+      .then(() => {})
+      .catch(() => {});
+  }
 
   return updated;
 }

@@ -92,12 +92,13 @@ export const listRequestsQuerySchema = z.object({
   assignedTo: z.string().regex(objectIdRegex, 'Invalid user ID').optional(),
   priority: z.enum(REQUEST_PRIORITIES).optional(),
   search: z.string().max(100).optional(),
-  sortBy: z.enum(['title', 'status', 'priority', 'createdAt', 'updatedAt', 'assignedTo', 'dueDate']).default('createdAt'),
+  sortBy: z.enum(['title', 'status', 'priority', 'createdAt', 'updatedAt', 'assignedTo', 'dueDate', 'chainSequence']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   createdAfter: z.coerce.date().optional(),
   createdBefore: z.coerce.date().optional(),
   dueBefore: z.coerce.date().optional(),
   dueAfter: z.coerce.date().optional(),
+  chainId: z.string().regex(objectIdRegex, 'Invalid chain ID').optional(),
   fields: z.record(z.string(), z.string()).optional(),
 });
 

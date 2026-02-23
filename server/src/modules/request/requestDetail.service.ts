@@ -2,16 +2,17 @@ import { Request } from './request.model.js';
 import { Comment } from './comment.model.js';
 import { Attachment } from './attachment.model.js';
 import { AuditLog } from '../audit/auditLog.model.js';
+import { getChainByRequestId } from '../chain/chain.service.js';
 import { NotFoundError, ForbiddenError } from '../../shared/errors.js';
 import type { Role } from '../../shared/types.js';
 
 /**
- * Get aggregated request detail with comments, attachments, and audit trail.
- * Runs 4 parallel queries for optimal performance.
+ * Get aggregated request detail with comments, attachments, audit trail, and chain context.
+ * Runs 5 parallel queries for optimal performance.
  * Client role users can only view detail for requests they created.
  */
 export async function getRequestDetail(requestId: string, userId: string, userRole: Role) {
-  const [request, comments, attachments, auditTrail] = await Promise.all([
+  const [request, comments, attachments, auditTrail, chain] = await Promise.all([
     // 1. Request with populated references
     Request.findById(requestId)
       .populate('createdBy', 'firstName lastName email')
@@ -36,6 +37,9 @@ export async function getRequestDetail(requestId: string, userId: string, userRo
       .populate('performedBy', 'firstName lastName email')
       .sort({ createdAt: -1 })
       .lean(),
+
+    // 5. Chain context (null if request is not in any chain)
+    getChainByRequestId(requestId),
   ]);
 
   if (!request) {
@@ -51,5 +55,5 @@ export async function getRequestDetail(requestId: string, userId: string, userRo
     }
   }
 
-  return { request, comments, attachments, auditTrail };
+  return { request, comments, attachments, auditTrail, chain };
 }
