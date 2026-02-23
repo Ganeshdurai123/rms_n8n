@@ -15,6 +15,8 @@ export const AUDIT_ACTIONS = [
   'attachment.uploaded',
   'attachment.deleted',
   'import.created',
+  'chain.created',
+  'chain.step_auto_submitted',
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -22,7 +24,7 @@ export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 /**
  * Entity types that can be audited.
  */
-export const AUDIT_ENTITY_TYPES = ['request', 'comment', 'attachment', 'import'] as const;
+export const AUDIT_ENTITY_TYPES = ['request', 'comment', 'attachment', 'import', 'chain'] as const;
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
 
 /**

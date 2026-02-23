@@ -20,7 +20,8 @@ export type SocketEventName =
   | 'comment:deleted'
   | 'attachment:uploaded'
   | 'attachment:deleted'
-  | 'notification:created';
+  | 'notification:created'
+  | 'chain:step_advanced';
 
 // ---------------------------------------------------------------------------
 // Payload
@@ -57,6 +58,7 @@ export interface ServerToClientEvents {
   'attachment:uploaded': (payload: SocketEventPayload) => void;
   'attachment:deleted': (payload: SocketEventPayload) => void;
   'notification:created': (payload: SocketEventPayload) => void;
+  'chain:step_advanced': (payload: SocketEventPayload) => void;
 }
 
 /** Events clients can emit to the server (empty in v1 — clients only receive) */

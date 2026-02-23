@@ -15,6 +15,7 @@ import { requestRouter } from './modules/request/request.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
 import { notificationRouter } from './modules/notification/notification.routes.js';
 import { internalRouter } from './modules/internal/internal.routes.js';
+import { chainRouter } from './modules/chain/chain.routes.js';
 
 const app = express();
 
@@ -73,6 +74,9 @@ app.use('/api/v1/programs', programRouter);
 
 // 14. Request routes (nested under programs, uses mergeParams)
 app.use('/api/v1/programs/:programId/requests', requestRouter);
+
+// 14b. Chain routes (sibling resource under programs, uses mergeParams)
+app.use('/api/v1/programs/:programId/chains', chainRouter);
 
 // 15. Admin audit log routes (admin-only)
 app.use('/api/v1/admin/audit', auditRouter);
