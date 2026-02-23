@@ -176,3 +176,47 @@ export interface ImportJob {
   errorCount: number;
   createdAt: string;
 }
+
+// ---------- Report Types ----------
+export type ReportType = 'summary' | 'program' | 'overdue';
+export type ReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export interface ReportJob {
+  _id: string;
+  type: ReportType;
+  status: ReportStatus;
+  params?: { startDate?: string; endDate?: string; programId?: string };
+  result?: SummaryReportResult | ProgramReportResult | OverdueReportResult | null;
+  requestedBy: string | { _id: string; firstName: string; lastName: string };
+  programId?: string | { _id: string; name: string };
+  error?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SummaryReportResult {
+  byStatus: Array<{ status: string; count: number }>;
+  byProgram: Array<{ programId: string; programName: string; count: number }>;
+  byMonth: Array<{ month: string; count: number }>;
+}
+
+export interface ProgramReportResult {
+  statusBreakdown: Array<{ status: string; count: number }>;
+  fieldDistributions: Array<{ fieldKey: string; fieldLabel: string; values: Array<{ value: string; count: number }> }>;
+  avgLifecycleDays: number | null;
+}
+
+export interface OverdueReportResult {
+  overdueRequests: Array<{
+    requestId: string;
+    title: string;
+    programName: string;
+    status: string;
+    dueDate: string;
+    daysOverdue: number;
+    assignedTo: { name: string; email: string } | null;
+    createdBy: { name: string; email: string };
+  }>;
+  totalOverdue: number;
+}
