@@ -136,10 +136,10 @@ Active milestone. Closes gaps identified by comparing scope document against v1 
 
 ### Reports & Dashboard
 
-- [ ] **RPT-01**: User can generate summary reports (request counts by status, program, timeframe)
-- [ ] **RPT-02**: User can generate program-level reports (field distributions, average lifecycle time)
-- [ ] **RPT-03**: User can generate overdue request reports (requires due dates)
-- [ ] **RPT-04**: Report generation runs asynchronously via n8n webhook
+- [x] **RPT-01**: User can generate summary reports (request counts by status, program, timeframe)
+- [x] **RPT-02**: User can generate program-level reports (field distributions, average lifecycle time)
+- [x] **RPT-03**: User can generate overdue request reports (requires due dates)
+- [x] **RPT-04**: Report generation runs asynchronously via n8n webhook
 
 ### Enhanced Program Boundaries
 
