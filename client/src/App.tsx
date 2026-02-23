@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { ProgramListPage } from '@/pages/ProgramListPage';
 import { SheetViewPage } from '@/pages/SheetViewPage';
 import { ImportWizardPage } from '@/pages/ImportWizardPage';
+import { ImportHistoryPage } from '@/pages/ImportHistoryPage';
 
 export default function App() {
   return (
@@ -19,6 +20,10 @@ export default function App() {
               <Route
                 path="/programs/:programId/sheet"
                 element={<SheetViewPage />}
+              />
+              <Route
+                path="/programs/:programId/import/history"
+                element={<ImportHistoryPage />}
               />
               <Route
                 path="/programs/:programId/import"

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, X, Download, Upload } from 'lucide-react';
+import { Search, X, Download, Upload, History } from 'lucide-react';
 import type { FieldDefinition, Role } from '@/lib/types';
 import type { SheetQuery } from './useSheetData';
 
@@ -263,6 +263,19 @@ export function SheetToolbar({
         >
           <Upload className="h-4 w-4 mr-1" />
           Import
+        </Button>
+      )}
+
+      {/* Import History button (admin/manager only) */}
+      {canImport && programId && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/programs/${programId}/import/history`)}
+          className="h-9"
+        >
+          <History className="h-4 w-4 mr-1" />
+          Import History
         </Button>
       )}
 
