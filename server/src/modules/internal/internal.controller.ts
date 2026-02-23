@@ -151,11 +151,16 @@ export const createNotificationHandler = async (
 // ---------------------------------------------------------------------------
 
 /**
- * Returns requests that have been stale (in submitted/in_review status) for
- * more than 48 hours. n8n's scheduled-reminder workflow calls this daily to
- * determine which requests need reminder emails.
+ * Returns requests based on actual dueDate for reminder lookups.
+ * n8n's scheduled-reminder workflow calls this daily to determine which
+ * requests need reminder emails.
  *
- * Query: ?programId=...  (optional filter)
+ * Query params:
+ *   ?type=upcoming|overdue  (default: both)
+ *   ?programId=...          (optional filter)
+ *
+ * - Overdue: requests past their due date that are still pending action
+ * - Upcoming: requests due within the next 24 hours
  */
 export const getPendingReminders = async (
   req: Request,
@@ -163,23 +168,52 @@ export const getPendingReminders = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { programId } = req.query as { programId?: string };
+    const { programId, type } = req.query as {
+      programId?: string;
+      type?: 'upcoming' | 'overdue';
+    };
 
-    const staleThreshold = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const now = new Date();
+    const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const filter: Record<string, unknown> = {
-      status: { $in: ['submitted', 'in_review'] },
-      updatedAt: { $lt: staleThreshold },
+    // Base filter: only requests that have a dueDate set
+    const baseFilter: Record<string, unknown> = {
+      dueDate: { $exists: true, $ne: null },
     };
 
     if (programId) {
-      filter.programId = programId;
+      baseFilter.programId = programId;
     }
 
-    const requests = await RequestModel.find(filter)
+    // Build type-specific query conditions
+    const overdueCondition = {
+      dueDate: { $lt: now },
+      status: { $in: ['submitted', 'in_review'] },
+    };
+
+    const upcomingCondition = {
+      dueDate: { $gte: now, $lte: in24h },
+      status: { $in: ['submitted', 'in_review', 'draft'] },
+    };
+
+    let typeFilter: Record<string, unknown>;
+
+    if (type === 'overdue') {
+      typeFilter = { ...baseFilter, ...overdueCondition };
+    } else if (type === 'upcoming') {
+      typeFilter = { ...baseFilter, ...upcomingCondition };
+    } else {
+      // Both: combine overdue and upcoming with $or
+      typeFilter = {
+        ...baseFilter,
+        $or: [overdueCondition, upcomingCondition],
+      };
+    }
+
+    const requests = await RequestModel.find(typeFilter)
       .populate('createdBy', 'firstName lastName email')
       .populate('assignedTo', 'firstName lastName email')
-      .sort({ updatedAt: 1 })
+      .sort({ dueDate: 1 })
       .limit(100)
       .lean();
 
@@ -197,11 +231,18 @@ export const getPendingReminders = async (
         email?: string;
       } | null;
 
+      const dueDateMs = r.dueDate?.getTime() ?? Date.now();
+      const daysOverdue = Math.floor(
+        (Date.now() - dueDateMs) / (24 * 60 * 60 * 1000),
+      );
+
       return {
         requestId: r._id.toString(),
         title: r.title,
         programId: r.programId.toString(),
         status: r.status,
+        dueDate: r.dueDate?.toISOString(),
+        daysOverdue,
         assignedTo: assignedToUser
           ? {
               email: assignedToUser.email ?? '',
@@ -214,7 +255,6 @@ export const getPendingReminders = async (
               name: `${createdByUser.firstName ?? ''} ${createdByUser.lastName ?? ''}`.trim(),
             }
           : null,
-        staleSince: r.updatedAt,
       };
     });
 
