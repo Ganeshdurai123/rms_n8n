@@ -61,8 +61,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CLIENT-02**: Client can create and submit requests within their assigned programs
 - [x] **CLIENT-03**: Client can view status and history of their own requests
 - [x] **CLIENT-04**: Client can add comments and attachments to their requests
-- [ ] **CLIENT-05**: Client sees activity feed of updates within their program
-- [ ] **CLIENT-06**: Client receives real-time updates via Socket.IO when their requests change
+- [x] **CLIENT-05**: Client sees activity feed of updates within their program
+- [x] **CLIENT-06**: Client receives real-time updates via Socket.IO when their requests change
 
 ### Request Books
 
@@ -221,8 +221,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLIENT-02 | Phase 8 | Complete |
 | CLIENT-03 | Phase 8 | Complete |
 | CLIENT-04 | Phase 8 | Complete |
-| CLIENT-05 | Phase 8 | Pending |
-| CLIENT-06 | Phase 8 | Pending |
+| CLIENT-05 | Phase 8 | Complete |
+| CLIENT-06 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 66 total

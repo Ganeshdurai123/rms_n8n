@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 8 - Client Collaboration (In Progress)
+**Current focus:** Phase 8 - Client Collaboration (Complete)
 
 ## Current Position
 
 Phase: 8 of 8 (Client Collaboration)
-Plan: 2 of 3 in current phase (08-02 complete)
-Status: In Progress
-Last activity: 2026-02-23 -- Completed 08-02-PLAN.md (Request Detail Page)
+Plan: 3 of 3 in current phase (08-03 complete)
+Status: Complete
+Last activity: 2026-02-23 -- Completed 08-03-PLAN.md (Client UI Restrictions, Real-Time, Activity Feed)
 
-Progress: [████████████] 96%
+Progress: [████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 7min
-- Total execution time: 2.7 hours
+- Total execution time: 2.8 hours
 
 **By Phase:**
 
@@ -34,10 +34,10 @@ Progress: [████████████] 96%
 | 05-n8n-integration-notifications | 4 | 26min | 6.5min |
 | 06-sheet-views | 4 | 39min | 9.8min |
 | 07-request-books | 3 | 11min | 3.7min |
-| 08-client-collaboration | 2 | 6min | 3min |
+| 08-client-collaboration | 3 | 10min | 3.3min |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (5min), 07-02 (4min), 07-03 (2min), 08-01 (3min), 08-02 (3min)
+- Last 5 plans: 07-02 (4min), 07-03 (2min), 08-01 (3min), 08-02 (3min), 08-03 (4min)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -56,6 +56,7 @@ Progress: [████████████] 96%
 | Phase 07 P03 | 2min | 1 tasks | 4 files |
 | Phase 08 P01 | 3min | 2 tasks | 6 files |
 | Phase 08 P02 | 3min | 2 tasks | 12 files |
+| Phase 08 P03 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -166,6 +167,11 @@ Recent decisions affecting current work:
 - 08-02: Blob download pattern for attachments (same as CSV export in Phase 6) via api.get responseType blob
 - 08-02: SheetTable already had onRowClick prop -- wired up from SheetViewPage with navigate callback
 - 08-02: AlertDialog used for attachment delete confirmation -- design system consistency with 06-04
+- 08-03: Socket.IO client connects to window.location.origin (same host behind nginx proxy) for environment portability
+- 08-03: useSocket hook stores handlers in ref to avoid re-registering listeners on handler identity changes
+- 08-03: lastEventTimestamp tracked module-level for reconnection catch-up matching server-side Redis pattern
+- 08-03: Activity feed is real-time-only in v1 -- starts empty and fills as events arrive (no audit API pre-population)
+- 08-03: SheetRowActions unchanged -- canEdit/canDelete already respect role and ownership from Phase 06
 
 ### Pending Todos
 
@@ -180,5 +186,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-02-PLAN.md (Request Detail Page)
+Stopped at: Completed 08-03-PLAN.md (Client UI Restrictions, Real-Time, Activity Feed) -- ALL PHASES COMPLETE
 Resume file: None
