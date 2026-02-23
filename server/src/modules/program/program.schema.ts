@@ -47,6 +47,15 @@ export type FieldDefinitionInput = z.infer<typeof fieldDefinitionSchema>;
  * Validates unique field keys within the fieldDefinitions array.
  * Validates that endDate is after startDate when both are provided.
  */
+/**
+ * Zod schema for dueDateConfig embedded subdocument.
+ */
+const dueDateConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  defaultOffsetDays: z.number().int().min(1).max(365).default(30),
+  dueDateField: z.string().regex(/^[a-z][a-z0-9_]*$/).optional(),
+}).default({});
+
 export const createProgramSchema = z.object({
   name: z.string().min(2, 'Program name must be at least 2 characters').max(100).trim(),
   description: z.string().max(2000).trim().optional(),
@@ -87,7 +96,23 @@ export const createProgramSchema = z.object({
       },
     )
     .default({}),
-});
+  dueDateConfig: dueDateConfigSchema,
+}).refine(
+  (data) => {
+    // If dueDateField is set, it must reference a key in fieldDefinitions with type 'date'
+    if (data.dueDateConfig?.dueDateField) {
+      const field = data.fieldDefinitions.find(
+        (f) => f.key === data.dueDateConfig.dueDateField,
+      );
+      return field !== undefined && field.type === 'date';
+    }
+    return true;
+  },
+  {
+    message: 'dueDateConfig.dueDateField must reference a fieldDefinition key with type "date"',
+    path: ['dueDateConfig', 'dueDateField'],
+  },
+);
 
 export type CreateProgramInput = z.infer<typeof createProgramSchema>;
 
@@ -136,7 +161,27 @@ export const updateProgramSchema = z.object({
       },
     )
     .optional(),
-});
+  dueDateConfig: z.object({
+    enabled: z.boolean().optional(),
+    defaultOffsetDays: z.number().int().min(1).max(365).optional(),
+    dueDateField: z.string().regex(/^[a-z][a-z0-9_]*$/).optional(),
+  }).optional(),
+}).refine(
+  (data) => {
+    // If both dueDateConfig.dueDateField and fieldDefinitions are provided, validate the reference
+    if (data.dueDateConfig?.dueDateField && data.fieldDefinitions) {
+      const field = data.fieldDefinitions.find(
+        (f) => f.key === data.dueDateConfig!.dueDateField,
+      );
+      return field !== undefined && field.type === 'date';
+    }
+    return true;
+  },
+  {
+    message: 'dueDateConfig.dueDateField must reference a fieldDefinition key with type "date"',
+    path: ['dueDateConfig', 'dueDateField'],
+  },
+);
 
 export type UpdateProgramInput = z.infer<typeof updateProgramSchema>;
 

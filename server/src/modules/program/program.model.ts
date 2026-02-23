@@ -35,6 +35,16 @@ export const PROGRAM_STATUSES = ['active', 'archived'] as const;
 export type ProgramStatus = (typeof PROGRAM_STATUSES)[number];
 
 /**
+ * Due date configuration for a program.
+ * Controls how due dates are computed for requests in this program.
+ */
+export interface IDueDateConfig {
+  enabled: boolean;
+  defaultOffsetDays: number;
+  dueDateField?: string;
+}
+
+/**
  * Full Program document interface.
  */
 export interface IProgramDocument extends Document {
@@ -51,6 +61,7 @@ export interface IProgramDocument extends Document {
     startDate?: Date;
     endDate?: Date;
   };
+  dueDateConfig: IDueDateConfig;
   status: ProgramStatus;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -151,6 +162,20 @@ const programSchema = new Schema<IProgramDocument>(
       },
       endDate: {
         type: Date,
+        default: undefined,
+      },
+    },
+    dueDateConfig: {
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+      defaultOffsetDays: {
+        type: Number,
+        default: 30,
+      },
+      dueDateField: {
+        type: String,
         default: undefined,
       },
     },

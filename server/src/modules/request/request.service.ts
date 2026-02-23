@@ -10,7 +10,7 @@ import { emitToProgram } from '../../config/socket.js';
 import { enqueueWebhookEvent } from '../webhook/webhook.service.js';
 import { createNotification } from '../notification/notification.service.js';
 import type { SocketEventPayload } from '../../shared/socketEvents.js';
-import type { IFieldDefinition } from '../program/program.model.js';
+import type { IFieldDefinition, IProgramDocument } from '../program/program.model.js';
 import type { Role } from '../../shared/types.js';
 import type { CreateRequestInput, UpdateRequestInput, ListRequestsQuery } from './request.schema.js';
 
@@ -104,6 +104,29 @@ function validateFields(
 }
 
 /**
+ * Compute a due date for a request based on the program's dueDateConfig.
+ * If dueDateField is set and a matching date value exists in fields, use it directly.
+ * Otherwise, fall back to defaultOffsetDays from now.
+ * Returns undefined if due dates are not enabled on the program.
+ */
+function computeDueDate(program: IProgramDocument, fields?: Record<string, unknown>): Date | undefined {
+  if (!program.dueDateConfig?.enabled) return undefined;
+
+  // If dueDateField is set and a date value exists in fields, use it
+  if (program.dueDateConfig.dueDateField && fields) {
+    const fieldValue = fields[program.dueDateConfig.dueDateField];
+    if (fieldValue && typeof fieldValue === 'string') {
+      const parsed = new Date(fieldValue);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+  }
+
+  // Fall back to defaultOffsetDays from now
+  const offset = program.dueDateConfig.defaultOffsetDays ?? 30;
+  return new Date(Date.now() + offset * 24 * 60 * 60 * 1000);
+}
+
+/**
  * Create a new request within a program.
  * Validates program existence, timeframe, and dynamic fields against field definitions.
  * Creates audit log entry for the creation event.
@@ -124,6 +147,9 @@ export async function createRequest(
     validateFields(data.fields, program.fieldDefinitions);
   }
 
+  // Compute due date from program config
+  const dueDate = computeDueDate(program, data.fields);
+
   // Create the request document with draft status
   const request = await Request.create({
     programId: data.programId,
@@ -133,6 +159,7 @@ export async function createRequest(
     priority: data.priority ?? 'medium',
     status: 'draft',
     createdBy: userId,
+    dueDate,
   });
 
   // Audit log: request created
@@ -273,6 +300,18 @@ export async function getRequests(
       createdAtFilter.$lte = query.createdBefore;
     }
     filter.createdAt = createdAtFilter;
+  }
+
+  // Due date range filters
+  if (query.dueAfter || query.dueBefore) {
+    const dueDateFilter: Record<string, unknown> = {};
+    if (query.dueAfter) {
+      dueDateFilter.$gte = query.dueAfter;
+    }
+    if (query.dueBefore) {
+      dueDateFilter.$lte = query.dueBefore;
+    }
+    filter.dueDate = dueDateFilter;
   }
 
   // Custom field filtering (dot-notation into request.fields Map)
@@ -776,6 +815,18 @@ export async function exportRequestsCsv(
       createdAtFilter.$lte = query.createdBefore;
     }
     filter.createdAt = createdAtFilter;
+  }
+
+  // Due date range filters
+  if (query.dueAfter || query.dueBefore) {
+    const dueDateFilter: Record<string, unknown> = {};
+    if (query.dueAfter) {
+      dueDateFilter.$gte = query.dueAfter;
+    }
+    if (query.dueBefore) {
+      dueDateFilter.$lte = query.dueBefore;
+    }
+    filter.dueDate = dueDateFilter;
   }
 
   // Custom field filtering

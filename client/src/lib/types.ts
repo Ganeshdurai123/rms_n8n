@@ -37,6 +37,11 @@ export interface Program {
     startDate?: string;
     endDate?: string;
   };
+  dueDateConfig?: {
+    enabled: boolean;
+    defaultOffsetDays: number;
+    dueDateField?: string;
+  };
   status: 'active' | 'archived';
   createdBy: string | { _id: string; firstName: string; lastName: string };
 }
@@ -51,6 +56,7 @@ export interface RequestItem {
   createdBy: string | { _id: string; firstName: string; lastName: string; email: string };
   assignedTo?: string | { _id: string; firstName: string; lastName: string; email: string } | null;
   priority: RequestPriority;
+  dueDate?: string;
   createdAt: string;
   updatedAt: string;
 }
