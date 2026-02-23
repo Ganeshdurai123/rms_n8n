@@ -6,6 +6,14 @@ import { createNotificationFromInternal } from '../notification/notification.ser
 import type { NotificationType } from '../notification/notification.model.js';
 import { NOTIFICATION_TYPES } from '../notification/notification.model.js';
 import { Request as RequestModel } from '../request/request.model.js';
+import { ReportJob } from '../report/report.model.js';
+import {
+  generateSummaryReport,
+  generateProgramReport,
+  generateOverdueReport,
+  completeReport,
+  failReport,
+} from '../report/report.service.js';
 
 /**
  * All valid socket event names for validation.
@@ -259,6 +267,148 @@ export const getPendingReminders = async (
     });
 
     res.json({ reminders, count: reminders.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Get Report Data (n8n calls this to run aggregation)
+// ---------------------------------------------------------------------------
+
+/**
+ * Runs the appropriate aggregation query for a report job.
+ * n8n calls this after receiving the webhook trigger.
+ *
+ * Query params: ?reportId=... (required)
+ */
+export const getReportData = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { reportId } = req.query as { reportId?: string };
+
+    // Inline validation (internal API is trusted, no Zod middleware)
+    if (!reportId) {
+      res.status(400).json({ error: 'Missing required query parameter: reportId' });
+      return;
+    }
+
+    // Look up the report job
+    const reportJob = await ReportJob.findById(reportId);
+    if (!reportJob) {
+      res.status(404).json({ error: 'Report job not found' });
+      return;
+    }
+
+    // Update status to processing
+    reportJob.status = 'processing';
+    await reportJob.save();
+
+    const { type, params, programId } = reportJob;
+
+    let result: Record<string, unknown>;
+
+    switch (type) {
+      case 'summary':
+        result = await generateSummaryReport(params ?? {});
+        break;
+      case 'program':
+        result = await generateProgramReport(
+          programId?.toString() ?? '',
+          params ?? {},
+        );
+        break;
+      case 'overdue':
+        result = await generateOverdueReport(params ?? {});
+        break;
+      default:
+        res.status(400).json({ error: `Unknown report type: ${type}` });
+        return;
+    }
+
+    res.json({ reportId, type, result });
+  } catch (error) {
+    // If we have a reportId, mark the report as failed
+    const { reportId } = req.query as { reportId?: string };
+    if (reportId) {
+      await failReport(
+        reportId,
+        error instanceof Error ? error.message : String(error),
+      ).catch(() => {
+        // Swallow -- already handling an error
+      });
+    }
+
+    logger.error('Report data generation failed', {
+      error: error instanceof Error ? error.message : String(error),
+      reportId: req.query.reportId,
+    });
+    next(error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Complete Report (n8n posts results back)
+// ---------------------------------------------------------------------------
+
+/**
+ * Stores the aggregation result in the ReportJob and notifies the user
+ * via Socket.IO that their report is ready.
+ *
+ * Body: { reportId, result }
+ */
+export const completeReportHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { reportId, result } = req.body as {
+      reportId?: string;
+      result?: Record<string, unknown>;
+    };
+
+    // Inline validation
+    if (!reportId || !result) {
+      res.status(400).json({
+        error: 'Missing required fields: reportId, result',
+      });
+      return;
+    }
+
+    const report = await completeReport(reportId, result);
+
+    // Fire-and-forget: notify the requesting user via Socket.IO
+    try {
+      const io = getIO();
+      const requestedByUserId = report.requestedBy.toString();
+
+      // Iterate connected sockets to find the requesting user
+      for (const [, socket] of io.sockets.sockets) {
+        if (socket.data.userId === requestedByUserId) {
+          socket.emit('report:completed' as SocketEventName, {
+            event: 'report:completed',
+            programId: report.programId?.toString() ?? '',
+            data: {
+              reportId: report._id.toString(),
+              type: report.type,
+              status: 'completed',
+            },
+            performedBy: { userId: 'system', name: 'System' },
+            timestamp: Date.now(),
+          } as unknown as SocketEventPayload);
+        }
+      }
+    } catch {
+      // Socket.IO not initialized -- no real-time notification, user can still poll
+      logger.warn('Could not send report:completed socket event');
+    }
+
+    logger.debug(`Report ${reportId} completed successfully`);
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }

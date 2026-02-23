@@ -5,6 +5,8 @@ import {
   socketEmit,
   createNotificationHandler,
   getPendingReminders,
+  getReportData,
+  completeReportHandler,
 } from './internal.controller.js';
 
 // ---------------------------------------------------------------------------
@@ -33,5 +35,11 @@ internalRouter.post('/notifications', createNotificationHandler);
 
 // GET /api/v1/internal/pending-reminders -- n8n checks for stale requests needing reminder emails
 internalRouter.get('/pending-reminders', getPendingReminders);
+
+// GET /api/v1/internal/report-data -- n8n fetches aggregation data for a report job
+internalRouter.get('/report-data', getReportData);
+
+// POST /api/v1/internal/report-complete -- n8n posts completed report results back
+internalRouter.post('/report-complete', completeReportHandler);
 
 export { internalRouter };
