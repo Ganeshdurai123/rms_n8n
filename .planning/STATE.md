@@ -5,23 +5,25 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Internal teams and clients can submit, track, and manage requests through configurable programs with full lifecycle visibility
-**Current focus:** Phase 8 - Client Collaboration (Complete)
+**Current focus:** v2 Milestone — Scope Document Gap Closure (Executing)
 
 ## Current Position
 
-Phase: 8 of 8 (Client Collaboration)
-Plan: 3 of 3 in current phase (08-03 complete)
-Status: Complete
-Last activity: 2026-02-23 -- Completed 08-03-PLAN.md (Client UI Restrictions, Real-Time, Activity Feed)
+Milestone: v2 (Scope Document Gap Closure)
+Phase: 9 of 13 (Due Dates & Reminders)
+Plan: 1 of 3 in current phase
+Status: Executing phase 9 plans
+Last activity: 2026-02-23 -- Completed 09-01 (dueDateConfig on programs, dueDate on requests, pending-reminders API)
 
-Progress: [████████████] 100%
+v1 Progress: [████████████] 100% (8/8 phases, 66/66 requirements)
+v2 Progress: [░░░░░░░░░░░░] 0% (0/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 7min
-- Total execution time: 2.8 hours
+- Total execution time: 2.9 hours
 
 **By Phase:**
 
@@ -37,7 +39,7 @@ Progress: [████████████] 100%
 | 08-client-collaboration | 3 | 10min | 3.3min |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (4min), 07-03 (2min), 08-01 (3min), 08-02 (3min), 08-03 (4min)
+- Last 5 plans: 07-03 (2min), 08-01 (3min), 08-02 (3min), 08-03 (4min), 09-01 (4min)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -57,6 +59,7 @@ Progress: [████████████] 100%
 | Phase 08 P01 | 3min | 2 tasks | 6 files |
 | Phase 08 P02 | 3min | 2 tasks | 12 files |
 | Phase 08 P03 | 4min | 2 tasks | 7 files |
+| Phase 09 P01 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -173,6 +176,12 @@ Recent decisions affecting current work:
 - 08-03: Activity feed is real-time-only in v1 -- starts empty and fills as events arrive (no audit API pre-population)
 - 08-03: SheetRowActions unchanged -- canEdit/canDelete already respect role and ownership from Phase 06
 
+- 09-01: dueDateConfig defaults enabled=false, defaultOffsetDays=30 -- programs opt-in to due dates
+- 09-01: computeDueDate prefers dueDateField value over defaultOffsetDays when both available
+- 09-01: Compound index {programId, dueDate} for calendar/reminder queries
+- 09-01: Pending reminders uses $or for combined overdue+upcoming when type param not specified
+- 09-01: daysOverdue uses negative values to indicate days until due (for n8n email template logic)
+
 ### Pending Todos
 
 None yet.
@@ -186,5 +195,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 08-03-PLAN.md (Client UI Restrictions, Real-Time, Activity Feed) -- ALL PHASES COMPLETE
+Stopped at: Completed 09-01-PLAN.md (dueDateConfig + dueDate data layer + pending-reminders rewrite)
 Resume file: None

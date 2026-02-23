@@ -155,7 +155,68 @@ Plans:
 - [ ] 08-02-PLAN.md — Request detail page with comments timeline, file attachments, audit history, and navigation from sheet view
 - [ ] 08-03-PLAN.md — Socket.IO client integration, client-aware UI restrictions, and program activity feed
 
+### Phase 9: Due Dates & Reminders
+**Goal**: Requests have configurable due dates with visual indicators, a calendar view for deadline planning, and automated reminders for upcoming/overdue items via n8n
+**Depends on**: Phase 3 (Request model), Phase 5 (n8n integration, existing reminder endpoint)
+**Requirements**: DUE-01, DUE-02, DUE-03, DUE-04
+**Success Criteria** (what must be TRUE):
+  1. Admin/manager can configure due date rules on a program (default offset from creation, field-level overrides)
+  2. Requests display a computed due date in the sheet view column and on the request detail page, with overdue/due-soon visual indicators
+  3. User can open a calendar view page that renders requests on their due dates, color-coded by status, with month and week views
+  4. n8n reminder workflow checks actual due dates (not just staleness) and sends reminder notifications for upcoming and overdue requests
+**Plans**: 3 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Backend: Program dueDateConfig, Request dueDate field, due date computation at creation, dueDate sort/filter, updated pending-reminders API
+- [ ] 09-02-PLAN.md — Frontend: Due Date column in sheet view with overdue/due-soon indicators, due date in request detail, calendar view page with month/week views
+- [ ] 09-03-PLAN.md — n8n workflow JSON template for due-date-based reminder notifications (daily schedule, overdue + upcoming checks, email + in-app)
+
+### Phase 10: Sequential Request Chains
+**Goal**: Requests can be linked into ordered chains so that completing one automatically activates the next, enabling sequential multi-step workflows within a program
+**Depends on**: Phase 3 (Request model, state machine)
+**Requirements**: CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04
+**Success Criteria** (what must be TRUE):
+  1. Admin/manager can create a chain of requests with defined order (chain name, sequence numbers)
+  2. When a request in a chain is completed, the next request in the sequence auto-transitions from draft to submitted
+  3. User can view chain status on request detail page showing all steps with their status (done/active/pending)
+  4. Sheet view shows chain membership as a column, and chain progress is visible at a glance
+**Plans**: TBD (to be created by /gsd:plan-phase 10)
+
+### Phase 11: HSSP Compliance
+**Goal**: Health & Safety compliance programs can define checklist fields, track completion status across requests, and provide structured review views for compliance monitoring
+**Depends on**: Phase 2 (Program config, dynamic fields), Phase 6 (Sheet view)
+**Requirements**: HSSP-01, HSSP-02, HSSP-03, HSSP-04
+**Success Criteria** (what must be TRUE):
+  1. Dynamic fields support a new "checklist" type — a list of items each with checked/unchecked state, rendered as checkboxes in the request form
+  2. Programs can be tagged with a compliance type (e.g., HSSP) and show compliance-specific indicators in the program list
+  3. A compliance review view shows aggregated checklist completion status across all requests in a compliance-tagged program
+  4. Sheet view renders a completion percentage column for checklist fields, enabling at-a-glance HSSP review
+**Plans**: TBD (to be created by /gsd:plan-phase 11)
+
+### Phase 12: Reports & Dashboard
+**Goal**: Users can generate and view reports on request metrics, program performance, and overdue items, with async report generation handled by n8n
+**Depends on**: Phase 9 (Due dates for overdue reports), Phase 5 (n8n webhooks)
+**Requirements**: RPT-01, RPT-02, RPT-03, RPT-04
+**Success Criteria** (what must be TRUE):
+  1. User can generate a summary report showing request counts grouped by status, program, and timeframe
+  2. User can generate a program-level report with field value distributions and average lifecycle durations
+  3. User can generate an overdue request report listing all requests past their due date with days overdue
+  4. Report generation triggers via n8n webhook and results are stored for retrieval — no blocking the UI
+**Plans**: TBD (to be created by /gsd:plan-phase 12)
+
+### Phase 13: Enhanced Program Boundaries
+**Goal**: Programs can enforce granular limits (per-user request caps, total active request limits) with clear feedback when boundaries are reached, and admins can monitor boundary utilization
+**Depends on**: Phase 2 (Program config)
+**Requirements**: BOUND-01, BOUND-02, BOUND-03
+**Success Criteria** (what must be TRUE):
+  1. Admin/manager can configure per-user active request limits on a program (in addition to existing maxActiveRequests)
+  2. When a user tries to create a request that would exceed limits, they receive a clear error message explaining which boundary was hit
+  3. Program management view shows boundary utilization indicators (e.g., "42/100 active requests", "User X: 3/5 limit")
+**Plans**: TBD (to be created by /gsd:plan-phase 13)
+
 ## Progress
+
+### v1 Milestone (Complete)
 
 **Execution Order:**
 Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
@@ -168,6 +229,20 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Request Lifecycle + Audit | 3/3 | Complete | 2026-02-20 |
 | 4. Real-Time Events | 2/2 | Complete | 2026-02-22 |
 | 5. n8n Integration + Notifications | 4/4 | Complete | 2026-02-22 |
-| 6. Sheet Views | 0/4 | Not started | - |
-| 7. Request Books | 0/3 | Not started | - |
-| 8. Client Collaboration | 0/2 | Not started | - |
+| 6. Sheet Views | 4/4 | Complete | 2026-02-22 |
+| 7. Request Books | 3/3 | Complete | 2026-02-23 |
+| 8. Client Collaboration | 3/3 | Complete | 2026-02-23 |
+
+### v2 Milestone — Scope Document Gap Closure
+
+**Execution Order:**
+9 -> 10 -> 11 -> 12 -> 13
+(Phase 12 depends on Phase 9 for overdue reports. Phases 10, 11, 13 are independent of each other.)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 9. Due Dates & Reminders | 0/3 | Planned | - |
+| 10. Sequential Request Chains | 0/? | Not started | - |
+| 11. HSSP Compliance | 0/? | Not started | - |
+| 12. Reports & Dashboard | 0/? | Not started | - |
+| 13. Enhanced Program Boundaries | 0/? | Not started | - |

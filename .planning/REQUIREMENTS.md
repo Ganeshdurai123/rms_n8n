@@ -109,25 +109,45 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INFRA-03**: All list endpoints support pagination (page, limit, total)
 - [x] **INFRA-04**: Redis caching for frequently accessed data (program configs, user sessions)
 
-## v2 Requirements
+## v2 Requirements — Scope Document Gap Closure
 
-Deferred to future release. Tracked but not in current roadmap.
+Active milestone. Closes gaps identified by comparing scope document against v1 codebase.
 
-### Due Dates
+### Due Dates & Reminders
 
-- **DUE-01**: Admin/manager can configure due date rules per program
-- **DUE-02**: Requests display due dates based on program rules
-- **DUE-03**: User can view requests in a calendar view
-- **DUE-04**: Reminder rules stored in DB, n8n reads and sends reminders
+- [x] **DUE-01**: Admin/manager can configure due date rules per program (default offset, field-level overrides)
+- [x] **DUE-02**: Requests display due dates based on program rules (sheet column + request detail)
+- [ ] **DUE-03**: User can view requests in a calendar view (month/week, color-coded by status)
+- [x] **DUE-04**: Reminder rules stored in DB, n8n reads and sends reminders for upcoming/overdue deadlines
 
-### Reports
+### Sequential Request Chains
 
-- **RPT-01**: User can generate summary reports (request counts by status, program, timeframe)
-- **RPT-02**: User can generate program-level reports
-- **RPT-03**: User can generate overdue request reports
-- **RPT-04**: Report generation runs asynchronously via n8n webhook
+- [ ] **CHAIN-01**: Admin/manager can create request chains — ordered sequence of linked requests within a program
+- [ ] **CHAIN-02**: When a request in a chain completes, the next request auto-transitions to submitted/active
+- [ ] **CHAIN-03**: User can view chain status showing which step is active, done, or pending
+- [ ] **CHAIN-04**: Chain progress visible on request detail page and as a column in sheet view
 
-### Enhancements
+### HSSP Compliance
+
+- [ ] **HSSP-01**: System supports a checklist field type for dynamic fields (list of items with checked/unchecked state)
+- [ ] **HSSP-02**: Program can be tagged with a compliance type (e.g., HSSP) with compliance-specific indicators
+- [ ] **HSSP-03**: Compliance review view showing checklist completion status across requests in a program
+- [ ] **HSSP-04**: HSSP information review integrated into sheet/list view with completion percentage column
+
+### Reports & Dashboard
+
+- [ ] **RPT-01**: User can generate summary reports (request counts by status, program, timeframe)
+- [ ] **RPT-02**: User can generate program-level reports (field distributions, average lifecycle time)
+- [ ] **RPT-03**: User can generate overdue request reports (requires due dates)
+- [ ] **RPT-04**: Report generation runs asynchronously via n8n webhook
+
+### Enhanced Program Boundaries
+
+- [ ] **BOUND-01**: Per-user active request limits within a program (configurable by admin/manager)
+- [ ] **BOUND-02**: maxActiveRequests enforcement on request creation (reject with clear message when limit reached)
+- [ ] **BOUND-03**: Boundary compliance indicators in program management view (usage vs limits)
+
+### Enhancements (deferred beyond v2)
 
 - **ENH-01**: Bulk actions on sheet (bulk status change, bulk assignment)
 - **ENH-02**: Request templates (pre-filled forms per request type)
@@ -224,11 +244,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLIENT-05 | Phase 8 | Complete |
 | CLIENT-06 | Phase 8 | Complete |
 
-**Coverage:**
+**v1 Coverage:**
 - v1 requirements: 66 total
 - Mapped to phases: 66
 - Unmapped: 0
 
+### v2 Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DUE-01 | Phase 9 | Planned |
+| DUE-02 | Phase 9 | Planned |
+| DUE-03 | Phase 9 | Planned |
+| DUE-04 | Phase 9 | Planned |
+| CHAIN-01 | Phase 10 | Planned |
+| CHAIN-02 | Phase 10 | Planned |
+| CHAIN-03 | Phase 10 | Planned |
+| CHAIN-04 | Phase 10 | Planned |
+| HSSP-01 | Phase 11 | Planned |
+| HSSP-02 | Phase 11 | Planned |
+| HSSP-03 | Phase 11 | Planned |
+| HSSP-04 | Phase 11 | Planned |
+| RPT-01 | Phase 12 | Planned |
+| RPT-02 | Phase 12 | Planned |
+| RPT-03 | Phase 12 | Planned |
+| RPT-04 | Phase 12 | Planned |
+| BOUND-01 | Phase 13 | Planned |
+| BOUND-02 | Phase 13 | Planned |
+| BOUND-03 | Phase 13 | Planned |
+
+**v2 Coverage:**
+- v2 requirements: 19 total
+- Mapped to phases: 19
+- Unmapped: 0
+
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after roadmap creation*
+*Last updated: 2026-02-23 after v2 milestone creation*
