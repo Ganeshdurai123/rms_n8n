@@ -175,28 +175,41 @@ export async function createRequest(
 
 /**
  * Get a single request by ID with populated references and caching.
+ * Client role users can only view their own requests.
  */
-export async function getRequestById(requestId: string): Promise<IRequestDocument> {
+export async function getRequestById(requestId: string, userId: string, userRole: Role): Promise<IRequestDocument> {
   const cacheKey = `requests:${requestId}`;
   const cached = await cacheGet<IRequestDocument>(cacheKey);
 
+  let result: IRequestDocument;
+
   if (cached) {
-    return cached;
+    result = cached;
+  } else {
+    const request = await Request.findById(requestId)
+      .populate('createdBy', 'firstName lastName email')
+      .populate('assignedTo', 'firstName lastName email')
+      .populate('programId', 'name')
+      .lean();
+
+    if (!request) {
+      throw new NotFoundError('Request not found');
+    }
+
+    await cacheSet(cacheKey, request, CACHE_TTL_CONFIG);
+    result = request as unknown as IRequestDocument;
   }
 
-  const request = await Request.findById(requestId)
-    .populate('createdBy', 'firstName lastName email')
-    .populate('assignedTo', 'firstName lastName email')
-    .populate('programId', 'name')
-    .lean();
-
-  if (!request) {
-    throw new NotFoundError('Request not found');
+  // Client ownership enforcement: clients can only view their own requests
+  if (userRole === 'client') {
+    const createdById = (result.createdBy as unknown as { _id: { toString(): string } })._id?.toString()
+      ?? (result.createdBy as unknown as string).toString();
+    if (createdById !== userId) {
+      throw new ForbiddenError('You can only view your own requests');
+    }
   }
 
-  await cacheSet(cacheKey, request, CACHE_TTL_CONFIG);
-
-  return request as unknown as IRequestDocument;
+  return result;
 }
 
 /**

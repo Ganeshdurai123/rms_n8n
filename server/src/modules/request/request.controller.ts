@@ -59,7 +59,11 @@ export async function getById(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const request = await requestService.getRequestById(req.params.requestId as string);
+    const request = await requestService.getRequestById(
+      req.params.requestId as string,
+      req.user!._id,
+      req.user!.role as Role,
+    );
     res.status(200).json({ data: request });
   } catch (err) {
     next(err);
@@ -141,7 +145,11 @@ export async function getDetail(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const result = await getRequestDetail(req.params.requestId as string);
+    const result = await getRequestDetail(
+      req.params.requestId as string,
+      req.user!._id,
+      req.user!.role as Role,
+    );
     res.status(200).json({ data: result });
   } catch (err) {
     next(err);
