@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import api, { setAccessToken } from '@/lib/api';
+import { connectSocket, disconnectSocket } from '@/lib/socket';
 import type { User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -36,11 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (data.accessToken) {
             setAccessToken(data.accessToken);
           }
+          connectSocket();
         }
       } catch {
         if (!cancelled) {
           setUser(null);
           setAccessToken(null);
+          disconnectSocket();
         }
       } finally {
         if (!cancelled) {
@@ -59,9 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = await api.post('/auth/login', { email, password });
     setAccessToken(data.accessToken);
     setUser(data.user);
+    connectSocket();
   }, []);
 
   const logout = useCallback(async () => {
+    // Disconnect socket BEFORE API call so it disconnects even if API fails
+    disconnectSocket();
     try {
       await api.post('/auth/logout');
     } catch {
