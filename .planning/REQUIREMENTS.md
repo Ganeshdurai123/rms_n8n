@@ -129,10 +129,10 @@ Active milestone. Closes gaps identified by comparing scope document against v1 
 
 ### HSSP Compliance
 
-- [ ] **HSSP-01**: System supports a checklist field type for dynamic fields (list of items with checked/unchecked state)
-- [ ] **HSSP-02**: Program can be tagged with a compliance type (e.g., HSSP) with compliance-specific indicators
-- [ ] **HSSP-03**: Compliance review view showing checklist completion status across requests in a program
-- [ ] **HSSP-04**: HSSP information review integrated into sheet/list view with completion percentage column
+- [x] **HSSP-01**: System supports a checklist field type for dynamic fields (list of items with checked/unchecked state)
+- [x] **HSSP-02**: Program can be tagged with a compliance type (e.g., HSSP) with compliance-specific indicators
+- [x] **HSSP-03**: Compliance review view showing checklist completion status across requests in a program
+- [x] **HSSP-04**: HSSP information review integrated into sheet/list view with completion percentage column
 
 ### Reports & Dashboard
 

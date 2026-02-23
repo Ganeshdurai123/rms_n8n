@@ -195,7 +195,11 @@ Plans:
   2. Programs can be tagged with a compliance type (e.g., HSSP) and show compliance-specific indicators in the program list
   3. A compliance review view shows aggregated checklist completion status across all requests in a compliance-tagged program
   4. Sheet view renders a completion percentage column for checklist fields, enabling at-a-glance HSSP review
-**Plans**: TBD (to be created by /gsd:plan-phase 11)
+**Plans**: 2 plans
+
+Plans:
+- [x] 11-01-PLAN.md — Backend: checklist field type, complianceType on Program model, checklist validation, compliance review aggregation API, CSV export support
+- [ ] 11-02-PLAN.md — Frontend: checklist rendering in forms/detail/sheet, compliance badge on programs, ComplianceReviewPage with aggregated completion data
 
 ### Phase 12: Reports & Dashboard
 **Goal**: Users can generate and view reports on request metrics, program performance, and overdue items, with async report generation handled by n8n
@@ -246,7 +250,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 9. Due Dates & Reminders | 0/3 | Complete    | 2026-02-23 |
-| 10. Sequential Request Chains | 2/2 | Complete   | 2026-02-23 |
-| 11. HSSP Compliance | 0/? | Not started | - |
+| 10. Sequential Request Chains | 2/2 | Complete    | 2026-02-23 |
+| 11. HSSP Compliance | 1/2 | In progress | - |
 | 12. Reports & Dashboard | 0/? | Not started | - |
 | 13. Enhanced Program Boundaries | 0/? | Not started | - |
