@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 Milestone: v2 (Scope Document Gap Closure)
 Phase: 9 of 13 (Due Dates & Reminders)
-Plan: 3 of 3 in current phase
-Status: Executing phase 9 plans
-Last activity: 2026-02-23 -- Completed 09-03 (n8n due-date reminder workflow JSON template)
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase 9 complete
+Last activity: 2026-02-23 -- Completed 09-02 (due date UI indicators + calendar view)
 
 v1 Progress: [████████████] 100% (8/8 phases, 66/66 requirements)
 v2 Progress: [░░░░░░░░░░░░] 0% (0/5 phases)
@@ -21,9 +21,9 @@ v2 Progress: [░░░░░░░░░░░░] 0% (0/5 phases)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
+- Total plans completed: 28
 - Average duration: 7min
-- Total execution time: 3.0 hours
+- Total execution time: 3.1 hours
 
 **By Phase:**
 
@@ -39,7 +39,7 @@ v2 Progress: [░░░░░░░░░░░░] 0% (0/5 phases)
 | 08-client-collaboration | 3 | 10min | 3.3min |
 
 **Recent Trend:**
-- Last 5 plans: 08-01 (3min), 08-02 (3min), 08-03 (4min), 09-01 (4min), 09-03 (2min)
+- Last 5 plans: 08-02 (3min), 08-03 (4min), 09-01 (4min), 09-03 (2min), 09-02 (4min)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -60,6 +60,7 @@ v2 Progress: [░░░░░░░░░░░░] 0% (0/5 phases)
 | Phase 08 P02 | 3min | 2 tasks | 12 files |
 | Phase 08 P03 | 4min | 2 tasks | 7 files |
 | Phase 09 P01 | 4min | 2 tasks | 7 files |
+| Phase 09 P02 | 4min | 2 tasks | 7 files |
 | Phase 09 P03 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
@@ -183,6 +184,12 @@ Recent decisions affecting current work:
 - 09-01: Pending reminders uses $or for combined overdue+upcoming when type param not specified
 - 09-01: daysOverdue uses negative values to indicate days until due (for n8n email template logic)
 
+- 09-02: Due Date column conditionally shown only when at least one request has dueDate -- no column clutter for programs without due dates
+- 09-02: Three-tier indicator: red (overdue), orange (due within 3 days), green (on-track, detail page only)
+- 09-02: Calendar uses Monday-based weeks with month range extended to full weeks for grid alignment
+- 09-02: Calendar button placed in SheetViewPage header (not sidebar) since no program-scoped sidebar nav exists
+- 09-02: Calendar items limited to 3 per day cell in month view with +N more overflow indicator
+
 - 09-03: n8n workflow set active: false by default -- user must configure SMTP credentials before enabling
 - 09-03: Schedule Trigger cron 0 8 * * * (daily 8AM) as configurable default
 - 09-03: splitOut node used instead of splitInBatches for simpler per-item processing
@@ -202,5 +209,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 09-03-PLAN.md (n8n due-date reminder workflow JSON template)
+Stopped at: Completed 09-02-PLAN.md (due date UI indicators + calendar view) -- all Phase 9 plans complete
 Resume file: None

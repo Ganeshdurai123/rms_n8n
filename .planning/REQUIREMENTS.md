@@ -117,7 +117,7 @@ Active milestone. Closes gaps identified by comparing scope document against v1 
 
 - [x] **DUE-01**: Admin/manager can configure due date rules per program (default offset, field-level overrides)
 - [x] **DUE-02**: Requests display due dates based on program rules (sheet column + request detail)
-- [ ] **DUE-03**: User can view requests in a calendar view (month/week, color-coded by status)
+- [x] **DUE-03**: User can view requests in a calendar view (month/week, color-coded by status)
 - [x] **DUE-04**: Reminder rules stored in DB, n8n reads and sends reminders for upcoming/overdue deadlines
 
 ### Sequential Request Chains
