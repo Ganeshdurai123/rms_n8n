@@ -57,6 +57,8 @@ export interface RequestItem {
   assignedTo?: string | { _id: string; firstName: string; lastName: string; email: string } | null;
   priority: RequestPriority;
   dueDate?: string;
+  chainId?: string | { _id: string; name: string };
+  chainSequence?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +71,24 @@ export interface PaginatedResponse<T> {
     total: number;
     pages: number;
   };
+}
+
+// ---------- Chain Types ----------
+
+export interface ChainStep {
+  requestId: string | { _id: string; title: string; status: RequestStatus };
+  sequence: number;
+}
+
+export interface RequestChain {
+  _id: string;
+  name: string;
+  programId: string;
+  steps: ChainStep[];
+  status: 'active' | 'completed';
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ---------- Request Detail Types ----------
@@ -113,6 +133,7 @@ export interface RequestDetail {
   comments: Comment[];
   attachments: Attachment[];
   auditTrail: AuditEntry[];
+  chain: RequestChain | null;
 }
 
 // ---------- Import Types ----------

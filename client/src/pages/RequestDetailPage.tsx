@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { useSocket } from '@/lib/socket';
 import type { RequestDetail } from '@/lib/types';
 import { RequestInfo } from '@/components/request/RequestInfo';
+import { ChainStatusPanel } from '@/components/request/ChainStatusPanel';
 import { CommentTimeline } from '@/components/request/CommentTimeline';
 import { AttachmentList } from '@/components/request/AttachmentList';
 import { AuditTimeline } from '@/components/request/AuditTimeline';
@@ -133,6 +134,11 @@ export function RequestDetailPage() {
       <div className="flex-1 overflow-auto px-6 py-6 space-y-6">
         {/* Request Info Card */}
         <RequestInfo detail={detail} />
+
+        {/* Chain Status Panel (shown when request belongs to a chain) */}
+        {detail.chain && (
+          <ChainStatusPanel chain={detail.chain} currentRequestId={requestId!} />
+        )}
 
         {/* Tabbed section */}
         <Tabs defaultValue="comments">
