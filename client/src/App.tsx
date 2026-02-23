@@ -11,6 +11,7 @@ import { RequestDetailPage } from '@/pages/RequestDetailPage';
 import { CalendarViewPage } from '@/pages/CalendarViewPage';
 import { ComplianceReviewPage } from '@/pages/ComplianceReviewPage';
 import { ReportsPage } from '@/pages/ReportsPage';
+import { ReportDetailPage } from '@/pages/ReportDetailPage';
 
 export default function App() {
   return (
@@ -46,6 +47,10 @@ export default function App() {
                 element={<RequestDetailPage />}
               />
               <Route path="/reports" element={<ReportsPage />} />
+              <Route
+                path="/reports/:reportId"
+                element={<ReportDetailPage />}
+              />
               <Route path="/" element={<Navigate to="/programs" replace />} />
             </Route>
           </Route>
