@@ -124,8 +124,8 @@ Active milestone. Closes gaps identified by comparing scope document against v1 
 
 - [x] **CHAIN-01**: Admin/manager can create request chains — ordered sequence of linked requests within a program
 - [x] **CHAIN-02**: When a request in a chain completes, the next request auto-transitions to submitted/active
-- [ ] **CHAIN-03**: User can view chain status showing which step is active, done, or pending
-- [ ] **CHAIN-04**: Chain progress visible on request detail page and as a column in sheet view
+- [x] **CHAIN-03**: User can view chain status showing which step is active, done, or pending
+- [x] **CHAIN-04**: Chain progress visible on request detail page and as a column in sheet view
 
 ### HSSP Compliance
 
