@@ -46,7 +46,8 @@ router.get(
 );
 
 // Mount import sub-resource routes (before /:requestId to prevent 'import' being parsed as requestId)
-router.use('/import', importRouter);
+// Restricted to manager role (admin bypasses authorizeProgram automatically)
+router.use('/import', authorizeProgram({ roles: ['manager'] }), importRouter);
 
 // GET /programs/:programId/requests/:requestId -- get single request
 router.get(

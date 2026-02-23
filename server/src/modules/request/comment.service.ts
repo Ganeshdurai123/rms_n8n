@@ -136,7 +136,12 @@ export async function deleteComment(
     throw new NotFoundError('Comment not found');
   }
 
-  // Authorization: only author or admin/manager can delete
+  // Authorization: client users can only delete their own comments
+  if (userRole === 'client' && comment.authorId.toString() !== userId) {
+    throw new ForbiddenError('You can only delete your own comments');
+  }
+
+  // For non-client roles: only author or admin/manager can delete
   const isAuthor = comment.authorId.toString() === userId;
   const isPrivileged = ['admin', 'manager'].includes(userRole);
 

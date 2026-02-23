@@ -199,7 +199,12 @@ export async function deleteAttachment(
     throw new NotFoundError('Attachment not found');
   }
 
-  // Authorization: only uploader or admin/manager can delete
+  // Authorization: client users can only delete their own attachments
+  if (userRole === 'client' && attachment.uploadedBy.toString() !== userId) {
+    throw new ForbiddenError('You can only delete your own attachments');
+  }
+
+  // For non-client roles: only uploader or admin/manager can delete
   const isUploader = attachment.uploadedBy.toString() === userId;
   const isPrivileged = ['admin', 'manager'].includes(userRole);
 
