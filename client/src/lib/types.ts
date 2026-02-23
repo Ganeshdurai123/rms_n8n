@@ -65,6 +65,50 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// ---------- Request Detail Types ----------
+
+export interface Comment {
+  _id: string;
+  requestId: string;
+  authorId: string | { _id: string; firstName: string; lastName: string; email: string };
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Attachment {
+  _id: string;
+  requestId: string;
+  uploadedBy: string | { _id: string; firstName: string; lastName: string; email: string };
+  originalName: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+}
+
+export interface AuditEntry {
+  _id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  requestId: string;
+  programId: string;
+  performedBy: string | { _id: string; firstName: string; lastName: string; email: string };
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface RequestDetail {
+  request: RequestItem & {
+    programId: { _id: string; name: string; fieldDefinitions: FieldDefinition[] };
+  };
+  comments: Comment[];
+  attachments: Attachment[];
+  auditTrail: AuditEntry[];
+}
+
 // ---------- Import Types ----------
 
 export interface ImportUploadResult {
