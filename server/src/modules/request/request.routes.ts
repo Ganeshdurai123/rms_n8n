@@ -13,6 +13,7 @@ import {
 } from './request.schema.js';
 import { commentRouter } from './comment.routes.js';
 import { attachmentRouter } from './attachment.routes.js';
+import { importRouter } from './import.routes.js';
 import { listAuditLogsQuerySchema } from '../audit/audit.schema.js';
 
 const router = Router({ mergeParams: true });
@@ -43,6 +44,9 @@ router.get(
   validate(listRequestsQuerySchema, 'query'),
   requestController.exportCsv,
 );
+
+// Mount import sub-resource routes (before /:requestId to prevent 'import' being parsed as requestId)
+router.use('/import', importRouter);
 
 // GET /programs/:programId/requests/:requestId -- get single request
 router.get(
