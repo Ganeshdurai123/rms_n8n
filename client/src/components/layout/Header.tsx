@@ -1,5 +1,6 @@
 import { useAuth } from '@/lib/auth';
 import { Badge } from '@/components/ui/badge';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 
 export function Header() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export function Header() {
       {/* User info */}
       {user && (
         <div className="flex items-center gap-3">
+          <NotificationBell />
           <span className="text-sm text-muted-foreground">
             {user.firstName} {user.lastName}
           </span>
