@@ -194,7 +194,7 @@ export function SheetTable({
 }: SheetTableProps) {
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
-  const sortedDefs = [...fieldDefinitions].sort(
+  const sortedDefs = [...(fieldDefinitions || [])].sort(
     (a, b) => a.order - b.order,
   );
 

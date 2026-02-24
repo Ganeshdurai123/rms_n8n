@@ -35,7 +35,8 @@ export function RequestDetailPage() {
       const { data } = await api.get(
         `/programs/${programId}/requests/${requestId}/detail`,
       );
-      setDetail(data);
+      // API returns { data: { request, comments, attachments, auditTrail, chain } }
+      setDetail(data.data || data);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to load request details';
