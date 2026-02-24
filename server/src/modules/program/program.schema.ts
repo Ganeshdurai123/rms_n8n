@@ -91,6 +91,7 @@ export const createProgramSchema = z.object({
       allowClientSubmission: z.boolean().default(true),
       requireApproval: z.boolean().default(true),
       maxActiveRequests: z.number().int().min(0).optional(),
+      maxActiveRequestsPerUser: z.number().int().min(1).optional(),
     })
     .default({}),
   timeframes: z
@@ -157,6 +158,7 @@ export const updateProgramSchema = z.object({
       allowClientSubmission: z.boolean().optional(),
       requireApproval: z.boolean().optional(),
       maxActiveRequests: z.number().int().min(0).optional(),
+      maxActiveRequestsPerUser: z.number().int().min(1).optional(),
     })
     .optional(),
   timeframes: z

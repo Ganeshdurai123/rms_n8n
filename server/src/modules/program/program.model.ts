@@ -64,6 +64,7 @@ export interface IProgramDocument extends Document {
     allowClientSubmission: boolean;
     requireApproval: boolean;
     maxActiveRequests?: number;
+    maxActiveRequestsPerUser?: number;
   };
   timeframes: {
     startDate?: Date;
@@ -164,6 +165,10 @@ const programSchema = new Schema<IProgramDocument>(
         default: true,
       },
       maxActiveRequests: {
+        type: Number,
+        default: undefined,
+      },
+      maxActiveRequestsPerUser: {
         type: Number,
         default: undefined,
       },
