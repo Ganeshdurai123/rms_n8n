@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -178,12 +179,13 @@ export function NotificationBell() {
 
         {/* Footer */}
         <div className="border-t px-4 py-2 text-center">
-          <a
-            href="/notifications"
+          <Link
+            to="/notifications"
             className="text-xs text-primary hover:underline"
+            onClick={() => setOpen(false)}
           >
             View all
-          </a>
+          </Link>
         </div>
       </PopoverContent>
     </Popover>

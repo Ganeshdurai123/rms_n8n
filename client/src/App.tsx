@@ -12,6 +12,7 @@ import { CalendarViewPage } from '@/pages/CalendarViewPage';
 import { ComplianceReviewPage } from '@/pages/ComplianceReviewPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { ReportDetailPage } from '@/pages/ReportDetailPage';
+import { NotificationsPage } from '@/pages/NotificationsPage';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
                 path="/programs/:programId/requests/:requestId"
                 element={<RequestDetailPage />}
               />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route
                 path="/reports/:reportId"
