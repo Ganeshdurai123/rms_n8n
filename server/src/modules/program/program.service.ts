@@ -1,4 +1,6 @@
+import mongoose from 'mongoose';
 import { Program } from './program.model.js';
+import { Request as RequestDoc } from '../request/request.model.js';
 import { ProgramMember } from '../user/programMember.model.js';
 import { User } from '../auth/auth.model.js';
 import { AppError, NotFoundError } from '../../shared/errors.js';
@@ -335,4 +337,81 @@ export async function getMembers(programId: string, query: ListMembersQuery) {
   ]);
 
   return { members, total, page, limit };
+}
+
+// --- Boundary Stats ---
+
+/**
+ * Get boundary utilization statistics for a program.
+ * Returns current active request counts vs configured limits, plus per-user breakdown.
+ */
+export async function getBoundaryStats(programId: string) {
+  const program = await getProgramById(programId);
+
+  const activeStatuses = ['submitted', 'in_review', 'approved'];
+
+  // Total active request count
+  const totalActiveRequests = await RequestDoc.countDocuments({
+    programId,
+    status: { $in: activeStatuses },
+  });
+
+  // Per-user active request counts (aggregate by createdBy)
+  const perUserCounts = await RequestDoc.aggregate([
+    {
+      $match: {
+        programId: new mongoose.Types.ObjectId(programId),
+        status: { $in: activeStatuses },
+      },
+    },
+    {
+      $group: {
+        _id: '$createdBy',
+        activeCount: { $sum: 1 },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'user',
+        pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }],
+      },
+    },
+    { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        userId: '$_id',
+        activeCount: 1,
+        name: {
+          $cond: {
+            if: '$user',
+            then: { $concat: ['$user.firstName', ' ', '$user.lastName'] },
+            else: 'Unknown User',
+          },
+        },
+        email: { $ifNull: ['$user.email', null] },
+      },
+    },
+    { $sort: { activeCount: -1 } },
+  ]);
+
+  return {
+    programId,
+    programName: program.name,
+    limits: {
+      maxActiveRequests: program.settings?.maxActiveRequests ?? null,
+      maxActiveRequestsPerUser: program.settings?.maxActiveRequestsPerUser ?? null,
+    },
+    usage: {
+      totalActiveRequests,
+      perUser: perUserCounts.map((u: any) => ({
+        userId: u.userId.toString(),
+        name: u.name,
+        email: u.email,
+        activeCount: u.activeCount,
+      })),
+    },
+  };
 }

@@ -144,6 +144,25 @@ export async function removeMember(
 }
 
 /**
+ * GET /api/v1/programs/:programId/boundary-stats
+ * Admin or program manager views boundary utilization.
+ */
+export async function getBoundaryStats(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const stats = await programService.getBoundaryStats(
+      req.params.programId as string,
+    );
+    res.status(200).json(stats);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/v1/programs/:programId/members
  * Admin or program manager lists members of a program.
  */

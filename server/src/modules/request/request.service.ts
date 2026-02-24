@@ -170,6 +170,48 @@ export function computeChecklistCompletion(value: unknown): { total: number; che
 }
 
 /**
+ * Check program boundary limits before allowing request creation.
+ * "Active" requests = status in ['submitted', 'in_review', 'approved'] -- these are requests consuming capacity.
+ * Throws AppError with clear message if any limit is exceeded.
+ */
+async function checkBoundaryLimits(
+  program: IProgramDocument,
+  programId: string,
+  userId: string,
+): Promise<void> {
+  const activeStatuses = ['submitted', 'in_review', 'approved'];
+
+  // Check program-wide maxActiveRequests
+  if (program.settings?.maxActiveRequests !== undefined && program.settings.maxActiveRequests !== null) {
+    const totalActive = await Request.countDocuments({
+      programId,
+      status: { $in: activeStatuses },
+    });
+    if (totalActive >= program.settings.maxActiveRequests) {
+      throw new AppError(
+        `Program has reached its maximum active request limit (${program.settings.maxActiveRequests}). Please wait for existing requests to be completed or rejected before creating new ones.`,
+        400,
+      );
+    }
+  }
+
+  // Check per-user maxActiveRequestsPerUser
+  if (program.settings?.maxActiveRequestsPerUser !== undefined && program.settings.maxActiveRequestsPerUser !== null) {
+    const userActive = await Request.countDocuments({
+      programId,
+      createdBy: userId,
+      status: { $in: activeStatuses },
+    });
+    if (userActive >= program.settings.maxActiveRequestsPerUser) {
+      throw new AppError(
+        `You have reached your per-user active request limit (${program.settings.maxActiveRequestsPerUser}) in this program. Please wait for your existing requests to be completed or rejected before creating new ones.`,
+        400,
+      );
+    }
+  }
+}
+
+/**
  * Create a new request within a program.
  * Validates program existence, timeframe, and dynamic fields against field definitions.
  * Creates audit log entry for the creation event.
@@ -184,6 +226,9 @@ export async function createRequest(
 
   // Enforce submission timeframe boundaries
   await checkProgramTimeframe(data.programId);
+
+  // Enforce boundary limits (program-wide + per-user active request caps)
+  await checkBoundaryLimits(program, data.programId, userId);
 
   // Validate dynamic fields against program field definitions
   if (data.fields || program.fieldDefinitions.length > 0) {

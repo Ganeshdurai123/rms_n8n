@@ -62,6 +62,16 @@ router.patch(
   programController.archiveProgram,
 );
 
+// --- Boundary stats route (admin/manager with program manager role) ---
+
+// GET /api/v1/programs/:programId/boundary-stats
+router.get(
+  '/:programId/boundary-stats',
+  authorize('admin', 'manager'),
+  authorizeProgram({ roles: ['manager'] }),
+  programController.getBoundaryStats,
+);
+
 // --- Member management routes (admin/manager with program manager role) ---
 
 // GET /api/v1/programs/:programId/members
