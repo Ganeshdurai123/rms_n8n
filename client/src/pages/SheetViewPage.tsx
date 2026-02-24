@@ -9,9 +9,10 @@ import { SheetTable } from '@/components/sheet/SheetTable';
 import { SheetToolbar } from '@/components/sheet/SheetToolbar';
 import { SheetPagination } from '@/components/sheet/SheetPagination';
 import { ActivityFeed } from '@/components/request/ActivityFeed';
+import { BoundaryStatsPanel } from '@/components/BoundaryStatsPanel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus, Radio, Calendar, ClipboardCheck } from 'lucide-react';
+import { RefreshCw, Plus, Radio, Calendar, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProgramMember {
@@ -30,6 +31,7 @@ export function SheetViewPage() {
   const [members, setMembers] = useState<ProgramMember[]>([]);
   const [showCreateRow, setShowCreateRow] = useState(false);
   const [showActivityFeed, setShowActivityFeed] = useState(false);
+  const [showBoundaryStats, setShowBoundaryStats] = useState(false);
 
   const {
     requests,
@@ -270,6 +272,17 @@ export function SheetViewPage() {
             <Calendar className="h-4 w-4 mr-1" />
             Calendar
           </Button>
+          {(user?.role === 'admin' || user?.role === 'manager') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBoundaryStats((v) => !v)}
+              className={showBoundaryStats ? 'bg-primary/10' : ''}
+            >
+              <ShieldCheck className="h-4 w-4 mr-1" />
+              Limits
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -288,6 +301,13 @@ export function SheetViewPage() {
           </Button>
         </div>
       </div>
+
+      {/* Boundary Stats Panel (collapsible) */}
+      {showBoundaryStats && programId && (
+        <div className="px-6 pt-3">
+          <BoundaryStatsPanel programId={programId} userRole={user?.role || 'client'} />
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="px-6 py-3">

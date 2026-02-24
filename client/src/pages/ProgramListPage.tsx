@@ -129,6 +129,16 @@ export function ProgramListPage() {
                     {program.fieldDefinitions.length} field
                     {program.fieldDefinitions.length !== 1 ? 's' : ''} defined
                   </p>
+                  {program.settings.maxActiveRequests !== undefined && program.settings.maxActiveRequests !== null && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Max {program.settings.maxActiveRequests} active requests
+                    </p>
+                  )}
+                  {program.settings.maxActiveRequestsPerUser !== undefined && program.settings.maxActiveRequestsPerUser !== null && (
+                    <p className="text-xs text-muted-foreground">
+                      Max {program.settings.maxActiveRequestsPerUser} per user
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </Link>
