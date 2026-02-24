@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+
 import { z } from 'zod';
 import logger from './logger.js';
 

@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cd \"D:\\\\Niranjan -n8n\\\\rms_proj\\\\server\" && npx tsx src/server.ts 2>&1)",
+      "Bash(head:*)",
+      "Bash(redis-cli ping:*)",
+      "Bash(powershell:*)",
+      "Bash(cd \"D:/Niranjan -n8n/rms_proj\" && docker compose up -d redis 2>&1)",
+      "Bash(docker exec:*)",
+      "Bash(cd \"D:/Niranjan -n8n/rms_proj/server\" && pnpm dev 2>&1)",
+      "Bash(cd \"D:/Niranjan -n8n/rms_proj/client\" && pnpm dev 2>&1)",
+      "Bash(curl:*)",
+      "Bash(cd:*)",
+      "Bash(xxd:*)"
     ]
   }
 }
