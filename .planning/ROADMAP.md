@@ -224,7 +224,11 @@ Plans:
   1. Admin/manager can configure per-user active request limits on a program (in addition to existing maxActiveRequests)
   2. When a user tries to create a request that would exceed limits, they receive a clear error message explaining which boundary was hit
   3. Program management view shows boundary utilization indicators (e.g., "42/100 active requests", "User X: 3/5 limit")
-**Plans**: TBD (to be created by /gsd:plan-phase 13)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Backend: maxActiveRequestsPerUser on Program model, boundary enforcement in createRequest (program-wide + per-user limits), boundary stats API endpoint
+- [ ] 13-02-PLAN.md — Frontend: BoundaryStatsPanel component, boundary indicators on ProgramListPage cards, boundary stats toggle in SheetViewPage header
 
 ## Progress
 
@@ -257,4 +261,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 10. Sequential Request Chains | 2/2 | Complete    | 2026-02-23 |
 | 11. HSSP Compliance | 2/2 | Complete    | 2026-02-23 |
 | 12. Reports & Dashboard | 2/2 | Complete    | 2026-02-24 |
-| 13. Enhanced Program Boundaries | 0/? | Not started | - |
+| 13. Enhanced Program Boundaries | 1/2 | In Progress|  |

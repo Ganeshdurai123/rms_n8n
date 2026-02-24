@@ -143,9 +143,9 @@ Active milestone. Closes gaps identified by comparing scope document against v1 
 
 ### Enhanced Program Boundaries
 
-- [ ] **BOUND-01**: Per-user active request limits within a program (configurable by admin/manager)
-- [ ] **BOUND-02**: maxActiveRequests enforcement on request creation (reject with clear message when limit reached)
-- [ ] **BOUND-03**: Boundary compliance indicators in program management view (usage vs limits)
+- [x] **BOUND-01**: Per-user active request limits within a program (configurable by admin/manager)
+- [x] **BOUND-02**: maxActiveRequests enforcement on request creation (reject with clear message when limit reached)
+- [x] **BOUND-03**: Boundary compliance indicators in program management view (usage vs limits)
 
 ### Enhancements (deferred beyond v2)
 
