@@ -35,6 +35,7 @@ export interface Program {
     allowClientSubmission: boolean;
     requireApproval: boolean;
     maxActiveRequests?: number;
+    maxActiveRequestsPerUser?: number;
   };
   timeframes: {
     startDate?: string;
@@ -219,4 +220,24 @@ export interface OverdueReportResult {
     createdBy: { name: string; email: string };
   }>;
   totalOverdue: number;
+}
+
+// ---------- Boundary Stats Types ----------
+
+export interface BoundaryStats {
+  programId: string;
+  programName: string;
+  limits: {
+    maxActiveRequests: number | null;
+    maxActiveRequestsPerUser: number | null;
+  };
+  usage: {
+    totalActiveRequests: number;
+    perUser: Array<{
+      userId: string;
+      name: string;
+      email: string | null;
+      activeCount: number;
+    }>;
+  };
 }
