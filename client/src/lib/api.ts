@@ -51,12 +51,13 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
-    // Only attempt refresh on 401, and not for the refresh endpoint itself
+    // Only attempt refresh on 401, and not for auth endpoints
     if (
       error.response?.status !== 401 ||
       !originalRequest ||
       originalRequest.url === '/auth/refresh' ||
-      originalRequest.url === '/auth/login'
+      originalRequest.url === '/auth/login' ||
+      originalRequest.url === '/auth/me'
     ) {
       return Promise.reject(error);
     }
@@ -84,8 +85,6 @@ api.interceptors.response.use(
     } catch (refreshError) {
       setAccessToken(null);
       processQueue(refreshError);
-      // Redirect to login
-      window.location.href = '/login';
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
