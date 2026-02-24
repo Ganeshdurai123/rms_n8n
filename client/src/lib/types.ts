@@ -241,3 +241,28 @@ export interface BoundaryStats {
     }>;
   };
 }
+
+// ---------- Notification Types ----------
+
+export type NotificationType =
+  | 'request.status_changed'
+  | 'request.assigned'
+  | 'request.created'
+  | 'request.updated'
+  | 'comment.added'
+  | 'attachment.uploaded'
+  | 'reminder';
+
+export interface Notification {
+  _id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  programId?: string;
+  requestId?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
