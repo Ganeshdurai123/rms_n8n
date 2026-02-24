@@ -54,7 +54,7 @@ export function ImportWizardPage() {
       try {
         const { data } = await api.get(`/programs/${programId}`);
         if (!cancelled) {
-          setProgram(data.data || data);
+          setProgram(data.program || data.data || data);
         }
       } catch {
         if (!cancelled) {

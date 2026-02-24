@@ -26,7 +26,7 @@ export function CalendarViewPage() {
       try {
         const { data } = await api.get(`/programs/${programId}`);
         if (!cancelled) {
-          const prog = data.data || data;
+          const prog = data.program || data.data || data;
           setProgramName(prog.name || '');
         }
       } catch {

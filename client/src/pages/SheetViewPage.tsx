@@ -62,8 +62,8 @@ export function SheetViewPage() {
       try {
         const { data } = await api.get(`/programs/${programId}`);
         if (!cancelled) {
-          // API may return { data: program } or just program directly
-          setProgram(data.data || data);
+          // API returns { program: {...} }
+          setProgram(data.program || data.data || data);
         }
       } catch (err) {
         if (!cancelled) {

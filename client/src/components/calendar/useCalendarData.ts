@@ -85,7 +85,7 @@ export function useCalendarData(
         const params = {
           dueAfter: dateRange.start.toISOString(),
           dueBefore: dateRange.end.toISOString(),
-          limit: 200,
+          limit: 100,
         };
         const { data } = await api.get(`/programs/${programId}/requests`, {
           params,
