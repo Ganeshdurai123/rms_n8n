@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import type { Program, PaginatedResponse } from '@/lib/types';
 import {
   Card,
@@ -10,41 +11,79 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { Plus, Loader2 } from 'lucide-react';
 
 export function ProgramListPage() {
+  const { user } = useAuth();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formDescription, setFormDescription] = useState('');
+
+  const canCreate = user?.role === 'admin' || user?.role === 'manager';
+
+  async function fetchPrograms() {
+    try {
+      const { data } = await api.get<PaginatedResponse<Program>>(
+        '/programs',
+        { params: { limit: 50 } },
+      );
+      setPrograms(data.data);
+    } catch {
+      setError('Failed to load programs. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function fetchPrograms() {
-      try {
-        const { data } = await api.get<PaginatedResponse<Program>>(
-          '/programs',
-          { params: { limit: 50 } },
-        );
-        if (!cancelled) {
-          setPrograms(data.data);
-        }
-      } catch {
-        if (!cancelled) {
-          setError('Failed to load programs. Please try again.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
     fetchPrograms();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  async function handleCreateProgram(e: React.FormEvent) {
+    e.preventDefault();
+    if (!formName.trim()) return;
+
+    setCreating(true);
+    try {
+      await api.post('/programs', {
+        name: formName.trim(),
+        description: formDescription.trim() || undefined,
+      });
+      toast.success('Program created successfully');
+      setDialogOpen(false);
+      setFormName('');
+      setFormDescription('');
+      await fetchPrograms();
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : 'Failed to create program';
+      toast.error(msg || 'Failed to create program');
+    } finally {
+      setCreating(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -78,9 +117,65 @@ export function ProgramListPage() {
     );
   }
 
+  const createDialog = canCreate ? (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          New Program
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form onSubmit={handleCreateProgram}>
+          <DialogHeader>
+            <DialogTitle>Create Program</DialogTitle>
+            <DialogDescription>
+              Create a new program. You can add custom fields and configure
+              settings after creation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="program-name">Name</Label>
+              <Input
+                id="program-name"
+                placeholder="e.g. Q1 Compliance Review"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                required
+                minLength={2}
+                maxLength={100}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="program-desc">Description (optional)</Label>
+              <Textarea
+                id="program-desc"
+                placeholder="Brief description of the program..."
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                maxLength={2000}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={creating || !formName.trim()}>
+              {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  ) : null;
+
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold tracking-tight">Programs</h2>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">Programs</h2>
+        {createDialog}
+      </div>
 
       {programs.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
@@ -88,8 +183,16 @@ export function ProgramListPage() {
             No programs found
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            You don&apos;t have access to any programs yet.
+            {canCreate
+              ? 'Get started by creating your first program.'
+              : "You don't have access to any programs yet."}
           </p>
+          {canCreate && (
+            <Button size="sm" className="mt-4" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Program
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
