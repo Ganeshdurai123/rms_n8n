@@ -64,53 +64,36 @@ export function RequestDetailPage() {
     fetchDetail();
   }, [fetchDetail]);
 
-  // Fetch program members for assignment dialog
+  // Fetch all active users for assignment dialog
   useEffect(() => {
-    if (!programId) return;
     let cancelled = false;
 
-    async function fetchMembers() {
+    async function fetchUsers() {
       try {
-        const { data } = await api.get(`/programs/${programId}/members`, {
-          params: { limit: 100 },
+        const { data } = await api.get('/users', {
+          params: { isActive: true, limit: 100 },
         });
         if (!cancelled) {
-          const memberList = data.data || data;
+          const userList = data.data || data.users || data;
           const mapped: ProgramMember[] = (
-            Array.isArray(memberList) ? memberList : []
-          ).map(
-            (m: {
-              userId?: { _id: string; firstName: string; lastName: string };
-              _id: string;
-              firstName?: string;
-              lastName?: string;
-            }) => {
-              if (m.userId) {
-                return {
-                  _id: m.userId._id,
-                  firstName: m.userId.firstName,
-                  lastName: m.userId.lastName,
-                };
-              }
-              return {
-                _id: m._id,
-                firstName: m.firstName || '',
-                lastName: m.lastName || '',
-              };
-            },
-          );
+            Array.isArray(userList) ? userList : []
+          ).map((u: { _id: string; firstName: string; lastName: string }) => ({
+            _id: u._id,
+            firstName: u.firstName,
+            lastName: u.lastName,
+          }));
           setMembers(mapped);
         }
       } catch {
-        // Silently handle -- members not critical for page load
+        // Silently handle -- users not critical for page load
       }
     }
 
-    fetchMembers();
+    fetchUsers();
     return () => {
       cancelled = true;
     };
-  }, [programId]);
+  }, []);
 
   const handleAssign = useCallback(
     async (userId: string) => {

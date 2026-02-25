@@ -30,6 +30,7 @@ export function SheetViewPage() {
   const [programLoading, setProgramLoading] = useState(true);
   const [programError, setProgramError] = useState<string | null>(null);
   const [members, setMembers] = useState<ProgramMember[]>([]);
+  const [allUsers, setAllUsers] = useState<ProgramMember[]>([]);
   const [showCreateRow, setShowCreateRow] = useState(false);
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [showBoundaryStats, setShowBoundaryStats] = useState(false);
@@ -134,6 +135,37 @@ export function SheetViewPage() {
       cancelled = true;
     };
   }, [programId]);
+
+  // Fetch all active users for assignment dialog
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchUsers() {
+      try {
+        const { data } = await api.get('/users', {
+          params: { isActive: true, limit: 100 },
+        });
+        if (!cancelled) {
+          const userList = data.data || data.users || data;
+          const mapped: ProgramMember[] = (
+            Array.isArray(userList) ? userList : []
+          ).map((u: { _id: string; firstName: string; lastName: string }) => ({
+            _id: u._id,
+            firstName: u.firstName,
+            lastName: u.lastName,
+          }));
+          setAllUsers(mapped);
+        }
+      } catch {
+        // Silently handle
+      }
+    }
+
+    fetchUsers();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // CSV Export handler
   const handleExport = useCallback(async () => {
@@ -408,7 +440,7 @@ export function SheetViewPage() {
         onOpenChange={(open) => {
           if (!open) setAssigningRequest(null);
         }}
-        members={members}
+        members={allUsers}
         currentAssigneeId={
           assigningRequest?.assignedTo
             ? typeof assigningRequest.assignedTo === 'string'

@@ -707,7 +707,7 @@ export async function assignRequest(
     );
   }
 
-  // Verify the assignee is a member of the request's program with team_member or manager role
+  // Verify the assignee is a member of the request's program; auto-enroll as team_member if not
   const membership = await ProgramMember.findOne({
     userId: assignedToUserId,
     programId: request.programId,
@@ -715,10 +715,15 @@ export async function assignRequest(
   }).lean();
 
   if (!membership) {
-    throw new AppError('Assignee is not a member of this program', 400);
-  }
-
-  if (!['team_member', 'manager'].includes(membership.role)) {
+    // Auto-enroll the user as a team_member in this program
+    await ProgramMember.create({
+      userId: assignedToUserId,
+      programId: request.programId,
+      role: 'team_member',
+      addedBy: performedByUserId,
+      isActive: true,
+    });
+  } else if (!['team_member', 'manager'].includes(membership.role)) {
     throw new AppError('Assignee must have team_member or manager role in the program', 400);
   }
 

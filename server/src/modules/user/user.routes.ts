@@ -13,35 +13,39 @@ import {
 
 const router = Router();
 
-// All user management routes are admin-only
 router.use(authenticate);
-router.use(authorize('admin'));
 
-// User CRUD
-router.post('/', validate(createUserSchema), userController.createUser);
+// List users -- accessible by admin and manager (needed for request assignment)
 router.get(
   '/',
+  authorize('admin', 'manager'),
   validate(listUsersQuerySchema, 'query'),
   paginate(),
   userController.getUsers,
 );
-router.get('/:userId', userController.getUserById);
+router.get('/:userId', authorize('admin', 'manager'), userController.getUserById);
+
+// Mutating user operations -- admin only
+router.post('/', authorize('admin'), validate(createUserSchema), userController.createUser);
 router.patch(
   '/:userId',
+  authorize('admin'),
   validate(updateUserSchema),
   userController.updateUser,
 );
-router.delete('/:userId', userController.deactivateUser); // Soft delete (deactivate)
-router.delete('/:userId/permanent', userController.hardDeleteUser); // Hard delete
+router.delete('/:userId', authorize('admin'), userController.deactivateUser); // Soft delete (deactivate)
+router.delete('/:userId/permanent', authorize('admin'), userController.hardDeleteUser); // Hard delete
 
-// Program assignment
+// Program assignment -- admin only
 router.post(
   '/program-assignments',
+  authorize('admin'),
   validate(assignProgramSchema),
   userController.assignToProgram,
 );
 router.delete(
   '/program-assignments/:userId/:programId',
+  authorize('admin'),
   userController.removeFromProgram,
 );
 
