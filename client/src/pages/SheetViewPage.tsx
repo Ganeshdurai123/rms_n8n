@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useSocket } from '@/lib/socket';
-import type { Program } from '@/lib/types';
+import type { Program, RequestItem } from '@/lib/types';
 import { useSheetData } from '@/components/sheet/useSheetData';
 import { SheetTable } from '@/components/sheet/SheetTable';
 import { SheetToolbar } from '@/components/sheet/SheetToolbar';
 import { SheetPagination } from '@/components/sheet/SheetPagination';
+import { AssignRequestDialog } from '@/components/request/AssignRequestDialog';
 import { ActivityFeed } from '@/components/request/ActivityFeed';
 import { BoundaryStatsPanel } from '@/components/BoundaryStatsPanel';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,6 +33,7 @@ export function SheetViewPage() {
   const [showCreateRow, setShowCreateRow] = useState(false);
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [showBoundaryStats, setShowBoundaryStats] = useState(false);
+  const [assigningRequest, setAssigningRequest] = useState<RequestItem | null>(null);
 
   const {
     requests,
@@ -185,6 +187,29 @@ export function SheetViewPage() {
       toast.error(message);
     }
   }, [programId, query]);
+
+  const handleAssign = useCallback(
+    async (userId: string) => {
+      if (!programId || !assigningRequest) return;
+      try {
+        await api.patch(
+          `/programs/${programId}/requests/${assigningRequest._id}/assign`,
+          { assignedTo: userId },
+        );
+        toast.success('Request assigned successfully');
+        refresh();
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : (err as { response?: { data?: { message?: string } } })?.response
+                ?.data?.message || 'Failed to assign request';
+        toast.error(message);
+        throw err;
+      }
+    },
+    [programId, assigningRequest, refresh],
+  );
 
   // Real-time Socket.IO updates -- refresh sheet data when events arrive
   const socketEvents = useMemo(() => ({
@@ -355,6 +380,7 @@ export function SheetViewPage() {
           }}
           onCreateCancel={() => setShowCreateRow(false)}
           onRefresh={refresh}
+          onAssign={(req) => setAssigningRequest(req)}
           userRole={user?.role || 'client'}
           userId={user?._id || ''}
         />
@@ -375,6 +401,23 @@ export function SheetViewPage() {
           <ActivityFeed programId={programId} />
         </div>
       )}
+
+      {/* Assign Request Dialog */}
+      <AssignRequestDialog
+        open={!!assigningRequest}
+        onOpenChange={(open) => {
+          if (!open) setAssigningRequest(null);
+        }}
+        members={members}
+        currentAssigneeId={
+          assigningRequest?.assignedTo
+            ? typeof assigningRequest.assignedTo === 'string'
+              ? assigningRequest.assignedTo
+              : assigningRequest.assignedTo._id
+            : null
+        }
+        onAssign={handleAssign}
+      />
     </div>
   );
 }

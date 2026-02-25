@@ -29,6 +29,7 @@ interface SheetTableProps {
   onCreateDone?: () => void;
   onCreateCancel?: () => void;
   onRefresh: () => void;
+  onAssign?: (request: RequestItem) => void;
   userRole: Role;
   userId: string;
 }
@@ -189,6 +190,7 @@ export function SheetTable({
   onCreateDone,
   onCreateCancel,
   onRefresh,
+  onAssign,
   userRole,
   userId,
 }: SheetTableProps) {
@@ -495,6 +497,7 @@ export function SheetTable({
                       programId={programId}
                       onEdit={() => setEditingRowId(req._id)}
                       onDeleted={onRefresh}
+                      onAssign={onAssign ? () => onAssign(req) : undefined}
                       userRole={userRole}
                       userId={userId}
                     />

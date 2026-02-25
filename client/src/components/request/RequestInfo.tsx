@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Check, Minus } from 'lucide-react';
+import { Check, Minus, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RequestDetail, FieldDefinition, ChecklistItem } from '@/lib/types';
 
@@ -86,9 +87,11 @@ function formatFieldValue(value: unknown, type: string): string {
 
 interface RequestInfoProps {
   detail: RequestDetail;
+  canAssign?: boolean;
+  onAssignClick?: () => void;
 }
 
-export function RequestInfo({ detail }: RequestInfoProps) {
+export function RequestInfo({ detail, canAssign, onAssignClick }: RequestInfoProps) {
   const { request } = detail;
   const program = request.programId;
   const fieldDefinitions: FieldDefinition[] = program.fieldDefinitions || [];
@@ -132,7 +135,20 @@ export function RequestInfo({ detail }: RequestInfoProps) {
           </div>
           <div>
             <span className="text-muted-foreground">Assigned To</span>
-            <p className="font-medium">{formatUserName(request.assignedTo, 'Unassigned')}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium">{formatUserName(request.assignedTo, 'Unassigned')}</p>
+              {canAssign && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={onAssignClick}
+                  title="Assign request"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
           </div>
           <div>
             <span className="text-muted-foreground">Created At</span>

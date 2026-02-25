@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Loader2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import type { RequestItem, Role } from '@/lib/types';
@@ -26,6 +26,7 @@ interface SheetRowActionsProps {
   programId: string;
   onEdit: () => void;
   onDeleted: () => void;
+  onAssign?: () => void;
   userRole: Role;
   userId: string;
 }
@@ -43,6 +44,7 @@ export function SheetRowActions({
   programId,
   onEdit,
   onDeleted,
+  onAssign,
   userRole,
   userId,
 }: SheetRowActionsProps) {
@@ -53,11 +55,13 @@ export function SheetRowActions({
   const isCreator = getCreatorId(request.createdBy) === userId;
   const isAdmin = userRole === 'admin';
 
+  const isManager = userRole === 'manager';
   const canEdit = isDraft;
   const canDelete = isDraft && (isCreator || isAdmin);
+  const canAssign = (isAdmin || isManager) && request.status !== 'draft' && request.status !== 'completed';
 
   // If no actions available, render nothing
-  if (!canEdit && !canDelete) {
+  if (!canEdit && !canDelete && !canAssign) {
     return null;
   }
 
@@ -90,6 +94,12 @@ export function SheetRowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {canAssign && (
+            <DropdownMenuItem onClick={onAssign}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Assign
+            </DropdownMenuItem>
+          )}
           {canEdit && (
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="h-4 w-4 mr-2" />
