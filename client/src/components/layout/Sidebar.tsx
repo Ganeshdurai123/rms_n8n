@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Bell, FileBarChart, LogOut } from 'lucide-react';
+import { LayoutGrid, Bell, FileBarChart, Users, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,9 @@ export function Sidebar() {
     { to: '/programs', label: 'Programs', icon: LayoutGrid },
     { to: '/reports', label: 'Reports', icon: FileBarChart },
     { to: '/notifications', label: 'Notifications', icon: Bell },
+    ...(user?.role === 'admin'
+      ? [{ to: '/admin/users', label: 'Users', icon: Users }]
+      : []),
   ];
 
   return (

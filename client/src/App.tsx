@@ -13,6 +13,7 @@ import { ComplianceReviewPage } from '@/pages/ComplianceReviewPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { ReportDetailPage } from '@/pages/ReportDetailPage';
 import { NotificationsPage } from '@/pages/NotificationsPage';
+import { UserManagementPage } from '@/pages/UserManagementPage';
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
                 element={<RequestDetailPage />}
               />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/admin/users" element={<UserManagementPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route
                 path="/reports/:reportId"

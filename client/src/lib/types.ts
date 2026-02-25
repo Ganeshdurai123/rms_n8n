@@ -13,6 +13,8 @@ export interface User {
   lastName: string;
   role: Role;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FieldDefinition {
