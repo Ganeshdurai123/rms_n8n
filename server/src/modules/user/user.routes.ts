@@ -32,6 +32,7 @@ router.patch(
   userController.updateUser,
 );
 router.delete('/:userId', userController.deactivateUser); // Soft delete (deactivate)
+router.delete('/:userId/permanent', userController.hardDeleteUser); // Hard delete
 
 // Program assignment
 router.post(

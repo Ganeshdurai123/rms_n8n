@@ -179,6 +179,26 @@ export async function assignToProgram(data: AssignProgramInput, assignedBy: stri
 }
 
 /**
+ * Hard-delete a user account permanently.
+ * Also removes all refresh tokens and program memberships.
+ */
+export async function hardDeleteUser(userId: string) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  // Remove all refresh tokens
+  await RefreshToken.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
+
+  // Remove all program memberships
+  await ProgramMember.deleteMany({ userId });
+
+  // Delete the user
+  await User.findByIdAndDelete(userId);
+}
+
+/**
  * Remove a user's membership from a program.
  */
 export async function removeFromProgram(userId: string, programId: string) {

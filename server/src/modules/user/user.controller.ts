@@ -89,6 +89,23 @@ export async function deactivateUser(
 }
 
 /**
+ * DELETE /api/v1/users/:userId/permanent
+ * Admin permanently deletes a user account and all associated data.
+ */
+export async function hardDeleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await userService.hardDeleteUser(req.params.userId as string);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/v1/users/program-assignments
  * Admin assigns a user to a program with a program-level role.
  */

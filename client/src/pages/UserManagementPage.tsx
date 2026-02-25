@@ -49,6 +49,7 @@ import {
   UserX,
   UserCheck,
   Link2,
+  Trash2,
 } from 'lucide-react';
 
 const ROLES: Role[] = ['admin', 'manager', 'team_member', 'client'];
@@ -509,16 +510,24 @@ export function UserManagementPage() {
 
   async function handleToggleActive(user: User) {
     try {
-      if (user.isActive) {
-        await api.delete('/users/' + user._id);
-        toast.success(user.firstName + ' deactivated');
-      } else {
-        await api.patch('/users/' + user._id, { isActive: true });
-        toast.success(user.firstName + ' reactivated');
-      }
+      await api.patch('/users/' + user._id, { isActive: !user.isActive });
+      toast.success(user.firstName + (user.isActive ? ' deactivated' : ' reactivated'));
       fetchUsers();
     } catch {
       toast.error('Failed to update user status');
+    }
+  }
+
+  async function handleDelete(user: User) {
+    if (!window.confirm(
+      `Permanently delete ${user.firstName} ${user.lastName}? This cannot be undone.`
+    )) return;
+    try {
+      await api.delete('/users/' + user._id + '/permanent');
+      toast.success(user.firstName + ' ' + user.lastName + ' deleted permanently');
+      fetchUsers();
+    } catch {
+      toast.error('Failed to delete user');
     }
   }
 
@@ -673,6 +682,13 @@ export function UserManagementPage() {
                             Reactivate
                           </>
                         )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(u)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
