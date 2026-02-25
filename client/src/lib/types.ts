@@ -51,6 +51,7 @@ export interface Program {
   complianceType?: 'hssp' | null;
   status: 'active' | 'archived';
   createdBy: string | { _id: string; firstName: string; lastName: string };
+  requestCount?: number;
 }
 
 export interface RequestItem {

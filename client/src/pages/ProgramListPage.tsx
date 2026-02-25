@@ -229,8 +229,8 @@ export function ProgramListPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {program.fieldDefinitions.length} field
-                    {program.fieldDefinitions.length !== 1 ? 's' : ''} defined
+                    {program.requestCount ?? 0} request
+                    {(program.requestCount ?? 0) !== 1 ? 's' : ''}
                   </p>
                   {program.settings.maxActiveRequests !== undefined && program.settings.maxActiveRequests !== null && (
                     <p className="text-xs text-muted-foreground mt-1">

@@ -144,7 +144,19 @@ export async function getPrograms(query: ListProgramsQuery, userId: string, user
     Program.countDocuments(filter),
   ]);
 
-  const result = { programs, total, page, limit };
+  // Attach request counts per program
+  const programIds = programs.map((p) => p._id);
+  const requestCounts = await RequestDoc.aggregate([
+    { $match: { programId: { $in: programIds } } },
+    { $group: { _id: '$programId', count: { $sum: 1 } } },
+  ]);
+  const countMap = new Map(requestCounts.map((r) => [r._id.toString(), r.count as number]));
+  const programsWithCounts = programs.map((p) => ({
+    ...p,
+    requestCount: countMap.get(p._id.toString()) || 0,
+  }));
+
+  const result = { programs: programsWithCounts, total, page, limit };
 
   // Cache list results
   await cacheSet(cacheKey, result, CACHE_TTL_LIST);
