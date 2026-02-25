@@ -699,10 +699,10 @@ export async function assignRequest(
     throw new NotFoundError('Request not found');
   }
 
-  // Assignment only for active requests (not draft or completed)
-  if (request.status === 'draft' || request.status === 'completed') {
+  // Assignment not allowed for completed requests
+  if (request.status === 'completed') {
     throw new AppError(
-      `Cannot assign a request with status "${request.status}". Assignment is only allowed for active requests.`,
+      'Cannot assign a completed request.',
       400,
     );
   }

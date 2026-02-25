@@ -58,7 +58,7 @@ export function SheetRowActions({
   const isManager = userRole === 'manager';
   const canEdit = isDraft;
   const canDelete = isDraft && (isCreator || isAdmin);
-  const canAssign = (isAdmin || isManager) && request.status !== 'draft' && request.status !== 'completed';
+  const canAssign = (isAdmin || isManager) && request.status !== 'completed';
 
   // If no actions available, render nothing
   if (!canEdit && !canDelete && !canAssign) {
