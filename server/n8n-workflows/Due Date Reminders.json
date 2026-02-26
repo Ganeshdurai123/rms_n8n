@@ -1,0 +1,288 @@
+{
+  "name": "Due Date Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "fb120fde-6d7c-4f3a-864c-9a70f2df9e09",
+      "name": "Daily 8AM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/v1/internal/pending-reminders?type=overdue",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "overdue"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "be8d82e3-6a9f-4007-8ce3-d9648354e657",
+      "name": "Fetch Overdue Requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HsLuO0JQpdRmNr2l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/v1/internal/pending-reminders?type=upcoming",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "upcoming"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "94b6fa65-6b4b-459d-8f35-885fe14a38aa",
+      "name": "Fetch Upcoming Requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HsLuO0JQpdRmNr2l",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "440edcc2-bdcd-4148-905d-efc6ef5432e0",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        256,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "reminders",
+        "options": {}
+      },
+      "id": "7bc7db25-dfa5-4c0c-b49d-2d6e6e4233be",
+      "name": "Split Into Items",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        512,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "karthikak0820@gmail.com",
+        "toEmail": "={{ $json.assignedTo?.email \n\n $json.createdBy?.email }}",
+        "subject": "={{ $json.daysOverdue > 0 ? '[RMS] OVERDUE: ' + $json.title + ' (' + $json.daysOverdue + ' days overdue)' : '[RMS] Reminder: ' + $json.title + ' (Due: ' + $json.dueDate + ')' }}",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }\n    .container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; }\n    .header { background: {{ $json.daysOverdue > 0 ? '#dc2626' : '#f59e0b' }}; color: #ffffff; padding: 24px 20px; border-radius: 8px 8px 0 0; text-align: center; }\n    .header h2 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }\n    .body { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }\n    .field { margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; }\n    .field:last-child { border-bottom: none; }\n    .label { font-weight: bold; color: #718096; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }\n    .value { font-size: 16px; margin-top: 4px; color: #2d3748; font-weight: 500; }\n    .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; }\n    .badge-overdue { background: #fee2e2; color: #b91c1c; }\n    .badge-upcoming { background: #fef3c7; color: #92400e; }\n    .btn { display: block; background: #2563eb; color: #ffffff !important; text-decoration: none; padding: 14px 24px; border-radius: 6px; font-weight: 700; text-align: center; margin-top: 25px; transition: background 0.2s; }\n    .footer { margin-top: 25px; font-size: 12px; color: #a0aec0; text-align: center; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h2>{{ $json.daysOverdue > 0 ? 'Action Required: Request Overdue' : 'Upcoming Deadline' }}</h2>\n    </div>\n    <div class=\"body\">\n      <div class=\"field\">\n        <div class=\"label\">Request Title</div>\n        <div class=\"value\">{{ $json.title }}</div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">Priority & Status</div>\n        <div class=\"value\">\n          <span class=\"badge {{ $json.daysOverdue > 0 ? 'badge-overdue' : 'badge-upcoming' }}\">\n            {{ $json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'Due ' + $json.dueDate }}\n          </span>\n        </div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">Original Due Date</div>\n        <div class=\"value\">{{ $json.dueDate }}</div>\n      </div>\n      <div class=\"field\">\n        <div class=\"label\">Current Status</div>\n        <div class=\"value\">{{ $json.status.replace('_', ' ').toUpperCase() }}</div>\n      </div>\n      <a class=\"btn\" href=\"http://localhost:3000/programs/{{ $json.programId }}/requests/{{ $json.requestId }}\">VIEW IN SYSTEM</a>\n    </div>\n    <div class=\"footer\">\n      <p>This is an automated notification from your Request Management System.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "5cdcfeca-53e7-4cec-b967-ec05a531bd69",
+      "name": "Send Reminder Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        112
+      ],
+      "webhookId": "f73bf7ad-0c71-48af-abe4-f429f07baab6",
+      "credentials": {
+        "smtp": {
+          "id": "RgARE5JcdiqobKAA",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5000/api/v1/internal/notifications",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"{{ $('Split Into Items').item.json.assignedTo }}\",\n  \"type\": \"reminder\",\n  \"title\": \"Due date reminder\",\n  \"message\": \"Request '{{ $('Fetch Overdue Requests').item.json.reminders[0].title }}' is {{ $json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'due soon' }}\",\n  \"programId\": \"{{ $('Fetch Overdue Requests').item.json.reminders[0].programId }}\",\n  \"requestId\": \"{{ $('Fetch Overdue Requests').item.json.reminders[0].requestId }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "d9860bab-6703-4df1-ba66-b734e2e16480",
+      "name": "Create In-App Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        112
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HsLuO0JQpdRmNr2l",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 8AM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Overdue Requests",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Upcoming Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Overdue Requests": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Upcoming Requests": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Split Into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Items": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reminder Email": {
+      "main": [
+        [
+          {
+            "node": "Create In-App Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "45771b7d-cebe-4611-850f-fd304e3295ba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17b3b6b1f7d89e2842f178ea7c48146500c89d357df23a0c3c75f8844de22311"
+  },
+  "id": "kpYGQ1l2haEu3zW2",
+  "tags": []
+}

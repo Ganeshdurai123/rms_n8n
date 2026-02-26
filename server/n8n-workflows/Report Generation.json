@@ -8,24 +8,25 @@
         "responseMode": "lastNode",
         "options": {}
       },
-      "id": "webhook-trigger",
+      "id": "dd68940d-cef3-42c5-ae46-e79aa06fc6b1",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [250, 300],
+      "position": [
+        0,
+        0
+      ],
       "webhookId": "report-requested"
     },
     {
       "parameters": {
-        "method": "GET",
-        "url": "=http://server:5000/api/v1/internal/report-data?reportId={{ $json.body.data.reportId }}&type={{ $json.body.data.type }}",
+        "url": "=http://host.docker.internal:5000/api/v1/internal/report-data?reportId={{ $json.body.data.reportId }}&type={{ $json.body.data.type }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "={{$env.INTERNAL_API_KEY}}"
-            }
+            {}
           ]
         },
         "options": {
@@ -36,23 +37,30 @@
           }
         }
       },
-      "id": "fetch-report-data",
+      "id": "0784db97-3b55-42c3-9df3-aae498e1c0f4",
       "name": "Fetch Report Data",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [500, 300]
+      "position": [
+        256,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HsLuO0JQpdRmNr2l",
+          "name": "Header Auth account"
+        }
+      }
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://server:5000/api/v1/internal/report-complete",
+        "url": "http://host.docker.internal:5000/api/v1/internal/report-complete",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "={{$env.INTERNAL_API_KEY}}"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"
@@ -70,13 +78,23 @@
           }
         }
       },
-      "id": "complete-report",
+      "id": "b0237701-988b-4d87-ba1c-5689b18aa32c",
       "name": "Complete Report",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [750, 300]
+      "position": [
+        512,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HsLuO0JQpdRmNr2l",
+          "name": "Header Auth account"
+        }
+      }
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook Trigger": {
       "main": [
@@ -101,14 +119,16 @@
       ]
     }
   },
-  "pinData": {},
+  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "staticData": null,
-  "tags": [],
-  "triggerCount": 1,
-  "updatedAt": "2026-02-23T14:10:00.000Z",
-  "versionId": "1",
-  "active": false
+  "versionId": "b0b25839-527b-40cd-947c-a600f7093902",
+  "meta": {
+    "instanceId": "17b3b6b1f7d89e2842f178ea7c48146500c89d357df23a0c3c75f8844de22311"
+  },
+  "id": "FdsMp10XkwMPyxsT",
+  "tags": []
 }
