@@ -27,6 +27,23 @@ async function getPerformerName(userId: string): Promise<{ userId: string; name:
 }
 
 /**
+ * Look up a user's email and display name for webhook payloads.
+ * Returns null if userId is falsy or user not found.
+ */
+async function getUserEmailInfo(
+  userId: string | undefined | null,
+): Promise<{ userId: string; name: string; email: string } | null> {
+  if (!userId) return null;
+  const user = await User.findById(userId).select('firstName lastName email').lean();
+  if (!user) return null;
+  return {
+    userId,
+    name: `${user.firstName} ${user.lastName}`.trim(),
+    email: user.email ?? '',
+  };
+}
+
+/**
  * Validate dynamic field values against a program's field definitions.
  * Enforces: required fields, type correctness, dropdown options, no extra fields.
  */
@@ -631,7 +648,11 @@ export async function transitionRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notifications (fire-and-forget)
-  getPerformerName(userId).then((performer) => {
+  getPerformerName(userId).then(async (performer) => {
+    const [assignedToInfo, createdByInfo] = await Promise.all([
+      getUserEmailInfo(request.assignedTo?.toString()),
+      getUserEmailInfo(request.createdBy.toString()),
+    ]);
     emitToProgram(request.programId.toString(), 'request:status_changed', {
       event: 'request:status_changed',
       programId: request.programId.toString(),
@@ -644,7 +665,7 @@ export async function transitionRequest(
       eventType: 'request.status_changed',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus, assignedTo: assignedToInfo, createdBy: createdByInfo },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -759,7 +780,11 @@ export async function assignRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notification (fire-and-forget)
-  getPerformerName(performedByUserId).then((performer) => {
+  getPerformerName(performedByUserId).then(async (performer) => {
+    const [assignedToInfo, createdByInfo] = await Promise.all([
+      getUserEmailInfo(assignedToUserId),
+      getUserEmailInfo(request.createdBy.toString()),
+    ]);
     emitToProgram(request.programId.toString(), 'request:assigned', {
       event: 'request:assigned',
       programId: request.programId.toString(),
@@ -772,7 +797,7 @@ export async function assignRequest(
       eventType: 'request.assigned',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      data: { request: updated.toObject(), assignedTo: assignedToInfo, createdBy: createdByInfo, previousAssignee: beforeAssignee },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });

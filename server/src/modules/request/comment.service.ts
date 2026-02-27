@@ -22,6 +22,23 @@ async function getPerformerName(userId: string): Promise<{ userId: string; name:
 }
 
 /**
+ * Look up a user's email and display name for webhook payloads.
+ * Returns null if userId is falsy or user not found.
+ */
+async function getUserEmailInfo(
+  userId: string | undefined | null,
+): Promise<{ userId: string; name: string; email: string } | null> {
+  if (!userId) return null;
+  const user = await User.findById(userId).select('firstName lastName email').lean();
+  if (!user) return null;
+  return {
+    userId,
+    name: `${user.firstName} ${user.lastName}`.trim(),
+    email: user.email ?? '',
+  };
+}
+
+/**
  * Add a comment to a request.
  * Verifies request exists, creates comment, logs audit entry.
  */
@@ -61,7 +78,11 @@ export async function addComment(
   });
 
   // Emit real-time event + webhook + notification (fire-and-forget)
-  getPerformerName(authorId).then((performer) => {
+  getPerformerName(authorId).then(async (performer) => {
+    const [assignedToInfo, createdByInfo] = await Promise.all([
+      getUserEmailInfo(request.assignedTo?.toString()),
+      getUserEmailInfo(request.createdBy.toString()),
+    ]);
     emitToProgram(programId, 'comment:added', {
       event: 'comment:added',
       programId,
@@ -74,7 +95,7 @@ export async function addComment(
       eventType: 'comment.added',
       programId,
       requestId,
-      data: { comment: populated },
+      data: { comment: populated, request: { title: request.title }, assignedTo: assignedToInfo, createdBy: createdByInfo },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
