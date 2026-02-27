@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/v1/internal/pending-reminders?type=overdue",
+        "url": "http://server:5000/api/v1/internal/pending-reminders",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
@@ -66,7 +66,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/v1/internal/pending-reminders?type=upcoming",
+        "url": "http://server:5000/api/v1/internal/pending-reminders",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
@@ -159,7 +159,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:5000/api/v1/internal/notifications",
+        "url": "http://server:5000/api/v1/internal/notifications",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
@@ -173,7 +173,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"userId\": \"{{ $('Split Into Items').item.json.assignedTo }}\",\n  \"type\": \"reminder\",\n  \"title\": \"Due date reminder\",\n  \"message\": \"Request '{{ $('Fetch Overdue Requests').item.json.reminders[0].title }}' is {{ $json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'due soon' }}\",\n  \"programId\": \"{{ $('Fetch Overdue Requests').item.json.reminders[0].programId }}\",\n  \"requestId\": \"{{ $('Fetch Overdue Requests').item.json.reminders[0].requestId }}\"\n}",
+        "jsonBody": "={\n  \"userId\": \"{{ $json.assignedTo?.userId || $json.createdBy?.userId || '' }}\",\n  \"type\": \"reminder\",\n  \"title\": \"Due date reminder\",\n  \"message\": \"Request '{{ $json.title }}' is {{ $json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'due soon' }}\",\n  \"programId\": \"{{ $json.programId }}\",\n  \"requestId\": \"{{ $json.requestId }}\"\n}",
         "options": {
           "response": {
             "response": {
