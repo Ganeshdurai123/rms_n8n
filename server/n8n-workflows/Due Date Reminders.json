@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 8 * * *"
+              "expression": "0 25 14 * * *"
             }
           ]
         }
@@ -172,8 +172,35 @@
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"userId\": \"{{ $json.assignedTo?.userId || $json.createdBy?.userId || '' }}\",\n  \"type\": \"reminder\",\n  \"title\": \"Due date reminder\",\n  \"message\": \"Request '{{ $json.title }}' is {{ $json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'due soon' }}\",\n  \"programId\": \"{{ $json.programId }}\",\n  \"requestId\": \"{{ $json.requestId }}\"\n}",
+        "specifyBody": "key-value",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "userId",
+              "value": "={{ $json.assignedTo?.userId || $json.createdBy?.userId }}"
+            },
+            {
+              "name": "type",
+              "value": "reminder"
+            },
+            {
+              "name": "title",
+              "value": "Due date reminder"
+            },
+            {
+              "name": "message",
+              "value": "={{ \"Request '\" + $json.title + \"' is \" + ($json.daysOverdue > 0 ? $json.daysOverdue + ' days overdue' : 'due soon') }}"
+            },
+            {
+              "name": "programId",
+              "value": "={{ $json.programId }}"
+            },
+            {
+              "name": "requestId",
+              "value": "={{ $json.requestId }}"
+            }
+          ]
+        },
         "options": {
           "response": {
             "response": {
