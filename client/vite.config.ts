@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const apiTarget = process.env.API_URL || 'http://localhost:5000';
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -17,11 +19,11 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:5000',
+        target: apiTarget,
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:5000',
+        target: apiTarget,
         changeOrigin: true,
         ws: true,
       },

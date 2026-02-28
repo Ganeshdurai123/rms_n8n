@@ -121,6 +121,7 @@ services:
         condition: service_healthy
     environment:
       CI: "true"
+      API_URL: "http://server:5000"
     volumes:
       - ./client:/app
       - /app/node_modules
