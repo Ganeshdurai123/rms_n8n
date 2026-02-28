@@ -252,8 +252,10 @@ export async function createRequest(
     validateFields(data.fields, program.fieldDefinitions);
   }
 
-  // Compute due date from program config
-  const dueDate = computeDueDate(program, data.fields);
+  // Use user-provided due date if present, otherwise compute from program config
+  const dueDate = data.dueDate
+    ? new Date(data.dueDate)
+    : computeDueDate(program, data.fields);
 
   // Create the request document with draft status
   const request = await Request.create({
@@ -516,6 +518,7 @@ export async function updateRequest(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.priority !== undefined) updateData.priority = data.priority;
   if (data.fields !== undefined) updateData.fields = data.fields;
+  if (data.dueDate !== undefined) updateData.dueDate = new Date(data.dueDate);
 
   const updated = await Request.findByIdAndUpdate(requestId, updateData, {
     new: true,

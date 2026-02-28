@@ -27,6 +27,12 @@ export const createRequestSchema = z.object({
     .regex(objectIdRegex, 'Invalid program ID'),
   fields: z.record(z.string(), z.unknown()).optional(),
   priority: z.enum(REQUEST_PRIORITIES).optional(),
+  dueDate: z
+    .string()
+    .refine((val) => !isNaN(new Date(val).getTime()), {
+      message: 'dueDate must be a valid date string',
+    })
+    .optional(),
 });
 
 export type CreateRequestInput = z.infer<typeof createRequestSchema>;
@@ -51,6 +57,12 @@ export const updateRequestSchema = z
       .optional(),
     fields: z.record(z.string(), z.unknown()).optional(),
     priority: z.enum(REQUEST_PRIORITIES).optional(),
+    dueDate: z
+      .string()
+      .refine((val) => !isNaN(new Date(val).getTime()), {
+        message: 'dueDate must be a valid date string',
+      })
+      .optional(),
   })
   .refine(
     (data) => Object.values(data).some((v) => v !== undefined),

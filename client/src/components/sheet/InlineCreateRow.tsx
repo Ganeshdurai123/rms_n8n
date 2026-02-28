@@ -18,6 +18,8 @@ import type { FieldDefinition, RequestPriority, ChecklistItem } from '@/lib/type
 interface InlineCreateRowProps {
   programId: string;
   fieldDefinitions: FieldDefinition[];
+  hasDueDate?: boolean;
+  hasChain?: boolean;
   onCreated: () => void;
   onCancel: () => void;
 }
@@ -25,11 +27,14 @@ interface InlineCreateRowProps {
 export function InlineCreateRow({
   programId,
   fieldDefinitions,
+  hasDueDate,
+  hasChain,
   onCreated,
   onCancel,
 }: InlineCreateRowProps) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<RequestPriority>('medium');
+  const [dueDate, setDueDate] = useState('');
   const [fields, setFields] = useState<Record<string, unknown>>({});
   const [titleError, setTitleError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,6 +67,7 @@ export function InlineCreateRow({
         title: title.trim(),
         description: '',
         priority,
+        dueDate: dueDate || undefined,
         fields: Object.keys(cleanFields).length > 0 ? cleanFields : undefined,
         programId,
       });
@@ -244,6 +250,25 @@ export function InlineCreateRow({
       <TableCell>
         <span className="text-muted-foreground text-sm">-</span>
       </TableCell>
+
+      {/* Due Date */}
+      {hasDueDate && (
+        <TableCell>
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="h-8 text-sm"
+          />
+        </TableCell>
+      )}
+
+      {/* Chain - placeholder */}
+      {hasChain && (
+        <TableCell>
+          <span className="text-muted-foreground text-sm">-</span>
+        </TableCell>
+      )}
 
       {/* Dynamic fields */}
       {sortedDefs.map((def) => (

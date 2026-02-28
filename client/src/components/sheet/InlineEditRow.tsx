@@ -31,6 +31,8 @@ interface InlineEditRowProps {
   request: RequestItem;
   programId: string;
   fieldDefinitions: FieldDefinition[];
+  hasDueDate?: boolean;
+  hasChain?: boolean;
   onSaved: () => void;
   onCancel: () => void;
 }
@@ -39,11 +41,19 @@ export function InlineEditRow({
   request,
   programId,
   fieldDefinitions,
+  hasDueDate,
+  hasChain,
   onSaved,
   onCancel,
 }: InlineEditRowProps) {
   const [title, setTitle] = useState(request.title);
   const [priority, setPriority] = useState<RequestPriority>(request.priority);
+  const [dueDate, setDueDate] = useState(() => {
+    if (!request.dueDate) return '';
+    const d = new Date(request.dueDate);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  });
   const [fields, setFields] = useState<Record<string, unknown>>({
     ...request.fields,
   });
@@ -93,6 +103,14 @@ export function InlineEditRow({
     }
     if (priority !== request.priority) {
       changes.priority = priority;
+    }
+
+    // Diff due date
+    const originalDueDate = request.dueDate
+      ? new Date(request.dueDate).toISOString().slice(0, 10)
+      : '';
+    if (dueDate !== originalDueDate) {
+      changes.dueDate = dueDate || undefined;
     }
 
     // Diff dynamic fields
@@ -323,6 +341,34 @@ export function InlineEditRow({
       <TableCell>
         <span className="text-sm">{formatDate(request.createdAt)}</span>
       </TableCell>
+
+      {/* Due Date */}
+      {hasDueDate && (
+        <TableCell>
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="h-8 text-sm"
+          />
+        </TableCell>
+      )}
+
+      {/* Chain - display only */}
+      {hasChain && (
+        <TableCell>
+          {request.chainId ? (
+            <span className="text-xs whitespace-nowrap">
+              {typeof request.chainId === 'object' ? request.chainId.name : 'Chain'}
+              {request.chainSequence != null && (
+                <span className="text-muted-foreground ml-1">(Step {request.chainSequence})</span>
+              )}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          )}
+        </TableCell>
+      )}
 
       {/* Dynamic fields */}
       {sortedDefs.map((def) => (

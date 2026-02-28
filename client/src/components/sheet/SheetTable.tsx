@@ -203,10 +203,10 @@ export function SheetTable({
   // Always show actions column for inline CRUD
   const hasActions = true;
 
-  // Show Due Date column only if at least one request has a dueDate
+  // Show Due Date column if any request has a dueDate or create row is active
   const hasDueDate = useMemo(
-    () => requests.some((req) => !!req.dueDate),
-    [requests],
+    () => !!showCreateRow || requests.some((req) => !!req.dueDate),
+    [requests, showCreateRow],
   );
 
   // Show Chain column only if at least one request belongs to a chain
@@ -332,6 +332,8 @@ export function SheetTable({
           <InlineCreateRow
             programId={programId}
             fieldDefinitions={fieldDefinitions}
+            hasDueDate={hasDueDate}
+            hasChain={hasChain}
             onCreated={() => {
               onCreateDone();
               onRefresh();
@@ -360,6 +362,8 @@ export function SheetTable({
                   request={req}
                   programId={programId}
                   fieldDefinitions={fieldDefinitions}
+                  hasDueDate={hasDueDate}
+                  hasChain={hasChain}
                   onSaved={() => {
                     setEditingRowId(null);
                     onRefresh();
