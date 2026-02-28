@@ -119,6 +119,8 @@ services:
     depends_on:
       server:
         condition: service_healthy
+    environment:
+      CI: "true"
     volumes:
       - ./client:/app
       - /app/node_modules

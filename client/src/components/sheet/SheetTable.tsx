@@ -203,11 +203,8 @@ export function SheetTable({
   // Always show actions column for inline CRUD
   const hasActions = true;
 
-  // Show Due Date column if any request has a dueDate or create row is active
-  const hasDueDate = useMemo(
-    () => !!showCreateRow || requests.some((req) => !!req.dueDate),
-    [requests, showCreateRow],
-  );
+  // Always show Due Date column
+  const hasDueDate = true;
 
   // Show Chain column only if at least one request belongs to a chain
   const hasChain = useMemo(
@@ -227,6 +224,7 @@ export function SheetTable({
             {FIXED_COLUMNS.map((col) => (
               <TableHead key={col.key}>{col.label}</TableHead>
             ))}
+            <TableHead>Due Date</TableHead>
             {sortedDefs.map((def) => (
               <TableHead key={def.key}>{def.label}</TableHead>
             ))}
@@ -241,6 +239,9 @@ export function SheetTable({
                   <Skeleton className="h-4 w-full" />
                 </TableCell>
               ))}
+              <TableCell>
+                <Skeleton className="h-4 w-full" />
+              </TableCell>
               {sortedDefs.map((def) => (
                 <TableCell key={def.key}>
                   <Skeleton className="h-4 w-full" />

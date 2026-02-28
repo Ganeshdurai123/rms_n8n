@@ -158,23 +158,27 @@ export function RequestInfo({ detail, canAssign, onAssignClick }: RequestInfoPro
             <span className="text-muted-foreground">Last Updated</span>
             <p className="font-medium">{formatDate(request.updatedAt)}</p>
           </div>
-          {request.dueDate && (() => {
-            const indicator = getDueDateIndicator(request.dueDate);
-            return (
-              <div>
-                <span className="text-muted-foreground">Due Date</span>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{formatDate(request.dueDate)}</p>
-                  <Badge
-                    variant="secondary"
-                    className={cn('text-[10px] px-1.5 py-0', indicator.className)}
-                  >
-                    {indicator.label}
-                  </Badge>
-                </div>
+          <div>
+            <span className="text-muted-foreground">Due Date</span>
+            {request.dueDate ? (
+              <div className="flex items-center gap-2">
+                <p className="font-medium">{formatDate(request.dueDate)}</p>
+                {(() => {
+                  const indicator = getDueDateIndicator(request.dueDate);
+                  return (
+                    <Badge
+                      variant="secondary"
+                      className={cn('text-[10px] px-1.5 py-0', indicator.className)}
+                    >
+                      {indicator.label}
+                    </Badge>
+                  );
+                })()}
               </div>
-            );
-          })()}
+            ) : (
+              <p className="font-medium text-muted-foreground">-</p>
+            )}
+          </div>
         </div>
 
         {sortedDefs.length > 0 && (
