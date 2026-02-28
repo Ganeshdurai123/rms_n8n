@@ -87,7 +87,7 @@ export async function createChain(
   // Auto-submit the first request in the chain (sequence=1)
   const firstStep = sortedSteps.find((s) => s.sequence === 1) ?? sortedSteps[0];
   await Request.findByIdAndUpdate(firstStep.requestId, {
-    status: 'submitted',
+    status: 'todo',
   });
 
   // Audit log: chain created
@@ -110,8 +110,8 @@ export async function createChain(
     programId,
     performedBy: userId,
     before: { status: 'draft' },
-    after: { status: 'submitted' },
-    metadata: { from: 'draft', to: 'submitted', chainId: chain._id.toString(), autoTransition: true },
+    after: { status: 'todo' },
+    metadata: { from: 'draft', to: 'todo', chainId: chain._id.toString(), autoTransition: true },
   });
 
   // Fire real-time + webhook events (fire-and-forget)
@@ -120,7 +120,7 @@ export async function createChain(
       event: 'request:status_changed',
       programId,
       requestId: firstStep.requestId,
-      data: { from: 'draft', to: 'submitted', chainId: chain._id.toString(), chainName: data.name },
+      data: { from: 'draft', to: 'todo', chainId: chain._id.toString(), chainName: data.name },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -250,7 +250,7 @@ export async function handleChainProgression(
   const nextRequest = await Request.findById(nextRequestId);
   if (!nextRequest || nextRequest.status !== 'draft') return;
 
-  nextRequest.status = 'submitted';
+  nextRequest.status = 'todo';
   await nextRequest.save();
 
   // Audit log: chain step auto-submitted
@@ -262,7 +262,7 @@ export async function handleChainProgression(
     programId,
     performedBy: userId,
     before: { status: 'draft' },
-    after: { status: 'submitted' },
+    after: { status: 'todo' },
     metadata: {
       chainId: chain._id.toString(),
       chainName: chain.name,
@@ -280,8 +280,8 @@ export async function handleChainProgression(
     programId,
     performedBy: userId,
     before: { status: 'draft' },
-    after: { status: 'submitted' },
-    metadata: { from: 'draft', to: 'submitted', chainId: chain._id.toString(), autoTransition: true },
+    after: { status: 'todo' },
+    metadata: { from: 'draft', to: 'todo', chainId: chain._id.toString(), autoTransition: true },
   });
 
   // Fire real-time + webhook events (fire-and-forget)
@@ -292,7 +292,7 @@ export async function handleChainProgression(
       requestId: nextRequestId,
       data: {
         from: 'draft',
-        to: 'submitted',
+        to: 'todo',
         chainId: chain._id.toString(),
         chainName: chain.name,
         autoTransition: true,
@@ -319,7 +319,7 @@ export async function handleChainProgression(
       requestId: nextRequestId,
       data: {
         from: 'draft',
-        to: 'submitted',
+        to: 'todo',
         chainId: chain._id.toString(),
         chainName: chain.name,
         autoTransition: true,

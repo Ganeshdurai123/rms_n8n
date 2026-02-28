@@ -360,7 +360,7 @@ export async function getMembers(programId: string, query: ListMembersQuery) {
 export async function getBoundaryStats(programId: string) {
   const program = await getProgramById(programId);
 
-  const activeStatuses = ['submitted', 'in_review', 'approved'];
+  const activeStatuses = ['todo', 'in_progress'];
 
   // Total active request count
   const totalActiveRequests = await RequestDoc.countDocuments({

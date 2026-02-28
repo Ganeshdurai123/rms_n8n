@@ -5,10 +5,8 @@ import mongoose, { Schema, Document } from 'mongoose';
  */
 export const REQUEST_STATUSES = [
   'draft',
-  'submitted',
-  'in_review',
-  'approved',
-  'rejected',
+  'todo',
+  'in_progress',
   'completed',
 ] as const;
 

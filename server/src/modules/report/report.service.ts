@@ -325,7 +325,7 @@ export async function generateOverdueReport(
 
   const filter: Record<string, unknown> = {
     dueDate: { $lt: now },
-    status: { $in: ['submitted', 'in_review'] },
+    status: { $in: ['todo', 'in_progress'] },
   };
 
   if (params.programId) {

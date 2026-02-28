@@ -28,10 +28,8 @@ interface SheetToolbarProps {
 const STATUS_OPTIONS = [
   { value: '__all__', label: 'All Statuses' },
   { value: 'draft', label: 'Draft' },
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'in_review', label: 'In Review' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'todo', label: 'Todo' },
+  { value: 'in_progress', label: 'In Progress' },
   { value: 'completed', label: 'Completed' },
 ];
 

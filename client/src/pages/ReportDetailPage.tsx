@@ -78,10 +78,8 @@ const TYPE_BADGE_CLASS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-400',
-  submitted: 'bg-blue-500',
-  in_review: 'bg-yellow-500',
-  approved: 'bg-green-500',
-  rejected: 'bg-red-500',
+  todo: 'bg-blue-500',
+  in_progress: 'bg-yellow-500',
   completed: 'bg-emerald-600',
 };
 

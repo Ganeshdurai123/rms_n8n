@@ -42,12 +42,12 @@ async function seed() {
         const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         const in12h = new Date(now.getTime() + 12 * 60 * 60 * 1000);
 
-        // 3. Create Overdue Request (submitted)
+        // 3. Create Overdue Request (todo)
         await Request.create({
             programId: program._id,
             title: 'Test Overdue Request',
             description: 'This request is overdue.',
-            status: 'submitted',
+            status: 'todo',
             createdBy: user._id,
             assignedTo: user._id,
             priority: 'high',

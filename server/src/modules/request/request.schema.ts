@@ -78,7 +78,7 @@ export type UpdateRequestInput = z.infer<typeof updateRequestSchema>;
  * Only non-draft target statuses are allowed (you cannot transition TO draft).
  */
 export const transitionRequestSchema = z.object({
-  status: z.enum(['submitted', 'in_review', 'approved', 'rejected', 'completed']),
+  status: z.enum(['todo', 'in_progress', 'completed']),
 });
 
 export type TransitionRequestInput = z.infer<typeof transitionRequestSchema>;

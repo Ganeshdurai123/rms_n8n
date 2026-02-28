@@ -188,7 +188,7 @@ export function computeChecklistCompletion(value: unknown): { total: number; che
 
 /**
  * Check program boundary limits before allowing request creation.
- * "Active" requests = status in ['submitted', 'in_review', 'approved'] -- these are requests consuming capacity.
+ * "Active" requests = status in ['todo', 'in_progress'] -- these are requests consuming capacity.
  * Throws AppError with clear message if any limit is exceeded.
  */
 async function checkBoundaryLimits(
@@ -196,7 +196,7 @@ async function checkBoundaryLimits(
   programId: string,
   userId: string,
 ): Promise<void> {
-  const activeStatuses = ['submitted', 'in_review', 'approved'];
+  const activeStatuses = ['todo', 'in_progress'];
 
   // Check program-wide maxActiveRequests
   if (program.settings?.maxActiveRequests !== undefined && program.settings.maxActiveRequests !== null) {
@@ -609,13 +609,10 @@ export async function transitionRequest(
     );
   }
 
-  // Additional rule: only the request creator can submit (draft->submitted) or resubmit (rejected->submitted)
-  if (
-    targetStatus === 'submitted' &&
-    (currentStatus === 'draft' || currentStatus === 'rejected')
-  ) {
+  // Additional rule: only the request creator can submit (draft->todo)
+  if (targetStatus === 'todo' && currentStatus === 'draft') {
     if (request.createdBy.toString() !== userId) {
-      throw new ForbiddenError('Only the request creator can submit or resubmit a request');
+      throw new ForbiddenError('Only the request creator can submit a request');
     }
   }
 

@@ -16,7 +16,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Pencil, Trash2, Loader2, UserPlus } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Loader2,
+  UserPlus,
+  Send,
+  Play,
+  CheckCircle2,
+} from 'lucide-react';
+import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import type { RequestItem, Role } from '@/lib/types';
@@ -27,6 +37,7 @@ interface SheetRowActionsProps {
   onEdit: () => void;
   onDeleted: () => void;
   onAssign?: () => void;
+  onRefresh: () => void;
   userRole: Role;
   userId: string;
 }
@@ -45,24 +56,55 @@ export function SheetRowActions({
   onEdit,
   onDeleted,
   onAssign,
+  onRefresh,
   userRole,
   userId,
 }: SheetRowActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const isDraft = request.status === 'draft';
   const isCreator = getCreatorId(request.createdBy) === userId;
   const isAdmin = userRole === 'admin';
-
   const isManager = userRole === 'manager';
+  const isTeamMember = userRole === 'team_member';
+
   const canEdit = isDraft;
   const canDelete = isDraft && (isCreator || isAdmin);
   const canAssign = (isAdmin || isManager) && request.status !== 'completed';
 
+  // Status transition permissions
+  const canSubmit = isDraft && isCreator;
+  const canStart = request.status === 'todo' && (isAdmin || isManager || isTeamMember);
+  const canComplete = request.status === 'in_progress' && (isAdmin || isManager || isTeamMember);
+
+  const hasAnyAction = canEdit || canDelete || canAssign || canSubmit || canStart || canComplete;
+
   // If no actions available, render nothing
-  if (!canEdit && !canDelete && !canAssign) {
+  if (!hasAnyAction) {
     return null;
+  }
+
+  async function handleTransition(targetStatus: string, label: string) {
+    setIsTransitioning(true);
+    try {
+      await api.patch(
+        `/programs/${programId}/requests/${request._id}/transition`,
+        { status: targetStatus },
+      );
+      toast.success(`Request ${label.toLowerCase()}`);
+      onRefresh();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message || `Failed to ${label.toLowerCase()} request`;
+      toast.error(message);
+    } finally {
+      setIsTransitioning(false);
+    }
   }
 
   async function handleDelete() {
@@ -94,6 +136,37 @@ export function SheetRowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {/* Status transition actions */}
+          {canSubmit && (
+            <DropdownMenuItem
+              onClick={() => handleTransition('todo', 'Submitted')}
+              disabled={isTransitioning}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Submit
+            </DropdownMenuItem>
+          )}
+          {canStart && (
+            <DropdownMenuItem
+              onClick={() => handleTransition('in_progress', 'Started')}
+              disabled={isTransitioning}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start
+            </DropdownMenuItem>
+          )}
+          {canComplete && (
+            <DropdownMenuItem
+              onClick={() => handleTransition('completed', 'Completed')}
+              disabled={isTransitioning}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Complete
+            </DropdownMenuItem>
+          )}
+          {(canSubmit || canStart || canComplete) && (canAssign || canEdit || canDelete) && (
+            <DropdownMenuSeparator />
+          )}
           {canAssign && (
             <DropdownMenuItem onClick={onAssign}>
               <UserPlus className="h-4 w-4 mr-2" />

@@ -4,11 +4,9 @@ import type { CalendarViewMode } from './useCalendarData';
 
 const STATUS_DOT: Record<string, string> = {
   draft: 'bg-gray-400',
-  submitted: 'bg-blue-500',
-  in_review: 'bg-yellow-500',
-  approved: 'bg-green-500',
-  rejected: 'bg-red-500',
-  completed: 'bg-gray-300',
+  todo: 'bg-blue-500',
+  in_progress: 'bg-yellow-500',
+  completed: 'bg-green-500',
 };
 
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
