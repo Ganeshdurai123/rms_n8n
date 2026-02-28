@@ -27,6 +27,23 @@ async function getPerformerName(userId: string): Promise<{ userId: string; name:
 }
 
 /**
+ * Look up a user's email and display name for webhook payloads.
+ * Returns null if userId is falsy or user not found.
+ */
+async function getUserEmailInfo(
+  userId: string | undefined | null,
+): Promise<{ userId: string; name: string; email: string } | null> {
+  if (!userId) return null;
+  const user = await User.findById(userId).select('firstName lastName email').lean();
+  if (!user) return null;
+  return {
+    userId,
+    name: `${user.firstName} ${user.lastName}`.trim(),
+    email: user.email ?? '',
+  };
+}
+
+/**
  * Validate dynamic field values against a program's field definitions.
  * Enforces: required fields, type correctness, dropdown options, no extra fields.
  */
@@ -171,7 +188,7 @@ export function computeChecklistCompletion(value: unknown): { total: number; che
 
 /**
  * Check program boundary limits before allowing request creation.
- * "Active" requests = status in ['submitted', 'in_review', 'approved'] -- these are requests consuming capacity.
+ * "Active" requests = status in ['todo', 'in_progress'] -- these are requests consuming capacity.
  * Throws AppError with clear message if any limit is exceeded.
  */
 async function checkBoundaryLimits(
@@ -179,7 +196,7 @@ async function checkBoundaryLimits(
   programId: string,
   userId: string,
 ): Promise<void> {
-  const activeStatuses = ['submitted', 'in_review', 'approved'];
+  const activeStatuses = ['todo', 'in_progress'];
 
   // Check program-wide maxActiveRequests
   if (program.settings?.maxActiveRequests !== undefined && program.settings.maxActiveRequests !== null) {
@@ -235,8 +252,10 @@ export async function createRequest(
     validateFields(data.fields, program.fieldDefinitions);
   }
 
-  // Compute due date from program config
-  const dueDate = computeDueDate(program, data.fields);
+  // Use user-provided due date if present, otherwise compute from program config
+  const dueDate = data.dueDate
+    ? new Date(data.dueDate)
+    : computeDueDate(program, data.fields);
 
   // Create the request document with draft status
   const request = await Request.create({
@@ -499,6 +518,7 @@ export async function updateRequest(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.priority !== undefined) updateData.priority = data.priority;
   if (data.fields !== undefined) updateData.fields = data.fields;
+  if (data.dueDate !== undefined) updateData.dueDate = new Date(data.dueDate);
 
   const updated = await Request.findByIdAndUpdate(requestId, updateData, {
     new: true,
@@ -589,13 +609,10 @@ export async function transitionRequest(
     );
   }
 
-  // Additional rule: only the request creator can submit (draft->submitted) or resubmit (rejected->submitted)
-  if (
-    targetStatus === 'submitted' &&
-    (currentStatus === 'draft' || currentStatus === 'rejected')
-  ) {
-    if (request.createdBy.toString() !== userId) {
-      throw new ForbiddenError('Only the request creator can submit or resubmit a request');
+  // Additional rule: only the request creator (or admin/manager) can submit (draft->todo)
+  if (targetStatus === 'todo' && currentStatus === 'draft') {
+    if (request.createdBy.toString() !== userId && userRole !== 'admin' && userRole !== 'manager') {
+      throw new ForbiddenError('Only the request creator can submit a request');
     }
   }
 
@@ -631,7 +648,11 @@ export async function transitionRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notifications (fire-and-forget)
-  getPerformerName(userId).then((performer) => {
+  getPerformerName(userId).then(async (performer) => {
+    const [assignedToInfo, createdByInfo] = await Promise.all([
+      getUserEmailInfo(request.assignedTo?.toString()),
+      getUserEmailInfo(request.createdBy.toString()),
+    ]);
     emitToProgram(request.programId.toString(), 'request:status_changed', {
       event: 'request:status_changed',
       programId: request.programId.toString(),
@@ -644,7 +665,7 @@ export async function transitionRequest(
       eventType: 'request.status_changed',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus, assignedTo: assignedToInfo, createdBy: createdByInfo },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -759,7 +780,11 @@ export async function assignRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notification (fire-and-forget)
-  getPerformerName(performedByUserId).then((performer) => {
+  getPerformerName(performedByUserId).then(async (performer) => {
+    const [assignedToInfo, createdByInfo] = await Promise.all([
+      getUserEmailInfo(assignedToUserId),
+      getUserEmailInfo(request.createdBy.toString()),
+    ]);
     emitToProgram(request.programId.toString(), 'request:assigned', {
       event: 'request:assigned',
       programId: request.programId.toString(),
@@ -772,7 +797,7 @@ export async function assignRequest(
       eventType: 'request.assigned',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      data: { request: updated.toObject(), assignedTo: assignedToInfo, createdBy: createdByInfo, previousAssignee: beforeAssignee },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });

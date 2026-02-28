@@ -18,19 +18,19 @@ import { cn } from '@/lib/utils';
 
 const STATUS_VARIANT: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
-  submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  in_review:
+  todo: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  in_progress:
     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  approved:
+  completed:
     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  completed: 'bg-muted text-muted-foreground',
 };
 
 interface InlineEditRowProps {
   request: RequestItem;
   programId: string;
   fieldDefinitions: FieldDefinition[];
+  hasDueDate?: boolean;
+  hasChain?: boolean;
   onSaved: () => void;
   onCancel: () => void;
 }
@@ -39,11 +39,19 @@ export function InlineEditRow({
   request,
   programId,
   fieldDefinitions,
+  hasDueDate,
+  hasChain,
   onSaved,
   onCancel,
 }: InlineEditRowProps) {
   const [title, setTitle] = useState(request.title);
   const [priority, setPriority] = useState<RequestPriority>(request.priority);
+  const [dueDate, setDueDate] = useState(() => {
+    if (!request.dueDate) return '';
+    const d = new Date(request.dueDate);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  });
   const [fields, setFields] = useState<Record<string, unknown>>({
     ...request.fields,
   });
@@ -93,6 +101,14 @@ export function InlineEditRow({
     }
     if (priority !== request.priority) {
       changes.priority = priority;
+    }
+
+    // Diff due date
+    const originalDueDate = request.dueDate
+      ? new Date(request.dueDate).toISOString().slice(0, 10)
+      : '';
+    if (dueDate !== originalDueDate) {
+      changes.dueDate = dueDate || undefined;
     }
 
     // Diff dynamic fields
@@ -323,6 +339,34 @@ export function InlineEditRow({
       <TableCell>
         <span className="text-sm">{formatDate(request.createdAt)}</span>
       </TableCell>
+
+      {/* Due Date */}
+      {hasDueDate && (
+        <TableCell>
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="h-8 text-sm"
+          />
+        </TableCell>
+      )}
+
+      {/* Chain - display only */}
+      {hasChain && (
+        <TableCell>
+          {request.chainId ? (
+            <span className="text-xs whitespace-nowrap">
+              {typeof request.chainId === 'object' ? request.chainId.name : 'Chain'}
+              {request.chainSequence != null && (
+                <span className="text-muted-foreground ml-1">(Step {request.chainSequence})</span>
+              )}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          )}
+        </TableCell>
+      )}
 
       {/* Dynamic fields */}
       {sortedDefs.map((def) => (

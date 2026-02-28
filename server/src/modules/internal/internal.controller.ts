@@ -176,10 +176,16 @@ export const getPendingReminders = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { programId, type } = req.query as {
+    const { programId, type: rawType } = req.query as {
       programId?: string;
-      type?: 'upcoming' | 'overdue';
+      type?: string | string[];
     };
+
+    // Normalise type -- n8n may send duplicate query params causing an array
+    const type: 'upcoming' | 'overdue' | undefined =
+      Array.isArray(rawType)
+        ? (rawType[0] as 'upcoming' | 'overdue' | undefined)
+        : (rawType as 'upcoming' | 'overdue' | undefined);
 
     const now = new Date();
     const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -196,12 +202,12 @@ export const getPendingReminders = async (
     // Build type-specific query conditions
     const overdueCondition = {
       dueDate: { $lt: now },
-      status: { $in: ['submitted', 'in_review'] },
+      status: { $in: ['todo', 'in_progress'] },
     };
 
     const upcomingCondition = {
       dueDate: { $gte: now, $lte: in24h },
-      status: { $in: ['submitted', 'in_review', 'draft'] },
+      status: { $in: ['todo', 'in_progress', 'draft'] },
     };
 
     let typeFilter: Record<string, unknown>;
@@ -253,12 +259,14 @@ export const getPendingReminders = async (
         daysOverdue,
         assignedTo: assignedToUser
           ? {
+              userId: assignedToUser._id.toString(),
               email: assignedToUser.email ?? '',
               name: `${assignedToUser.firstName ?? ''} ${assignedToUser.lastName ?? ''}`.trim(),
             }
           : null,
         createdBy: createdByUser
           ? {
+              userId: createdByUser._id.toString(),
               email: createdByUser.email ?? '',
               name: `${createdByUser.firstName ?? ''} ${createdByUser.lastName ?? ''}`.trim(),
             }

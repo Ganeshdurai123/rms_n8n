@@ -2,17 +2,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Check, Minus, UserPlus } from 'lucide-react';
+import { Check, Minus, UserPlus, Send, Play, CheckCircle2, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import api from '@/lib/api';
 import { cn } from '@/lib/utils';
-import type { RequestDetail, FieldDefinition, ChecklistItem } from '@/lib/types';
+import type { RequestDetail, FieldDefinition, ChecklistItem, Role } from '@/lib/types';
 
 const STATUS_VARIANT: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
-  submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  in_review: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  completed: 'bg-muted text-muted-foreground',
+  todo: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  in_progress: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 };
 
 const PRIORITY_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -89,11 +90,47 @@ interface RequestInfoProps {
   detail: RequestDetail;
   canAssign?: boolean;
   onAssignClick?: () => void;
+  userRole?: Role;
+  userId?: string;
+  onRefresh?: () => void;
 }
 
-export function RequestInfo({ detail, canAssign, onAssignClick }: RequestInfoProps) {
+export function RequestInfo({ detail, canAssign, onAssignClick, userRole, userId, onRefresh }: RequestInfoProps) {
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const { request } = detail;
   const program = request.programId;
+
+  const creatorId = request.createdBy
+    ? typeof request.createdBy === 'string'
+      ? request.createdBy
+      : request.createdBy._id
+    : '';
+
+  const isCreator = creatorId === userId;
+  const canSubmit = request.status === 'draft' && isCreator;
+  const canStart = request.status === 'todo' && (userRole === 'admin' || userRole === 'manager' || userRole === 'team_member');
+  const canComplete = request.status === 'in_progress' && (userRole === 'admin' || userRole === 'manager' || userRole === 'team_member');
+
+  async function handleTransition(targetStatus: string, label: string) {
+    setIsTransitioning(true);
+    try {
+      await api.patch(
+        `/programs/${program._id}/requests/${request._id}/transition`,
+        { status: targetStatus },
+      );
+      toast.success(`Request ${label.toLowerCase()}`);
+      onRefresh?.();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message || `Failed to ${label.toLowerCase()} request`;
+      toast.error(message);
+    } finally {
+      setIsTransitioning(false);
+    }
+  }
   const fieldDefinitions: FieldDefinition[] = program.fieldDefinitions || [];
   const sortedDefs = [...fieldDefinitions].sort((a, b) => a.order - b.order);
 
@@ -120,6 +157,37 @@ export function RequestInfo({ detail, canAssign, onAssignClick }: RequestInfoPro
             >
               {request.priority}
             </Badge>
+            {canSubmit && (
+              <Button
+                size="sm"
+                onClick={() => handleTransition('todo', 'Submitted')}
+                disabled={isTransitioning}
+              >
+                {isTransitioning ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                Submit
+              </Button>
+            )}
+            {canStart && (
+              <Button
+                size="sm"
+                onClick={() => handleTransition('in_progress', 'Started')}
+                disabled={isTransitioning}
+              >
+                {isTransitioning ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Play className="h-4 w-4 mr-1" />}
+                Start
+              </Button>
+            )}
+            {canComplete && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => handleTransition('completed', 'Completed')}
+                disabled={isTransitioning}
+              >
+                {isTransitioning ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
+                Complete
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -158,23 +226,27 @@ export function RequestInfo({ detail, canAssign, onAssignClick }: RequestInfoPro
             <span className="text-muted-foreground">Last Updated</span>
             <p className="font-medium">{formatDate(request.updatedAt)}</p>
           </div>
-          {request.dueDate && (() => {
-            const indicator = getDueDateIndicator(request.dueDate);
-            return (
-              <div>
-                <span className="text-muted-foreground">Due Date</span>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{formatDate(request.dueDate)}</p>
-                  <Badge
-                    variant="secondary"
-                    className={cn('text-[10px] px-1.5 py-0', indicator.className)}
-                  >
-                    {indicator.label}
-                  </Badge>
-                </div>
+          <div>
+            <span className="text-muted-foreground">Due Date</span>
+            {request.dueDate ? (
+              <div className="flex items-center gap-2">
+                <p className="font-medium">{formatDate(request.dueDate)}</p>
+                {(() => {
+                  const indicator = getDueDateIndicator(request.dueDate);
+                  return (
+                    <Badge
+                      variant="secondary"
+                      className={cn('text-[10px] px-1.5 py-0', indicator.className)}
+                    >
+                      {indicator.label}
+                    </Badge>
+                  );
+                })()}
               </div>
-            );
-          })()}
+            ) : (
+              <p className="font-medium text-muted-foreground">-</p>
+            )}
+          </div>
         </div>
 
         {sortedDefs.length > 0 && (

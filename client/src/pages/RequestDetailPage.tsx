@@ -211,6 +211,9 @@ export function RequestDetailPage() {
           detail={detail}
           canAssign={canAssign}
           onAssignClick={() => setShowAssignDialog(true)}
+          userRole={user?.role}
+          userId={user?._id}
+          onRefresh={handleRefresh}
         />
 
         {/* Assign Request Dialog */}

@@ -1,16 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Check, Circle, Clock, XCircle } from 'lucide-react';
+import { Check, Circle, Clock } from 'lucide-react';
 import type { RequestChain, RequestStatus } from '@/lib/types';
 
 const STATUS_VARIANT: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
-  submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  in_review: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  completed: 'bg-muted text-muted-foreground',
+  todo: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  in_progress: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 };
 
 const CHAIN_STATUS_VARIANT: Record<string, string> = {
@@ -18,12 +16,11 @@ const CHAIN_STATUS_VARIANT: Record<string, string> = {
   completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 };
 
-type StepCategory = 'completed' | 'active' | 'pending' | 'rejected';
+type StepCategory = 'completed' | 'active' | 'pending';
 
 function getStepCategory(status: RequestStatus): StepCategory {
   if (status === 'completed') return 'completed';
-  if (status === 'rejected') return 'rejected';
-  if (status === 'submitted' || status === 'in_review' || status === 'approved') return 'active';
+  if (status === 'todo' || status === 'in_progress') return 'active';
   return 'pending';
 }
 
@@ -33,8 +30,6 @@ function StepIcon({ category }: { category: StepCategory }) {
       return <Check className="h-3.5 w-3.5 text-white" />;
     case 'active':
       return <Clock className="h-3.5 w-3.5 text-white" />;
-    case 'rejected':
-      return <XCircle className="h-3.5 w-3.5 text-white" />;
     default:
       return <Circle className="h-3.5 w-3.5 text-muted-foreground" />;
   }
@@ -43,7 +38,6 @@ function StepIcon({ category }: { category: StepCategory }) {
 const CIRCLE_CLASS: Record<StepCategory, string> = {
   completed: 'bg-green-600',
   active: 'bg-blue-600',
-  rejected: 'bg-red-600',
   pending: 'bg-muted border border-border',
 };
 
@@ -113,7 +107,6 @@ export function ChainStatusPanel({ chain, currentRequestId }: ChainStatusPanelPr
                         category === 'completed' && 'text-muted-foreground',
                         category === 'active' && 'font-semibold',
                         category === 'pending' && 'text-muted-foreground/70',
-                        category === 'rejected' && 'line-through text-muted-foreground',
                       )}
                     >
                       {title}

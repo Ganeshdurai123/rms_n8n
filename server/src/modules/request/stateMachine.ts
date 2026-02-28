@@ -5,34 +5,27 @@ import type { Role } from '../../shared/types.js';
  * Valid status transitions for the request lifecycle.
  *
  * Lifecycle flow:
- *   draft -> submitted -> in_review -> approved -> completed
- *                  \          \-> rejected -> submitted (resubmission)
- *                   \-> rejected
+ *   draft -> (submit) -> todo -> (pick/start) -> in_progress -> (complete) -> completed
  */
 export const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
-  draft: ['submitted'],
-  submitted: ['in_review', 'rejected'],
-  in_review: ['approved', 'rejected'],
-  approved: ['completed'],
-  rejected: ['submitted'], // Allows resubmission after rejection
+  draft: ['todo'],
+  todo: ['in_progress'],
+  in_progress: ['completed'],
   completed: [], // Terminal state
 };
 
 /**
  * Role-based transition authorization.
  * Maps each "from->to" transition key to the roles allowed to perform it.
- * All roles can submit their own drafts and resubmit after rejection.
+ * All roles can submit their drafts.
+ * Admin, manager, and team_member can pick (start) and complete requests.
  */
 const ALL_ROLES: Role[] = ['admin', 'manager', 'team_member', 'client'];
 
 export const TRANSITION_ROLES: Record<string, Role[]> = {
-  'draft->submitted': ALL_ROLES,
-  'submitted->in_review': ['admin', 'manager'],
-  'submitted->rejected': ['admin', 'manager'],
-  'in_review->approved': ['admin', 'manager'],
-  'in_review->rejected': ['admin', 'manager'],
-  'approved->completed': ['admin', 'manager'],
-  'rejected->submitted': ALL_ROLES,
+  'draft->todo': ALL_ROLES,
+  'todo->in_progress': ['admin', 'manager', 'team_member'],
+  'in_progress->completed': ['admin', 'manager', 'team_member'],
 };
 
 /**

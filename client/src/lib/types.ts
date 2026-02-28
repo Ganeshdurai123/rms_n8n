@@ -1,6 +1,6 @@
 export type Role = 'admin' | 'manager' | 'team_member' | 'client';
 export type ProgramRole = 'manager' | 'team_member' | 'client';
-export type RequestStatus = 'draft' | 'submitted' | 'in_review' | 'approved' | 'rejected' | 'completed';
+export type RequestStatus = 'draft' | 'todo' | 'in_progress' | 'completed';
 export type RequestPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type FieldType = 'text' | 'number' | 'date' | 'dropdown' | 'checkbox' | 'checklist' | 'file_upload';
 

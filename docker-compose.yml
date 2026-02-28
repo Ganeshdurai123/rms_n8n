@@ -68,6 +68,8 @@ services:
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: ${N8N_USER}
       N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      GENERIC_TIMEZONE: Asia/Kolkata
       WEBHOOK_URL: http://n8n:5678/
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:5678/healthz || exit 1"]
@@ -92,6 +94,10 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      CI: "true"
+      MONGO_URI: mongodb://mongo:27017/rms
+      REDIS_URL: redis://redis:6379
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -114,6 +120,9 @@ services:
     depends_on:
       server:
         condition: service_healthy
+    environment:
+      CI: "true"
+      API_URL: "http://server:5000"
     volumes:
       - ./client:/app
       - /app/node_modules

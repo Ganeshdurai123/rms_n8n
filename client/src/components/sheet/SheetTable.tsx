@@ -36,13 +36,11 @@ interface SheetTableProps {
 
 const STATUS_VARIANT: Record<string, string> = {
   draft: 'bg-secondary text-secondary-foreground',
-  submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  in_review:
+  todo: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  in_progress:
     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  approved:
+  completed:
     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  completed: 'bg-muted text-muted-foreground',
 };
 
 const PRIORITY_VARIANT: Record<
@@ -203,11 +201,8 @@ export function SheetTable({
   // Always show actions column for inline CRUD
   const hasActions = true;
 
-  // Show Due Date column only if at least one request has a dueDate
-  const hasDueDate = useMemo(
-    () => requests.some((req) => !!req.dueDate),
-    [requests],
-  );
+  // Always show Due Date column
+  const hasDueDate = true;
 
   // Show Chain column only if at least one request belongs to a chain
   const hasChain = useMemo(
@@ -227,6 +222,7 @@ export function SheetTable({
             {FIXED_COLUMNS.map((col) => (
               <TableHead key={col.key}>{col.label}</TableHead>
             ))}
+            <TableHead>Due Date</TableHead>
             {sortedDefs.map((def) => (
               <TableHead key={def.key}>{def.label}</TableHead>
             ))}
@@ -241,6 +237,9 @@ export function SheetTable({
                   <Skeleton className="h-4 w-full" />
                 </TableCell>
               ))}
+              <TableCell>
+                <Skeleton className="h-4 w-full" />
+              </TableCell>
               {sortedDefs.map((def) => (
                 <TableCell key={def.key}>
                   <Skeleton className="h-4 w-full" />
@@ -332,6 +331,8 @@ export function SheetTable({
           <InlineCreateRow
             programId={programId}
             fieldDefinitions={fieldDefinitions}
+            hasDueDate={hasDueDate}
+            hasChain={hasChain}
             onCreated={() => {
               onCreateDone();
               onRefresh();
@@ -360,6 +361,8 @@ export function SheetTable({
                   request={req}
                   programId={programId}
                   fieldDefinitions={fieldDefinitions}
+                  hasDueDate={hasDueDate}
+                  hasChain={hasChain}
                   onSaved={() => {
                     setEditingRowId(null);
                     onRefresh();
@@ -498,6 +501,7 @@ export function SheetTable({
                       onEdit={() => setEditingRowId(req._id)}
                       onDeleted={onRefresh}
                       onAssign={onAssign ? () => onAssign(req) : undefined}
+                      onRefresh={onRefresh}
                       userRole={userRole}
                       userId={userId}
                     />
