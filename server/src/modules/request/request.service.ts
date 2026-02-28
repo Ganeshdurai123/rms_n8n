@@ -609,9 +609,9 @@ export async function transitionRequest(
     );
   }
 
-  // Additional rule: only the request creator can submit (draft->todo)
+  // Additional rule: only the request creator (or admin/manager) can submit (draft->todo)
   if (targetStatus === 'todo' && currentStatus === 'draft') {
-    if (request.createdBy.toString() !== userId) {
+    if (request.createdBy.toString() !== userId && userRole !== 'admin' && userRole !== 'manager') {
       throw new ForbiddenError('Only the request creator can submit a request');
     }
   }
