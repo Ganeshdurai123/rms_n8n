@@ -1,13 +1,15 @@
 FROM node:20-alpine
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
 EXPOSE 5000
 
-CMD ["npx", "tsx", "watch", "src/server.ts"]
+CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm dev"]
