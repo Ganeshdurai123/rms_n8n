@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { useSocket } from '@/lib/socket';
 import type { RequestDetail } from '@/lib/types';
 import { RequestInfo } from '@/components/request/RequestInfo';
+import { StatusTransitionButtons } from '@/components/request/StatusTransitionButtons';
 import { AssignRequestDialog } from '@/components/request/AssignRequestDialog';
 import { ChainStatusPanel } from '@/components/request/ChainStatusPanel';
 import { CommentTimeline } from '@/components/request/CommentTimeline';
@@ -96,12 +97,12 @@ export function RequestDetailPage() {
   }, []);
 
   const handleAssign = useCallback(
-    async (userId: string) => {
+    async (userId: string, dueDate: string | null) => {
       if (!programId || !requestId) return;
       try {
         await api.patch(
           `/programs/${programId}/requests/${requestId}/assign`,
-          { assignedTo: userId },
+          { assignedTo: userId, dueDate },
         );
         toast.success('Request assigned successfully');
         fetchDetail();
@@ -110,7 +111,7 @@ export function RequestDetailPage() {
           err instanceof Error
             ? err.message
             : (err as { response?: { data?: { message?: string } } })?.response
-                ?.data?.message || 'Failed to assign request';
+              ?.data?.message || 'Failed to assign request';
         toast.error(message);
         throw err; // Re-throw so dialog stays open on error
       }
@@ -206,6 +207,22 @@ export function RequestDetailPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto px-6 py-6 space-y-6">
+        {/* Status Transition Actions */}
+        <div className="flex items-center justify-between bg-muted/20 p-4 rounded-lg border border-dashed border-muted-foreground/20">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status Controls:</span>
+            <StatusTransitionButtons
+              requestId={requestId!}
+              programId={programId!}
+              currentStatus={detail.request.status}
+              userRole={user?.role || 'client'}
+              userId={user?._id || ''}
+              creatorId={typeof detail.request.createdBy === 'string' ? detail.request.createdBy : detail.request.createdBy._id}
+              onTransition={handleRefresh}
+            />
+          </div>
+        </div>
+
         {/* Request Info Card */}
         <RequestInfo
           detail={detail}
@@ -220,6 +237,7 @@ export function RequestDetailPage() {
             onOpenChange={setShowAssignDialog}
             members={members}
             currentAssigneeId={currentAssigneeId}
+            currentDueDate={detail.request.dueDate}
             onAssign={handleAssign}
           />
         )}

@@ -11,8 +11,11 @@
       "id": "webhook-trigger",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [250, 300],
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
       "webhookId": "report-requested"
     },
     {
@@ -28,19 +31,16 @@
             }
           ]
         },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
+        "options": {}
       },
       "id": "fetch-report-data",
       "name": "Fetch Report Data",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [500, 300]
+      "typeVersion": 4.1,
+      "position": [
+        500,
+        300
+      ]
     },
     {
       "parameters": {
@@ -60,21 +60,18 @@
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"reportId\": \"{{ $json.reportId }}\",\n  \"result\": {{ JSON.stringify($json.result) }}\n}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
+        "bodyType": "json",
+        "body": "={\n  \"reportId\": \"{{ $json.reportId }}\",\n  \"result\": {{ JSON.stringify($json.result) }}\n}",
+        "options": {}
       },
       "id": "complete-report",
       "name": "Complete Report",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [750, 300]
+      "typeVersion": 4.1,
+      "position": [
+        750,
+        300
+      ]
     }
   ],
   "connections": {
@@ -108,7 +105,7 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-02-23T14:10:00.000Z",
+  "updatedAt": "2026-02-28T04:40:29.000Z",
   "versionId": "1",
   "active": false
 }

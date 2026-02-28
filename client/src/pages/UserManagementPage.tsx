@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -108,7 +107,7 @@ function CreateUserDialog({
       const msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+            ?.data?.message
           : 'Failed to create user';
       toast.error(msg || 'Failed to create user');
     } finally {
@@ -244,7 +243,7 @@ function EditUserDialog({
       const msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+            ?.data?.message
           : 'Failed to update user';
       toast.error(msg || 'Failed to update user');
     } finally {
@@ -387,7 +386,7 @@ function AssignProgramDialog({
       const msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+            ?.data?.message
           : 'Failed to assign user';
       toast.error(msg || 'Failed to assign user');
     } finally {

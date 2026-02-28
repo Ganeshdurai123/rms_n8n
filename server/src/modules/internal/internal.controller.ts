@@ -1,5 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 import { getIO } from '../../config/socket.js';
+import {
+  transitionRequest,
+  updateRequest,
+} from '../request/request.service.js';
 import logger from '../../config/logger.js';
 import type { SocketEventName, SocketEventPayload } from '../../shared/socketEvents.js';
 import { createNotificationFromInternal } from '../notification/notification.service.js';
@@ -196,7 +200,7 @@ export const getPendingReminders = async (
     // Build type-specific query conditions
     const overdueCondition = {
       dueDate: { $lt: now },
-      status: { $in: ['submitted', 'in_review'] },
+      status: { $in: ['submitted', 'in_review', 'draft'] }, // Included 'draft' for flexibility
     };
 
     const upcomingCondition = {
@@ -251,22 +255,80 @@ export const getPendingReminders = async (
         status: r.status,
         dueDate: r.dueDate?.toISOString(),
         daysOverdue,
+        staleSince: r.dueDate ? r.dueDate.toLocaleDateString() : 'Unknown', // Added for n8n compatibility
         assignedTo: assignedToUser
           ? {
-              email: assignedToUser.email ?? '',
-              name: `${assignedToUser.firstName ?? ''} ${assignedToUser.lastName ?? ''}`.trim(),
-            }
+            userId: assignedToUser._id.toString(), // Include ID for internal notification
+            email: assignedToUser.email ?? '',
+            name: `${assignedToUser.firstName ?? ''} ${assignedToUser.lastName ?? ''}`.trim(),
+          }
           : null,
         createdBy: createdByUser
           ? {
-              email: createdByUser.email ?? '',
-              name: `${createdByUser.firstName ?? ''} ${createdByUser.lastName ?? ''}`.trim(),
-            }
+            userId: createdByUser._id.toString(), // Include ID for internal notification
+            email: createdByUser.email ?? '',
+            name: `${createdByUser.firstName ?? ''} ${createdByUser.lastName ?? ''}`.trim(),
+          }
           : null,
       };
     });
 
     res.json({ reminders, count: reminders.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Transition a request status via internal API.
+ * POST /api/v1/internal/requests/:requestId/transition
+ */
+export const transitionRequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    // Use a system user or the performing user ID if provided
+    const systemUserId = '000000000000000000001001'; // Default system ID
+
+    const updated = await transitionRequest(
+      requestId as string,
+      status,
+      systemUserId,
+      'admin',
+    );
+
+    res.json({ success: true, request: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update request fields (including dueDate) via internal API.
+ * PATCH /api/v1/internal/requests/:requestId
+ */
+export const updateRequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { requestId } = req.params;
+    const data = req.body;
+
+    const updated = await updateRequest(
+      requestId as string,
+      data,
+      '000000000000000000001001', // system user
+      'admin',
+    );
+
+    res.json({ success: true, request: updated });
   } catch (error) {
     next(error);
   }

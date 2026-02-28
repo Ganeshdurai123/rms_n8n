@@ -15,6 +15,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Plus, Radio, Calendar, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ProgramMember {
   _id: string;
@@ -35,6 +45,10 @@ export function SheetViewPage() {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [showBoundaryStats, setShowBoundaryStats] = useState(false);
   const [assigningRequest, setAssigningRequest] = useState<RequestItem | null>(null);
+  const [showDueDateSettings, setShowDueDateSettings] = useState(false);
+  const [dueDateSettingsEnabled, setDueDateSettingsEnabled] = useState(false);
+  const [dueDateSettingsOffset, setDueDateSettingsOffset] = useState(7);
+  const [savingDueDate, setSavingDueDate] = useState(false);
 
   const {
     requests,
@@ -66,7 +80,11 @@ export function SheetViewPage() {
         const { data } = await api.get(`/programs/${programId}`);
         if (!cancelled) {
           // API returns { program: {...} }
-          setProgram(data.program || data.data || data);
+          const p = data.program || data.data || data;
+          setProgram(p);
+          // Seed Due Date dialog state from loaded program
+          setDueDateSettingsEnabled(!!p?.dueDateConfig?.enabled);
+          setDueDateSettingsOffset(p?.dueDateConfig?.defaultOffsetDays ?? 7);
         }
       } catch (err) {
         if (!cancelled) {
@@ -235,13 +253,34 @@ export function SheetViewPage() {
           err instanceof Error
             ? err.message
             : (err as { response?: { data?: { message?: string } } })?.response
-                ?.data?.message || 'Failed to assign request';
+              ?.data?.message || 'Failed to assign request';
         toast.error(message);
         throw err;
       }
     },
     [programId, assigningRequest, refresh],
   );
+
+  const handleSaveDueDateSettings = useCallback(async () => {
+    if (!programId) return;
+    setSavingDueDate(true);
+    try {
+      const { data } = await api.patch(`/programs/${programId}`, {
+        dueDateConfig: {
+          enabled: dueDateSettingsEnabled,
+          defaultOffsetDays: dueDateSettingsOffset,
+        },
+      });
+      const updated = data.program || data.data || data;
+      setProgram(updated);
+      toast.success('Due date settings saved!');
+      setShowDueDateSettings(false);
+    } catch {
+      toast.error('Failed to save due date settings');
+    } finally {
+      setSavingDueDate(false);
+    }
+  }, [programId, dueDateSettingsEnabled, dueDateSettingsOffset]);
 
   // Real-time Socket.IO updates -- refresh sheet data when events arrive
   const socketEvents = useMemo(() => ({
@@ -340,6 +379,18 @@ export function SheetViewPage() {
               Limits
             </Button>
           )}
+          {(user?.role === 'admin' || user?.role === 'manager') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setShowDueDateSettings(true); }}
+              className={program?.dueDateConfig?.enabled ? 'border-primary text-primary' : ''}
+              title={program?.dueDateConfig?.enabled ? 'Due dates enabled' : 'Due dates disabled'}
+            >
+              <Calendar className="h-4 w-4 mr-1" />
+              Due Dates
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -358,6 +409,62 @@ export function SheetViewPage() {
           </Button>
         </div>
       </div>
+
+      {/* Due Date Settings Dialog */}
+      <Dialog open={showDueDateSettings} onOpenChange={setShowDueDateSettings}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Due Date Settings</DialogTitle>
+            <DialogDescription>
+              Configure how due dates are assigned to new requests in <strong>{program?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <Label className="font-medium">Enable Due Dates</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Automatically assign a due date when a request is created.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={dueDateSettingsEnabled}
+                onChange={(e) => setDueDateSettingsEnabled(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-primary"
+              />
+            </div>
+            {dueDateSettingsEnabled && (
+              <div className="space-y-2">
+                <Label htmlFor="sheet-due-offset">Default Days Until Due</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    id="sheet-due-offset"
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={dueDateSettingsOffset}
+                    onChange={(e) => setDueDateSettingsOffset(Math.max(1, Math.min(365, parseInt(e.target.value, 10) || 1)))}
+                    className="w-28"
+                  />
+                  <span className="text-sm text-muted-foreground">days after creation</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  New requests will be due {dueDateSettingsOffset} day{dueDateSettingsOffset !== 1 ? 's' : ''} after they are created.
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDueDateSettings(false)} disabled={savingDueDate}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveDueDateSettings} disabled={savingDueDate}>
+              {savingDueDate ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Boundary Stats Panel (collapsible) */}
       {showBoundaryStats && programId && (

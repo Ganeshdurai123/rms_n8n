@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
@@ -26,7 +26,6 @@ const STEPS = [
 
 export function ImportWizardPage() {
   const { programId } = useParams<{ programId: string }>();
-  const navigate = useNavigate();
 
   // Program data
   const [program, setProgram] = useState<Program | null>(null);
@@ -167,22 +166,20 @@ export function ImportWizardPage() {
           {STEPS.map((step) => (
             <div
               key={step.number}
-              className={`flex items-center gap-2 text-sm font-medium ${
-                step.number === currentStep
-                  ? 'text-primary'
-                  : step.number < currentStep
-                    ? 'text-green-600'
-                    : 'text-muted-foreground'
-              }`}
+              className={`flex items-center gap-2 text-sm font-medium ${step.number === currentStep
+                ? 'text-primary'
+                : step.number < currentStep
+                  ? 'text-green-600'
+                  : 'text-muted-foreground'
+                }`}
             >
               <div
-                className={`flex items-center justify-center h-7 w-7 rounded-full border-2 text-xs font-bold ${
-                  step.number === currentStep
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : step.number < currentStep
-                      ? 'border-green-600 bg-green-600 text-white'
-                      : 'border-muted-foreground/30'
-                }`}
+                className={`flex items-center justify-center h-7 w-7 rounded-full border-2 text-xs font-bold ${step.number === currentStep
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : step.number < currentStep
+                    ? 'border-green-600 bg-green-600 text-white'
+                    : 'border-muted-foreground/30'
+                  }`}
               >
                 {step.number < currentStep ? (
                   <Check className="h-4 w-4" />

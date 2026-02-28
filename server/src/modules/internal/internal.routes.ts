@@ -7,6 +7,8 @@ import {
   getPendingReminders,
   getReportData,
   completeReportHandler,
+  transitionRequestHandler,
+  updateRequestHandler,
 } from './internal.controller.js';
 
 // ---------------------------------------------------------------------------
@@ -41,5 +43,9 @@ internalRouter.get('/report-data', getReportData);
 
 // POST /api/v1/internal/report-complete -- n8n posts completed report results back
 internalRouter.post('/report-complete', completeReportHandler);
+
+// Request management for automation
+internalRouter.patch('/requests/:requestId', updateRequestHandler);
+internalRouter.post('/requests/:requestId/transition', transitionRequestHandler);
 
 export { internalRouter };

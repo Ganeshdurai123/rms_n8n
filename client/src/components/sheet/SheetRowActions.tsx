@@ -20,6 +20,7 @@ import { MoreHorizontal, Pencil, Trash2, Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import type { RequestItem, Role } from '@/lib/types';
+import { StatusTransitionButtons } from '../request/StatusTransitionButtons';
 
 interface SheetRowActionsProps {
   request: RequestItem;
@@ -60,10 +61,10 @@ export function SheetRowActions({
   const canDelete = isDraft && (isCreator || isAdmin);
   const canAssign = (isAdmin || isManager) && request.status !== 'completed';
 
-  // If no actions available, render nothing
-  if (!canEdit && !canDelete && !canAssign) {
-    return null;
-  }
+  // We can always render the dropdown trigger if there are status transitions available,
+  // but StatusTransitionButtons handles its own logic for rendering buttons or returning null.
+  // To avoid an empty dropdown, we render but let StatusTransitionButtons decide.
+  // We'll place the buttons inside the dropdown menu for clean UI.
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -77,7 +78,7 @@ export function SheetRowActions({
         err instanceof Error
           ? err.message
           : (err as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to delete request';
+            ?.data?.message || 'Failed to delete request';
       toast.error(message);
     } finally {
       setIsDeleting(false);
@@ -106,10 +107,29 @@ export function SheetRowActions({
               Edit
             </DropdownMenuItem>
           )}
+
+          {/* Status Transitions */}
+          <div className="px-2 py-1.5 flex flex-col gap-1 b border-t border-b">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Status</span>
+            <StatusTransitionButtons
+              requestId={request._id}
+              programId={programId}
+              currentStatus={request.status}
+              userRole={userRole}
+              userId={userId}
+              creatorId={getCreatorId(request.createdBy)}
+              onTransition={() => {
+                // Dropdown menu will close automatically, and we trigger a refresh
+                onDeleted(); // Re-use the refresh callback
+              }}
+              className="flex-col items-stretch w-full gap-1 [&>button]:w-full [&>button]:justify-start"
+            />
+          </div>
+
           {canDelete && (
             <DropdownMenuItem
               onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive focus:text-destructive"
+              className="text-destructive focus:text-destructive mt-1"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete

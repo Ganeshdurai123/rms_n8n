@@ -26,7 +26,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, CalendarClock, Calendar } from 'lucide-react';
 
 export function ProgramListPage() {
   const { user } = useAuth();
@@ -37,6 +37,8 @@ export function ProgramListPage() {
   const [creating, setCreating] = useState(false);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [dueDateEnabled, setDueDateEnabled] = useState(false);
+  const [dueDateOffsetDays, setDueDateOffsetDays] = useState(7);
 
   const canCreate = user?.role === 'admin' || user?.role === 'manager';
 
@@ -67,17 +69,23 @@ export function ProgramListPage() {
       await api.post('/programs', {
         name: formName.trim(),
         description: formDescription.trim() || undefined,
+        dueDateConfig: {
+          enabled: dueDateEnabled,
+          defaultOffsetDays: dueDateEnabled ? dueDateOffsetDays : 30,
+        },
       });
       toast.success('Program created successfully');
       setDialogOpen(false);
       setFormName('');
       setFormDescription('');
+      setDueDateEnabled(false);
+      setDueDateOffsetDays(7);
       await fetchPrograms();
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+            ?.data?.message
           : 'Failed to create program';
       toast.error(msg || 'Failed to create program');
     } finally {
@@ -157,6 +165,50 @@ export function ProgramListPage() {
                 maxLength={2000}
                 rows={3}
               />
+            </div>
+
+            {/* Due Date Configuration */}
+            <div className="rounded-lg border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  <Label className="font-medium">Enable Due Dates</Label>
+                </div>
+                <input
+                  type="checkbox"
+                  id="due-date-enabled"
+                  checked={dueDateEnabled}
+                  onChange={(e) => setDueDateEnabled(e.target.checked)}
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                When enabled, each new request will automatically get a due date.
+              </p>
+
+              {dueDateEnabled && (
+                <div className="space-y-2 pt-2 border-t">
+                  <Label htmlFor="due-date-offset" className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Default Days Until Due
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="due-date-offset"
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={dueDateOffsetDays}
+                      onChange={(e) => setDueDateOffsetDays(Math.max(1, Math.min(365, parseInt(e.target.value, 10) || 1)))}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">days after creation</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    e.g. if set to 7, a request created today will be due {new Date(Date.now() + dueDateOffsetDays * 24 * 60 * 60 * 1000).toLocaleDateString()}.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

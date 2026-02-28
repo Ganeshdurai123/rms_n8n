@@ -127,6 +127,7 @@ export async function assign(
     const request = await requestService.assignRequest(
       req.params.requestId as string,
       req.body.assignedTo,
+      req.body.dueDate,
       req.user!._id,
     );
     res.status(200).json({ data: request });

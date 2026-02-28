@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -13,7 +12,7 @@ import {
 import { Check, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import type { RequestItem, FieldDefinition, RequestPriority, ChecklistItem } from '@/lib/types';
+import type { RequestItem, FieldDefinition, RequestPriority, ChecklistItem, RequestStatus, Role } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 const STATUS_VARIANT: Record<string, string> = {
@@ -33,6 +32,8 @@ interface InlineEditRowProps {
   fieldDefinitions: FieldDefinition[];
   onSaved: () => void;
   onCancel: () => void;
+  userRole: Role;
+  userId: string;
 }
 
 export function InlineEditRow({
@@ -41,8 +42,11 @@ export function InlineEditRow({
   fieldDefinitions,
   onSaved,
   onCancel,
+  userRole,
+  userId,
 }: InlineEditRowProps) {
   const [title, setTitle] = useState(request.title);
+  const [status, setStatus] = useState<RequestStatus>(request.status);
   const [priority, setPriority] = useState<RequestPriority>(request.priority);
   const [fields, setFields] = useState<Record<string, unknown>>({
     ...request.fields,
@@ -54,6 +58,12 @@ export function InlineEditRow({
 
   function updateField(key: string, value: unknown) {
     setFields((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function getCreatorId(createdBy: RequestItem['createdBy']): string {
+    if (!createdBy) return '';
+    if (typeof createdBy === 'string') return createdBy;
+    return createdBy._id;
   }
 
   function formatUserName(
@@ -112,17 +122,25 @@ export function InlineEditRow({
     }
 
     // If nothing changed, just cancel
-    if (Object.keys(changes).length === 0) {
+    if (Object.keys(changes).length === 0 && status === request.status) {
       onCancel();
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await api.patch(
-        `/programs/${programId}/requests/${request._id}`,
-        changes,
-      );
+      if (Object.keys(changes).length > 0) {
+        await api.patch(
+          `/programs/${programId}/requests/${request._id}`,
+          changes,
+        );
+      }
+      if (status !== request.status) {
+        await api.patch(
+          `/programs/${programId}/requests/${request._id}/transition`,
+          { status }
+        );
+      }
       toast.success('Request updated');
       onSaved();
     } catch (err: unknown) {
@@ -130,7 +148,7 @@ export function InlineEditRow({
         err instanceof Error
           ? err.message
           : (err as { response?: { data?: { message?: string } } })?.response
-              ?.data?.message || 'Failed to update request';
+            ?.data?.message || 'Failed to update request';
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -264,14 +282,25 @@ export function InlineEditRow({
         </div>
       </TableCell>
 
-      {/* Status - disabled, shows current */}
+      {/* Status */}
       <TableCell>
-        <Badge
-          className={cn('capitalize', STATUS_VARIANT[request.status] || '')}
-          variant="secondary"
+        <Select
+          value={status}
+          onValueChange={(val) => setStatus(val as RequestStatus)}
         >
-          {request.status.replace('_', ' ')}
-        </Badge>
+          <SelectTrigger className={cn('h-8 text-sm w-[120px] capitalize', STATUS_VARIANT[status] || '')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={request.status}>
+              <span className="capitalize">{request.status.replace('_', ' ')}</span>
+            </SelectItem>
+            {(request.status === 'draft' || request.status === 'rejected') && (getCreatorId(request.createdBy) === userId || userRole === 'admin' || userRole === 'manager') && (
+              <SelectItem value="submitted">Submitted</SelectItem>
+            )}
+            {/* Other transitions could go here, but inline row is mostly used for Drafts */}
+          </SelectContent>
+        </Select>
       </TableCell>
 
       {/* Priority */}
@@ -297,10 +326,10 @@ export function InlineEditRow({
         <span className="text-sm">
           {formatUserName(
             request.assignedTo as
-              | string
-              | { _id: string; firstName: string; lastName: string }
-              | null
-              | undefined,
+            | string
+            | { _id: string; firstName: string; lastName: string }
+            | null
+            | undefined,
             'Unassigned',
           )}
         </span>
@@ -311,10 +340,10 @@ export function InlineEditRow({
         <span className="text-sm">
           {formatUserName(
             request.createdBy as
-              | string
-              | { _id: string; firstName: string; lastName: string }
-              | null
-              | undefined,
+            | string
+            | { _id: string; firstName: string; lastName: string }
+            | null
+            | undefined,
           )}
         </span>
       </TableCell>

@@ -76,6 +76,7 @@ export type TransitionRequestInput = z.infer<typeof transitionRequestSchema>;
  */
 export const assignRequestSchema = z.object({
   assignedTo: z.string().regex(objectIdRegex, 'Invalid user ID'),
+  dueDate: z.string().datetime().optional().nullable(),
 });
 
 export type AssignRequestInput = z.infer<typeof assignRequestSchema>;

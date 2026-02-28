@@ -66,7 +66,7 @@ export async function processOutbox(): Promise<void> {
   });
 
   for (const event of events) {
-    const url = `${env.N8N_WEBHOOK_BASE_URL}/${event.eventType}`;
+    const url = env.N8N_WEBHOOK_BASE_URL; // Send all events to the same root webhook URL
 
     try {
       const response = await fetch(url, {

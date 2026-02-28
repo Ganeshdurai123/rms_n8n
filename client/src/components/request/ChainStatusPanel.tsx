@@ -71,16 +71,17 @@ export function ChainStatusPanel({ chain, currentRequestId }: ChainStatusPanelPr
       <CardContent>
         <div className="space-y-0">
           {sortedSteps.map((step, idx) => {
-            const isPopulated = typeof step.requestId === 'object';
-            const reqId = isPopulated ? step.requestId._id : step.requestId;
-            const title = isPopulated ? step.requestId.title : 'Untitled';
-            const status: RequestStatus = isPopulated ? step.requestId.status : 'draft';
+            const isPopulated = typeof step.requestId === 'object' && step.requestId !== null;
+            const populatedReq = isPopulated ? (step.requestId as unknown as { _id: string; title: string; status: RequestStatus }) : null;
+            const reqId = populatedReq ? populatedReq._id : (step.requestId as string);
+            const title = populatedReq ? populatedReq.title : 'Untitled';
+            const status: RequestStatus = populatedReq ? populatedReq.status : 'draft';
             const category = getStepCategory(status);
             const isCurrent = reqId === currentRequestId;
             const isLast = idx === sortedSteps.length - 1;
 
             return (
-              <div key={reqId} className="flex items-stretch">
+              <div key={idx} className="flex items-stretch">
                 {/* Step indicator column */}
                 <div className="flex flex-col items-center mr-3">
                   <div

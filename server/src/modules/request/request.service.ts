@@ -283,7 +283,7 @@ export async function createRequest(
       timestamp: new Date().toISOString(),
     });
     // No notification for request creation (creator doesn't need to notify themselves)
-  }).catch(() => {});
+  }).catch(() => { });
 
   return request;
 }
@@ -557,7 +557,7 @@ export async function updateRequest(
       timestamp: new Date().toISOString(),
     });
     // No notification for update (only draft requests can be updated, by creator)
-  }).catch(() => {});
+  }).catch(() => { });
 
   return updated;
 }
@@ -589,13 +589,13 @@ export async function transitionRequest(
     );
   }
 
-  // Additional rule: only the request creator can submit (draft->submitted) or resubmit (rejected->submitted)
+  // Additional rule: only the request creator or admin/manager can submit (draft->submitted) or resubmit (rejected->submitted)
   if (
     targetStatus === 'submitted' &&
     (currentStatus === 'draft' || currentStatus === 'rejected')
   ) {
-    if (request.createdBy.toString() !== userId) {
-      throw new ForbiddenError('Only the request creator can submit or resubmit a request');
+    if (request.createdBy.toString() !== userId && userRole !== 'admin' && userRole !== 'manager') {
+      throw new ForbiddenError('Only the request creator or administrators can submit or resubmit a request');
     }
   }
 
@@ -631,12 +631,21 @@ export async function transitionRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notifications (fire-and-forget)
-  getPerformerName(userId).then((performer) => {
+  // Emit real-time event + webhook + notifications (fire-and-forget)
+  getPerformerName(userId).then(async (performer) => {
+    // Populate request for webhook/socket
+    const populated = await Request.findById(requestId)
+      .populate('createdBy', 'firstName lastName email')
+      .populate('assignedTo', 'firstName lastName email')
+      .lean();
+
+    if (!populated) return;
+
     emitToProgram(request.programId.toString(), 'request:status_changed', {
       event: 'request:status_changed',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      data: { request: populated, from: beforeStatus, to: targetStatus },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -644,7 +653,7 @@ export async function transitionRequest(
       eventType: 'request.status_changed',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), from: beforeStatus, to: targetStatus },
+      data: { request: populated, from: beforeStatus, to: targetStatus },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -672,13 +681,13 @@ export async function transitionRequest(
         requestId: requestId,
       });
     }
-  }).catch(() => {});
+  }).catch(() => { });
 
   // Chain progression: if request completed, advance the chain (fire-and-forget)
   if (targetStatus === 'completed') {
     handleChainProgression(requestId, request.programId.toString(), userId)
-      .then(() => {})
-      .catch(() => {});
+      .then(() => { })
+      .catch(() => { });
   }
 
   return updated;
@@ -691,6 +700,7 @@ export async function transitionRequest(
 export async function assignRequest(
   requestId: string,
   assignedToUserId: string,
+  dueDate: string | null | undefined,
   performedByUserId: string,
 ): Promise<IRequestDocument> {
   const request = await Request.findById(requestId);
@@ -730,10 +740,15 @@ export async function assignRequest(
   // Capture before state
   const beforeAssignee = request.assignedTo?.toString() ?? null;
 
-  // Update assignedTo
+  // Update assignedTo and optionally dueDate
+  const updatePayload: Record<string, unknown> = { assignedTo: assignedToUserId };
+  if (dueDate !== undefined) {
+    updatePayload.dueDate = dueDate ? new Date(dueDate) : null;
+  }
+
   const updated = await Request.findByIdAndUpdate(
     requestId,
-    { assignedTo: assignedToUserId },
+    updatePayload,
     { new: true, runValidators: true },
   );
 
@@ -759,12 +774,21 @@ export async function assignRequest(
   await cacheInvalidate('requests:list:*');
 
   // Emit real-time event + webhook + notification (fire-and-forget)
-  getPerformerName(performedByUserId).then((performer) => {
+  // Emit real-time event + webhook + notification (fire-and-forget)
+  getPerformerName(performedByUserId).then(async (performer) => {
+    // Populate request for webhook/socket
+    const populated = await Request.findById(requestId)
+      .populate('createdBy', 'firstName lastName email')
+      .populate('assignedTo', 'firstName lastName email')
+      .lean();
+
+    if (!populated) return;
+
     emitToProgram(request.programId.toString(), 'request:assigned', {
       event: 'request:assigned',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      data: { request: populated, assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -772,7 +796,7 @@ export async function assignRequest(
       eventType: 'request.assigned',
       programId: request.programId.toString(),
       requestId: requestId,
-      data: { request: updated.toObject(), assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
+      data: { request: populated, assignedTo: assignedToUserId, previousAssignee: beforeAssignee },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -788,7 +812,7 @@ export async function assignRequest(
         metadata: { programId: request.programId.toString(), requestId: requestId },
       });
     }
-  }).catch(() => {});
+  }).catch(() => { });
 
   return updated;
 }
@@ -859,7 +883,7 @@ export async function deleteRequest(
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
-  }).catch(() => {});
+  }).catch(() => { });
 
   return request;
 }
@@ -1087,8 +1111,8 @@ export async function getComplianceReview(
   const averageCompletion =
     requestResults.length > 0
       ? Math.round(
-          requestResults.reduce((sum, r) => sum + r.overallPercentage, 0) / requestResults.length,
-        )
+        requestResults.reduce((sum, r) => sum + r.overallPercentage, 0) / requestResults.length,
+      )
       : 0;
 
   return {

@@ -61,12 +61,22 @@ export async function addComment(
   });
 
   // Emit real-time event + webhook + notification (fire-and-forget)
-  getPerformerName(authorId).then((performer) => {
+  getPerformerName(authorId).then(async (performer) => {
+    // Populate request for context in n8n
+    const requestContext = await Request.findById(requestId)
+      .populate('createdBy', 'firstName lastName email')
+      .populate('assignedTo', 'firstName lastName email')
+      .select('title createdBy assignedTo')
+      .lean();
+
     emitToProgram(programId, 'comment:added', {
       event: 'comment:added',
       programId,
       requestId,
-      data: { comment: populated },
+      data: {
+        comment: populated,
+        request: requestContext // Include request context for n8n
+      },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -74,7 +84,10 @@ export async function addComment(
       eventType: 'comment.added',
       programId,
       requestId,
-      data: { comment: populated },
+      data: {
+        comment: populated,
+        request: requestContext // Include request context for n8n
+      },
       performedBy: performer,
       timestamp: new Date().toISOString(),
     });
@@ -90,7 +103,7 @@ export async function addComment(
         requestId,
       });
     }
-  }).catch(() => {});
+  }).catch(() => { });
 
   return populated as unknown as ICommentDocument;
 }
@@ -182,5 +195,5 @@ export async function deleteComment(
       timestamp: new Date().toISOString(),
     });
     // No notification for comment deletion
-  }).catch(() => {});
+  }).catch(() => { });
 }

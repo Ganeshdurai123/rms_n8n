@@ -1,0 +1,331 @@
+{
+  "name": "RMS Email Notification Dispatch",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "rms-events",
+        "httpMethod": "POST",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "rms-events"
+    },
+    {
+      "parameters": {
+        "rules": [
+          {
+            "conditions": [
+              {
+                "value1": "={{ $json.eventType }}",
+                "value2": "request.status_changed"
+              }
+            ],
+            "output": 0
+          },
+          {
+            "conditions": [
+              {
+                "value1": "={{ $json.eventType }}",
+                "value2": "request.assigned"
+              }
+            ],
+            "output": 1
+          },
+          {
+            "conditions": [
+              {
+                "value1": "={{ $json.eventType }}",
+                "value2": "comment.added"
+              }
+            ],
+            "output": 2
+          }
+        ]
+      },
+      "id": "switch-event-type",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        470,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.request?.assignedTo?.email || $json.data.request?.createdBy?.email || '' }}",
+        "subject": "=Request status changed: {{ $json.data.request?.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;\">\n  <div style=\"background: #2563eb; color: white; padding: 20px; text-align: center;\">\n    <h1 style=\"margin: 0; font-size: 24px;\">Status Updated</h1>\n  </div>\n  <div style=\"padding: 30px;\">\n    <p style=\"font-size: 16px; color: #475569;\">A request has changed its status in the system.</p>\n    <div style=\"background: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0;\">\n      <p style=\"margin: 5px 0;\"><strong>Request:</strong> {{ $json.data.request?.title }}</p>\n      <p style=\"margin: 5px 0;\"><strong>New Status:</strong> <span style=\"text-transform: uppercase; color: #2563eb;\">{{ $json.data.to }}</span></p>\n      <p style=\"margin: 5px 0;\"><strong>Changed by:</strong> {{ $json.performedBy?.name }}</p>\n    </div>\n    <div style=\"text-align: center; margin-top: 30px;\">\n      <a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/programs/{{ $json.programId }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;\">View Request</a>\n    </div>\n  </div>\n  <div style=\"background: #f1f5f9; padding: 15px; text-align: center; color: #64748b; font-size: 12px;\">\n    This is an automated notification from RMS.\n  </div>\n</div>"
+      },
+      "id": "email-status-changed",
+      "name": "Email: Status Changed",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        700,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.request?.assignedTo?.email || '' }}",
+        "subject": "=You have been assigned: {{ $json.data.request?.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;\">\n  <div style=\"background: #2563eb; color: white; padding: 20px; text-align: center;\">\n    <h1 style=\"margin: 0; font-size: 24px;\">New Assignment</h1>\n  </div>\n  <div style=\"padding: 30px;\">\n    <p style=\"font-size: 16px; color: #475569;\">You have been assigned a new request.</p>\n    <div style=\"background: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0;\">\n      <p style=\"margin: 5px 0;\"><strong>Request:</strong> {{ $json.data.request?.title }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Priority:</strong> {{ $json.data.request?.priority }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Assigned by:</strong> {{ $json.performedBy?.name }}</p>\n    </div>\n    <div style=\"text-align: center; margin-top: 30px;\">\n      <a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/programs/{{ $json.programId }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;\">Go to Request</a>\n    </div>\n  </div>\n</div>"
+      },
+      "id": "email-assigned",
+      "name": "Email: Assignment",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL || 'noreply@rms.local' }}",
+        "toEmail": "={{ $json.data.request?.assignedTo?.email || $json.data.request?.createdBy?.email || '' }}",
+        "subject": "=New comment on: {{ $json.data.request?.title || 'Untitled' }}",
+        "emailType": "html",
+        "html": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;\">\n  <div style=\"background: #2563eb; color: white; padding: 20px; text-align: center;\">\n    <h1 style=\"margin: 0; font-size: 24px;\">New Comment</h1>\n  </div>\n  <div style=\"padding: 30px;\">\n    <p style=\"font-size: 16px; color: #475569;\"><strong>{{ $json.performedBy?.name }}</strong> left a comment on request <strong>\"{{ $json.data.request?.title }}\"</strong>.</p>\n    <div style=\"background: #f8fafc; padding: 20px; border-radius: 6px; border-left: 4px solid #2563eb; margin: 20px 0;\">\n      {{ $json.data.comment?.content }}\n    </div>\n    <div style=\"text-align: center; margin-top: 30px;\">\n      <a href=\"{{ $env.CLIENT_URL || 'http://localhost' }}/programs/{{ $json.programId }}/requests/{{ $json.requestId }}\" style=\"background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;\">Reply to Comment</a>\n    </div>\n  </div>\n</div>"
+      },
+      "id": "email-comment-added",
+      "name": "Email: Comment Added",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        700,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://rms_server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyType": "json",
+        "body": "={\n  \"userId\": \"{{ $json.data.request?.assignedTo?._id || $json.data.request?.createdBy?._id || '' }}\",\n  \"type\": \"request.status_changed\",\n  \"title\": \"Status Updated\",\n  \"message\": \"Request '{{ $json.data.request?.title }}' status changed to {{ $json.data.to }}\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-status-changed",
+      "name": "Int-Notification: Status Changed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        950,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://rms_server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyType": "json",
+        "body": "={\n  \"userId\": \"{{ $json.data.request?.assignedTo?._id || '' }}\",\n  \"type\": \"request.assigned\",\n  \"title\": \"New Assignment\",\n  \"message\": \"You have been assigned to '{{ $json.data.request?.title }}'\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-assigned",
+      "name": "Int-Notification: Assigned",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        950,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://rms_server:5000/api/v1/internal/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyType": "json",
+        "body": "={\n  \"userId\": \"{{ $json.data.request?.assignedTo?._id || $json.data.request?.createdBy?._id || '' }}\",\n  \"type\": \"comment.added\",\n  \"title\": \"New Comment\",\n  \"message\": \"{{ $json.performedBy?.name }} commented on '{{ $json.data.request?.title }}'\",\n  \"requestId\": \"{{ $json.requestId }}\",\n  \"programId\": \"{{ $json.programId }}\"\n}",
+        "options": {}
+      },
+      "id": "notify-comment-added",
+      "name": "Int-Notification: Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        950,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"event\": \"{{ $json.eventType }}\"\n}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route by Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Event Type": {
+      "main": [
+        [
+          {
+            "node": "Email: Status Changed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: Assignment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: Comment Added",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Status Changed": {
+      "main": [
+        [
+          {
+            "node": "Int-Notification: Status Changed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Assignment": {
+      "main": [
+        [
+          {
+            "node": "Int-Notification: Assigned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Comment Added": {
+      "main": [
+        [
+          {
+            "node": "Int-Notification: Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Int-Notification: Status Changed": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Int-Notification: Assigned": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Int-Notification: Comment": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": ""
+  },
+  "active": false
+}

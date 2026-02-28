@@ -279,7 +279,7 @@ export function SheetTable({
               key={col.key}
               className={cn(
                 col.sortable &&
-                  'cursor-pointer select-none group hover:text-foreground',
+                'cursor-pointer select-none group hover:text-foreground',
               )}
               onClick={
                 col.sortable ? () => onToggleSort(col.key) : undefined
@@ -310,7 +310,7 @@ export function SheetTable({
                 key={def.key}
                 className={cn(
                   sortable &&
-                    'cursor-pointer select-none group hover:text-foreground',
+                  'cursor-pointer select-none group hover:text-foreground',
                 )}
                 onClick={
                   sortable ? () => onToggleSort(def.key) : undefined
@@ -365,6 +365,8 @@ export function SheetTable({
                     onRefresh();
                   }}
                   onCancel={() => setEditingRowId(null)}
+                  userRole={userRole}
+                  userId={userId}
                 />
               );
             }
@@ -411,14 +413,14 @@ export function SheetTable({
                 <TableCell>
                   {formatUserName(
                     req.assignedTo as
-                      | string
-                      | {
-                          _id: string;
-                          firstName: string;
-                          lastName: string;
-                        }
-                      | null
-                      | undefined,
+                    | string
+                    | {
+                      _id: string;
+                      firstName: string;
+                      lastName: string;
+                    }
+                    | null
+                    | undefined,
                     'Unassigned',
                   )}
                 </TableCell>
@@ -427,14 +429,14 @@ export function SheetTable({
                 <TableCell>
                   {formatUserName(
                     req.createdBy as
-                      | string
-                      | {
-                          _id: string;
-                          firstName: string;
-                          lastName: string;
-                        }
-                      | null
-                      | undefined,
+                    | string
+                    | {
+                      _id: string;
+                      firstName: string;
+                      lastName: string;
+                    }
+                    | null
+                    | undefined,
                   )}
                 </TableCell>
 
